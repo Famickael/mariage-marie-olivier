@@ -112,18 +112,19 @@ textarea{resize:vertical}
 .cote.droite img{object-position:right top}
 @media (min-width:980px){.cote{display:block}}
 .frise-bas{display:block;width:min(1000px,96%);margin:40px auto -30px;position:relative;z-index:1}
-.entete-site .orn.c{width:min(200px,34vw);left:-24px;bottom:-30px;opacity:.95}
+.entete-site .orn.c{width:min(130px,24vw);left:-14px;bottom:-16px;opacity:.95}
 @media (max-width:520px){.entete-site .orn.c{display:none}}
 body > main,body > footer,body > header{position:relative;z-index:1}
 
 /* En-tête commun des pages invités */
-.entete-site{text-align:center;position:relative;padding:44px 22px 34px;overflow:hidden}
+.entete-site{text-align:center;position:relative;padding:44px 60px 40px;overflow:hidden}
+@media (max-width:600px){.entete-site{padding:40px 22px 34px}}
 .entete-site .monogramme{font-size:clamp(3.4rem,15vw,4.8rem);margin:6px 0 2px}
 .entete-site h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.5rem)}
 .entete-site .sous{margin:8px 0 0;color:var(--encre-douce)}
 .entete-site .orn{position:absolute;pointer-events:none}
-.entete-site .orn.a{width:min(150px,28vw);left:-20px;top:-14px;opacity:.92}
-.entete-site .orn.b{width:min(230px,36vw);right:-20px;bottom:-24px;opacity:.95}
+.entete-site .orn.a{width:min(120px,22vw);left:-16px;top:-12px;opacity:.92}
+.entete-site .orn.b{width:min(150px,26vw);right:-14px;bottom:-16px;opacity:.95}
 @media (max-width:520px){.entete-site .orn.b{right:-34px;bottom:-44px;opacity:.8}}
 .entete-site > *:not(.orn){position:relative}
 

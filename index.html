@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241637">
+<link rel="stylesheet" href="assets/charte.css?v=202610241644">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -21,7 +21,6 @@
 
   /* ---- sections ---- */
   section.groupe{margin-top:54px;position:relative}
-  section.groupe > .motif-titre{display:block;width:min(420px,80vw);margin:0 auto 6px;height:70px;object-fit:contain;object-position:bottom}
   section.groupe > h2{font-size:2.1rem;text-align:center;font-style:italic;color:var(--or)}
   section.groupe > p{text-align:center;margin:4px auto 0;max-width:560px;color:var(--encre-douce)}
   .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:24px}
@@ -57,14 +56,12 @@
   </header>
 
   <section class="groupe">
-    <img class="motif motif-titre" src="assets/motifs/colibri-droit.png" alt="">
     <h2>Pour les invités</h2>
     <p class="italique">Trois pages à partager avec vos invités : par message, sur le livret ou en affichette à l'entrée de la salle. Chacune a son lien et son QR code.</p>
     <div class="grille" id="g-invites"></div>
   </section>
 
   <section class="groupe">
-    <img class="motif motif-titre" src="assets/motifs/oiseau-branche.png" alt="" style="height:110px">
     <h2>Pour les organisateurs</h2>
     <p class="italique">Les coulisses du mariage, pour Marie, Olivier et ceux qui les aident. Ces liens restent entre nous : ils permettent de tout modifier.</p>
     <div class="grille" id="g-orga"></div>
@@ -87,23 +84,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241637"></script>
-<script src="assets/ouverture.js?v=202610241637"></script>
+<script src="assets/commun.js?v=202610241644"></script>
+<script src="assets/ouverture.js?v=202610241644"></script>
 <script>
 const FONCTIONS = [
-  { groupe: 'invites', deco: 'colibri', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
+  { groupe: 'invites', deco: 'carte-1', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
     texte: 'Avant le grand jour, les invités déposent ici leurs photos, leurs vidéos et un petit mot pour les mariés. Tout ce qui est déposé sera projeté sur grand écran pendant la soirée, pour revivre ensemble ces années de souvenirs.' },
-  { groupe: 'invites', deco: 'couv-droite-haut', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
+  { groupe: 'invites', deco: 'carte-7', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
     texte: 'À l\'entrée de la salle, chaque invité tape son prénom ou son nom et découvre aussitôt sa table, son emplacement sur le plan et les convives qui l\'entourent. Plus besoin de chercher son nom sur un panneau.' },
-  { groupe: 'invites', deco: 'motif-a', titre: 'Programme', chemin: 'programme/', accroche: 'Le programme',
+  { groupe: 'invites', deco: 'carte-2', titre: 'Programme', chemin: 'programme/', accroche: 'Le programme',
     texte: 'Le déroulé du week-end heure par heure : la cérémonie, le vin d\'honneur, le dîner, la soirée et le lendemain. Les lieux et horaires sont indiqués, et le moment en cours est mis en avant le jour J.' },
-  { groupe: 'orga', deco: 'colibri', titre: 'Souvenirs', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
+  { groupe: 'orga', deco: 'carte-5', titre: 'Souvenirs', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
     texte: 'Tout ce que les invités ont déposé, envoi par envoi. Choisissez ce qui sera projeté, corrigez un mot, téléchargez l\'ensemble en un clic. C\'est aussi ici que vous ouvrez ou fermez le dépôt.' },
-  { groupe: 'orga', deco: 'couv-gauche-bas', titre: 'Projection', chemin: 'projection/', accroche: 'Projection',
+  { groupe: 'orga', deco: 'carte-4', titre: 'Projection', chemin: 'projection/', accroche: 'Projection',
     texte: 'Le diaporama de la soirée, à lancer sur l\'écran de la salle. Les photos et les mots défilent en boucle, les nouveaux souvenirs y arrivent au fil de l\'eau, et un QR code invite à en déposer d\'autres.' },
-  { groupe: 'orga', deco: 'oiseau-branche', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
+  { groupe: 'orga', deco: 'carte-3', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
     texte: 'La salle au vrai format, les tables qu\'on assemble, les invités qu\'on glisse à leur place, les nappes et les centres de table. Publiez-le quand il est prêt : « Trouver ma table » s\'en sert aussitôt.' },
-  { groupe: 'orga', deco: 'colibri-droit', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
+  { groupe: 'orga', deco: 'carte-6', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
     texte: 'Le minute par minute du week-end pour les témoins et la famille : qui fait quoi, où et quand. Cochez les moments à montrer aux invités, puis publiez leur programme d\'un geste.' }
 ];
 
