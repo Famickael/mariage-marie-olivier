@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241756">
+<link rel="stylesheet" href="assets/charte.css?v=202610241757">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -28,8 +28,8 @@
   .fonction:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(27,38,82,.16)}
   .fonction .deco{position:absolute;right:-10px;top:-6px;width:46%;max-height:46%;object-fit:contain;object-position:top right;opacity:.95}
   .fonction .deco.carte-1{transform:scaleX(-1);right:22px;top:6px;width:40%}
-  .visites{position:relative;margin:0;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-douce);display:flex;align-items:center;gap:7px;min-height:1em;white-space:nowrap}
-  .visites::before{content:'✦';color:var(--or);font-size:.55rem}
+  .visites{position:absolute;left:20px;top:46px;margin:0;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:12px;border:1px solid var(--perle-fonce);color:var(--encre-douce);background:rgba(255,255,255,.7);white-space:nowrap}
+  .visites:empty{display:none}
   .fonction h3{font-size:1.5rem;font-style:italic;margin-top:70px;position:relative}
   .etat-pub{position:absolute;left:20px;top:18px;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:12px;border:1px solid var(--perle-fonce);color:var(--encre-douce);background:rgba(255,255,255,.7)}
   .etat-pub.ok{border-color:#9bbba6;color:var(--ok)} .etat-pub.non{border-color:#e0b4b8;color:var(--erreur)}
@@ -89,8 +89,8 @@
 
 <script src="assets/vendor/supabase.min.js"></script>
 <script src="assets/vendor/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241756"></script>
-<script src="assets/ouverture.js?v=202610241756"></script>
+<script src="assets/commun.js?v=202610241757"></script>
+<script src="assets/ouverture.js?v=202610241757"></script>
 <script>
 const FONCTIONS = [
   { groupe: 'invites', deco: 'carte-1', titre: 'Déposer ses souvenirs', chemin: 'souvenirs/', etat: 'depot', accroche: 'Partagez vos souvenirs',
@@ -120,8 +120,8 @@ for (const f of FONCTIONS) {
   el.innerHTML = `${motif(f.deco, 'deco ' + f.deco)}
     ${f.etat ? `<span class="etat-pub" data-etat="${f.etat}">…</span>` : ''}
     <h3>${echap(f.titre)}</h3>
+    ${f.etat ? `<span class="visites" data-visites="${f.etat}"></span>` : ''}
     <p>${echap(f.texte)}</p>
-    ${f.etat ? `<p class="visites" data-visites="${f.etat}"></p>` : ''}
     ${f.groupe === 'invites' ? `<div class="actions">
       <button class="btn clair" data-copier>Copier le lien</button>
       <button class="btn clair" data-qr>QR code</button>
