@@ -341,11 +341,11 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.16s}
 @media (prefers-reduced-motion:reduce){#ouverture{display:none}body.fp-en-cours{overflow:auto}body.fp-en-cours > :not(#ouverture){visibility:visible;opacity:1;transform:none;animation:none}}
 
 /* Ruban et nœud bleus sur le coin haut-droit des cartes d'en-tête (pages invités) */
-.entete-site .ruban-coin{position:absolute;top:0;right:0;width:150px;height:150px;overflow:hidden;pointer-events:none;z-index:2}
-.ruban-coin::before{content:"";position:absolute;top:34px;right:-60px;width:260px;height:26px;transform:rotate(45deg);
+.entete-site .ruban-coin{position:absolute;top:0;right:0;width:210px;height:210px;overflow:hidden;pointer-events:none;z-index:2}
+.ruban-coin::before{content:"";position:absolute;top:50px;right:-80px;width:360px;height:34px;transform:rotate(45deg);
   background:repeating-linear-gradient(90deg,#1b2652 0 2px,#243271 2px 3px);box-shadow:0 3px 8px rgba(27,38,82,.3)}
-.ruban-coin svg{position:absolute;top:22px;right:22px;width:62px;height:auto;transform:rotate(45deg);filter:drop-shadow(0 2px 3px rgba(27,38,82,.35))}
-@media (max-width:520px){.ruban-coin{width:110px;height:110px}.ruban-coin::before{top:24px;right:-50px;height:20px}.ruban-coin svg{width:46px;top:16px;right:16px}}
+.ruban-coin svg{position:absolute;top:26px;right:26px;width:104px;height:auto;transform:rotate(45deg);filter:drop-shadow(0 2px 3px rgba(27,38,82,.35))}
+@media (max-width:520px){.entete-site .ruban-coin{width:140px;height:140px}.ruban-coin::before{top:32px;right:-56px;height:24px;width:260px}.ruban-coin svg{width:68px;top:18px;right:18px}}
 
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}
