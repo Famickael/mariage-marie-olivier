@@ -171,7 +171,7 @@ async function affiche(f){
   const dessiner = (im, dx, dy, dw) => { if (!im) return; const dh = dw * im.height / im.width; x.drawImage(im, dx, dy, dw, dh); return dh; };
   if (pg) dessiner(pg, 110, 110, 330);
   if (pd) dessiner(pd, W - 110 - 380, 110, 380);
-  if (bas) { x.save(); x.globalAlpha = .9; dessiner(bas, 110, H - 110 - 400, 420); x.restore(); }
+  if (bas) { x.save(); x.globalAlpha = .9; dessiner(bas, 110, 2000, 240); x.restore(); }
   // textes
   x.textAlign = 'center'; x.fillStyle = '#1e1e22';
   x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'NOTRE MARIAGE', W / 2, 330, 18);
@@ -183,15 +183,15 @@ async function affiche(f){
   x.fillStyle = '#b8913f'; x.font = '40px serif'; x.fillText('✦', W / 2, 754);
   x.fillStyle = '#1e1e22'; let fs = 150; do { x.font = `italic 500 ${fs}px "Cormorant Garamond", Georgia, serif`; fs -= 6; } while (x.measureText(f.accroche).width > W - 420 && fs > 60); x.fillText(f.accroche, W / 2, 940);
   // QR sur carte blanche
-  const qc = $('#qr canvas'); const taille = 820, qx = (W - taille) / 2, qy = 1040;
+  const qc = $('#qr canvas') || $('#qr img'); const taille = 820, qx = (W - taille) / 2, qy = 1040;
   x.save(); x.shadowColor = 'rgba(27,38,82,.18)'; x.shadowBlur = 40; x.shadowOffsetY = 16; x.fillStyle = '#fff'; x.fillRect(qx - 40, qy - 40, taille + 80, taille + 80); x.restore();
   x.strokeStyle = 'rgba(38,53,111,.3)'; x.lineWidth = 1.5; x.strokeRect(qx - 24, qy - 24, taille + 48, taille + 48);
   if (qc) { x.imageSmoothingEnabled = false; x.drawImage(qc, qx, qy, taille, taille); x.imageSmoothingEnabled = true; }
   if (colib) dessiner(colib, qx + taille - 20, qy - 150, 170);
-  x.fillStyle = '#1e1e22'; x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'SCANNEZ-MOI', W / 2, qy + taille + 130, 16);
-  x.fillStyle = '#5c5c63'; x.font = 'italic 400 54px "EB Garamond", Georgia, serif'; x.textAlign = 'center'; x.fillText(f.titre === 'Souvenirs' ? 'Vos photos, vidéos et petits mots de la journée' : f.titre === 'Trouver ma table' ? 'Votre nom, votre table, vos voisins' : 'Avec l\'appareil photo de votre téléphone', W / 2, qy + taille + 210);
-  if (oiseau) dessiner(oiseau, W - 110 - 300, H - 110 - 390, 300);
-  x.fillStyle = '#1e1e22'; x.font = '500 38px "EB Garamond", Georgia, serif'; espacer(x, 'SAMEDI 5 DÉCEMBRE 2026 · OUVROUER-LES-CHAMPS', W / 2, H - 150, 10);
+  x.fillStyle = '#1e1e22'; x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'SCANNEZ-MOI', W / 2, qy + taille + 100, 16);
+  x.fillStyle = '#5c5c63'; x.font = 'italic 400 54px "EB Garamond", Georgia, serif'; x.textAlign = 'center'; x.fillText(f.titre === 'Souvenirs' ? 'Vos photos, vidéos et petits mots de la journée' : f.titre === 'Trouver ma table' ? 'Votre nom, votre table, vos voisins' : 'Avec l\'appareil photo de votre téléphone', W / 2, qy + taille + 170);
+  if (oiseau) dessiner(oiseau, W - 110 - 240, 2000, 240);
+  x.fillStyle = '#1e1e22'; x.font = '500 38px "EB Garamond", Georgia, serif'; espacer(x, 'SAMEDI 5 DÉCEMBRE 2026 · OUVROUER-LES-CHAMPS', W / 2, H - 118, 10);
   c.toBlob(b => telecharger(b, `affiche-${sansAccent(f.titre).replace(/[^a-z0-9]+/g, '-')}.png`), 'image/png');
   toast('Affiche A5 téléchargée : à imprimer, puis découper le long du cadre.', 3500);
 }
