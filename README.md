@@ -2,6 +2,9 @@
 
 Site statique (HTML/CSS/JS, sans compilation) + Supabase pour les données. Charte du faire-part : blanc satiné, bleu de toile de Jouy, une touche d'or.
 
+- Site : https://famickael.github.io/mariage-marie-olivier/ (GitHub Pages, branche `main`)
+- Base : projet Supabase `wrcjthhrouditgbpjegy`, **partagé avec le site d'Aude & Jérémie**. Les tables, fonctions et espaces de stockage de ce mariage sont préfixés `mo_` / `mo-` ; ceux d'Aude et Jérémie (`envois`, `fichiers`, `programme`, bucket `mariage`) sont intacts.
+
 ## Les pages
 
 | Adresse | Pour qui | Rôle |
@@ -20,11 +23,12 @@ Aucune page invité ne contient de lien vers une autre page : chacun ne voit que
 
 ## Mise en route
 
-1. **Supabase** : exécuter `supabase/schema.sql` dans l'éditeur SQL du projet (tables, règles d'accès, fonctions, espaces de stockage).
-2. **Comptes** : Authentication > Users > *Add user* pour Marie, Olivier (et qui doit pouvoir modifier). Tous les comptes ont les mêmes droits.
-3. **Configuration** : dans `assets/commun.js`, renseigner `SUPABASE_URL` et `SUPABASE_ANON_KEY` (Project Settings > API). Cette clé est publique par conception ; ce que chacun peut faire est décidé par les règles en base.
-4. **Hébergement** : GitHub Pages (Settings > Pages > branche `main`, dossier racine) ou Netlify. Il faut une adresse en https.
-5. Ouvrir `/coulisses/` et distribuer les liens.
+1. **Supabase** : `supabase/schema.sql` est déjà appliqué (migration `mariage_marie_olivier`). Pour repartir de zéro sur un autre projet, l'exécuter dans l'éditeur SQL.
+2. **Comptes** : Authentication > Users > *Add user* pour Marie et Olivier. Attention : le projet étant partagé, **tout compte connecté peut modifier les deux sites** (celui d'Aude & Jérémie compris).
+3. **Configuration** : `assets/commun.js` contient déjà l'URL et la clé `anon` du projet. Cette clé est publique par conception ; ce que chacun peut faire est décidé par les règles en base (RLS).
+4. **Hébergement** : Settings > Pages > *Deploy from a branch* > `main` / `(root)`. Il faut une adresse en https, la page ne fonctionne pas ouverte en local.
+5. **Test avant diffusion** : depuis un téléphone, déposer une photo et une vidéo sur `/souvenirs/`, vérifier dans `/souvenirs/admin.html`, puis publier un plan de table et chercher un nom dans `/plan-de-table/ma-place.html`.
+6. Ouvrir `/coulisses/` et distribuer les liens.
 
 ## La salle
 
