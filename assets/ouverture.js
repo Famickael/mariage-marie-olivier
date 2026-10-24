@@ -68,6 +68,7 @@
       </svg>
     </div>
   </div>
+  <p class="indice">Cliquez sur le faire-part pour l'ouvrir</p>
   <button class="passer" type="button">Passer</button>`;
   document.body.prepend(ov);
   document.body.classList.add('fp-en-cours');
@@ -85,15 +86,17 @@
   };
   // Plan 1 : approche
   requestAnimationFrame(() => fp.classList.add('approche'));
-  // Plan 2 : dénouage en plusieurs temps
-  t.push(setTimeout(() => fp.classList.add('tire'),   1600));   // 1. on tire un pan, il s'allonge et oscille
-  t.push(setTimeout(() => fp.classList.add('denoue'), 2200));   // 2-5. les boucles se vident, le nœud lâche, les pans retombent
-  t.push(setTimeout(() => fp.classList.add('glisse'), 3900));   // 6. le ruban glisse vers le bas en ondulant
-  // Plan 3 : ouverture des volets, la caméra avance
-  t.push(setTimeout(() => { fp.classList.add('ouvert'); ov.classList.add('ouvre'); }, 4500));
-  // Plan 4 : on entre dans le faire-part, le site arrive en fondu
-  t.push(setTimeout(entree, 6300));
-  t.push(setTimeout(fin, 8500));
+  // Plans 2 à 4, décalés par rapport au moment où le dénouage commence
+  const suite = [[() => fp.classList.add('tire'), 0], [() => fp.classList.add('denoue'), 600], [() => fp.classList.add('glisse'), 2300],
+                 [() => { fp.classList.add('ouvert'); ov.classList.add('ouvre'); }, 2900], [entree, 4700], [fin, 6900]];
+  let lance = false;
+  const lancer = () => { if (lance) return; lance = true; ov.classList.remove('attente'); suite.forEach(([f, d]) => t.push(setTimeout(f, d))); };
+  if (document.body.dataset.ouverture === 'clic') {
+    // page principale : le faire-part attend qu'on clique dessus
+    t.push(setTimeout(() => ov.classList.add('attente'), 1500));
+    fp.addEventListener('click', lancer); ov.querySelector('.indice').addEventListener('click', lancer);
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') lancer(); }, { once: true });
+  } else t.push(setTimeout(lancer, 1600));
   // « Passer » : on saute directement à l'arrivée du site
   ov.querySelector('.passer').onclick = () => { if (!fp.classList.contains('entree')) entree(); fin(); };
 })();

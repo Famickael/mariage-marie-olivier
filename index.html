@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241644">
+<link rel="stylesheet" href="assets/charte.css?v=202610241705">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -45,7 +45,7 @@
   canvas#affiche{display:none}
 </style>
 </head>
-<body>
+<body data-ouverture="clic">
 <main>
   <header class="tete">
     <p class="capitales">Notre mariage</p>
@@ -84,8 +84,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241644"></script>
-<script src="assets/ouverture.js?v=202610241644"></script>
+<script src="assets/commun.js?v=202610241705"></script>
+<script src="assets/ouverture.js?v=202610241705"></script>
 <script>
 const FONCTIONS = [
   { groupe: 'invites', deco: 'carte-1', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
@@ -100,7 +100,7 @@ const FONCTIONS = [
     texte: 'Le diaporama de la soirée, à lancer sur l\'écran de la salle. Les photos et les mots défilent en boucle, les nouveaux souvenirs y arrivent au fil de l\'eau, et un QR code invite à en déposer d\'autres.' },
   { groupe: 'orga', deco: 'carte-3', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
     texte: 'La salle au vrai format, les tables qu\'on assemble, les invités qu\'on glisse à leur place, les nappes et les centres de table. Publiez-le quand il est prêt : « Trouver ma table » s\'en sert aussitôt.' },
-  { groupe: 'orga', deco: 'carte-6', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
+  { groupe: 'orga', deco: 'carte-6', titre: 'Programme détaillé', chemin: 'planning/', accroche: 'Le programme du week-end',
     texte: 'Le minute par minute du week-end pour les témoins et la famille : qui fait quoi, où et quand. Cochez les moments à montrer aux invités, puis publiez leur programme d\'un geste.' }
 ];
 

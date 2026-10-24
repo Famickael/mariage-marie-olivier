@@ -96,7 +96,14 @@ function enteteSite(el){
     <p class="capitales" style="letter-spacing:.3em">05.12.2026</p>
     <div class="filet-or"><span>✦</span></div>
     <h1>${echap(el.dataset.titre || '')}</h1>
-    ${el.dataset.sous ? `<p class="sous">${el.dataset.sous}</p>` : ''}`;
+    ${el.dataset.sous ? `<p class="sous">${el.dataset.sous}</p>` : ''}
+    <span class="ruban-coin" aria-hidden="true"><svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+      <path d="M152 128 C 120 160, 96 200, 70 250 L 112 250 L 100 232 C 124 196, 146 164, 166 136 Z" fill="#1b2652"/>
+      <path d="M168 128 C 196 150, 232 170, 268 180 L 274 212 L 246 204 C 216 190, 186 168, 162 142 Z" fill="#1b2652"/>
+      <path d="M158 122 C 110 70, 30 74, 26 118 C 22 164, 96 170, 158 128 Z" fill="#1b2652"/><path d="M152 122 C 110 92, 56 94, 48 118 C 56 146, 112 146, 150 124" fill="none" stroke="#0f1838" stroke-opacity=".45" stroke-width="4"/>
+      <path d="M162 122 C 206 60, 300 66, 298 112 C 296 160, 214 172, 162 128 Z" fill="#1b2652"/><path d="M168 122 C 210 90, 268 90, 276 112 C 268 142, 212 146, 170 124" fill="none" stroke="#0f1838" stroke-opacity=".45" stroke-width="4"/>
+      <path d="M136 104 C 148 98, 172 98, 184 104 C 194 118, 194 136, 184 148 C 170 156, 150 156, 136 148 C 126 136, 126 118, 136 104 Z" fill="#141d4a"/>
+    </svg></span>`;
 }
 document.addEventListener('DOMContentLoaded', () => { $$('header.entete-site').forEach(enteteSite); if (document.body.dataset.cotes !== 'non') colonnesCote(); });
 

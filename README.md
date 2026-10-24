@@ -13,7 +13,7 @@ Site statique (HTML/CSS/JS, sans compilation) + Supabase pour les données. Char
 | `/souvenirs/` | invités | Dépôt de photos, vidéos et mots (envoi par morceaux, reprise en cas de coupure) |
 | `/plan-de-table/ma-place.html` | invités | « Trouver ma table » : nom → table, voisins, mini-plan (seulement si un plan est publié) |
 | `/programme/` | invités | Le déroulé, uniquement les moments cochés « visibles des invités » |
-| `/planning/` | témoins, famille | Le minute par minute ; lecture avec le lien, modification une fois connecté |
+| `/planning/` | organisateurs | Le programme détaillé, minute par minute ; lecture avec le lien, modification une fois connecté |
 | `/plan-de-table/` | Marie & Olivier (connexion) | L'éditeur de plan de table |
 | `/souvenirs/admin.html` | Marie & Olivier (connexion) | Trier, masquer, télécharger les souvenirs (zip) |
 | `/projection/` | Marie & Olivier (connexion) | Diaporama de la soirée, avec QR code vers `/souvenirs/` |

@@ -126,7 +126,7 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .entete-site .orn.a{width:min(120px,22vw);left:-16px;top:-12px;opacity:.92}
 .entete-site .orn.b{width:min(150px,26vw);right:-14px;bottom:-16px;opacity:.95}
 @media (max-width:520px){.entete-site .orn.b{right:-34px;bottom:-44px;opacity:.8}}
-.entete-site > *:not(.orn){position:relative}
+.entete-site > *:not(.orn):not(.ruban-coin){position:relative}
 
 /* Bandeau des pages organisateurs : titre à gauche, publication toujours à droite */
 .bandeau-orga{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:0 16px;height:58px;background:var(--bleu-nuit);color:#fff;box-shadow:0 2px 12px rgba(27,38,82,.25)}
@@ -168,11 +168,16 @@ body.fp-entree > :not(#ouverture){animation:fp-site 1.6s cubic-bezier(.3,.6,.2,1
 #ouverture.entree{background-color:transparent;transition-duration:.9s}
 #ouverture.fin{animation:fp-fondu .6s ease forwards}
 @keyframes fp-fondu{to{opacity:0;visibility:hidden}}
+#ouverture .indice{position:absolute;left:50%;bottom:3.5%;transform:translateX(-50%);font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--encre-douce);opacity:0;transition:opacity .8s ease;pointer-events:none;white-space:nowrap}
+#ouverture.attente .indice{opacity:1;pointer-events:auto;cursor:pointer;animation:fp-indice 2.4s ease-in-out infinite}
+@keyframes fp-indice{50%{opacity:.45}}
+#ouverture.attente .fp{cursor:pointer}
+#ouverture.attente .noeud .boucle{animation:fp-souffle 2.6s ease-in-out infinite alternate}
 #ouverture .passer{position:absolute;right:18px;bottom:16px;font:inherit;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;background:none;border:0;color:var(--encre-douce);cursor:pointer;transition:opacity .5s ease}
 #ouverture.entree .passer{opacity:0;pointer-events:none}
 
 /* Le faire-part (la « caméra » agit sur son transform) */
-.fp{position:relative;width:min(520px,84vw);aspect-ratio:1500/2016;max-height:86vh;transform-style:preserve-3d;
+.fp{position:relative;width:min(520px,84vw);aspect-ratio:1500/2016;max-height:78vh;transform-style:preserve-3d;
   transform:translateY(2%) scale(.82) rotateX(6deg) rotateY(-4deg);will-change:transform}
 /* ombre portée séparée (pas de filter sur .fp : casserait le preserve-3d) */
 .fp::before{content:"";position:absolute;inset:2% 1%;border-radius:4px;transform:translateY(28px) translateZ(-2px) scale(1.07);opacity:.55;
@@ -283,6 +288,13 @@ body.fp-entree > :not(#ouverture){animation:fp-site 1.6s cubic-bezier(.3,.6,.2,1
 @keyframes fp-noeud-glisse{0%{transform:translateZ(8px) translateY(0) rotate(0)}25%{transform:translateZ(8px) translateY(7vh) rotate(-3deg)}55%{transform:translateZ(8px) translateY(28vh) rotate(3deg);opacity:1}100%{transform:translateZ(8px) translateY(80vh) rotate(-6deg);opacity:0}}
 
 @media (prefers-reduced-motion:reduce){#ouverture{display:none}body.fp-en-cours{overflow:auto}body.fp-en-cours > :not(#ouverture){opacity:1;transform:none;filter:none}}
+
+/* Ruban et nœud bleus sur le coin haut-droit des cartes d'en-tête (pages invités) */
+.entete-site .ruban-coin{position:absolute;top:0;right:0;width:150px;height:150px;overflow:hidden;pointer-events:none;z-index:2}
+.ruban-coin::before{content:"";position:absolute;top:34px;right:-60px;width:260px;height:26px;transform:rotate(45deg);
+  background:repeating-linear-gradient(90deg,#1b2652 0 2px,#243271 2px 3px);box-shadow:0 3px 8px rgba(27,38,82,.3)}
+.ruban-coin svg{position:absolute;top:22px;right:22px;width:62px;height:auto;transform:rotate(45deg);filter:drop-shadow(0 2px 3px rgba(27,38,82,.35))}
+@media (max-width:520px){.ruban-coin{width:110px;height:110px}.ruban-coin::before{top:24px;right:-50px;height:20px}.ruban-coin svg{width:46px;top:16px;right:16px}}
 
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}
