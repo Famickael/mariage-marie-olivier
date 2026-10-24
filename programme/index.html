@@ -50,7 +50,7 @@ const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, C
 let items = [];
 async function charger(){
   if (!sbInvite) return;
-  const { data, error } = await sbInvite.from('programme').select('jour,debut,duree,titre,lieu,description').eq('public', true).order('jour').order('debut');
+  const { data, error } = await sbInvite.from('mo_programme').select('jour,debut,duree,titre,lieu,description').eq('public', true).order('jour').order('debut');
   if (error) { $('#jours').innerHTML = '<p class="vide">Le programme n\'est pas disponible pour le moment.</p>'; return; }
   items = data; rendre();
 }

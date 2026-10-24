@@ -33,7 +33,7 @@ exigerConnexion('Plan de table', async () => {
 });
 
 async function chargerListePlans(){
-  const { data, error } = await sb.from('plans').select('id,nom,publie,updated_at').order('created_at');
+  const { data, error } = await sb.from('mo_plans').select('id,nom,publie,updated_at').order('created_at');
   if (error) { statut('Erreur : ' + error.message, 'err'); return; }
   plans = data;
 }
@@ -43,7 +43,7 @@ function rendreSelecteurPlans(){
 
 async function ouvrirPlan(id){
   if (sauvegarde.sale) await sauverMaintenant();
-  const { data, error } = await sb.from('plans').select('*').eq('id', id).single();
+  const { data, error } = await sb.from('mo_plans').select('*').eq('id', id).single();
   if (error) { statut('Erreur : ' + error.message, 'err'); return; }
   plan = { id: data.id, nom: data.nom, version: data.version, publie: data.publie };
   D = normaliser(data.data);
@@ -76,7 +76,7 @@ function normaliser(d){
 }
 
 async function creerPlan(nom, data){
-  const { data: row, error } = await sb.from('plans').insert({ nom, data, version: 1 }).select('id,nom,publie,updated_at').single();
+  const { data: row, error } = await sb.from('mo_plans').insert({ nom, data, version: 1 }).select('id,nom,publie,updated_at').single();
   if (error) { alert('Création impossible : ' + error.message); return null; }
   plans.push(row); return row.id;
 }
@@ -150,7 +150,7 @@ async function sauverMaintenant(){
   sauvegarde.enCours = true; sauvegarde.sale = false; statut('Enregistrement…');
   const v = plan.version;
   try {
-    const { data, error } = await sb.from('plans').update({ data: D, version: v + 1 }).eq('id', plan.id).eq('version', v).select('version,updated_at');
+    const { data, error } = await sb.from('mo_plans').update({ data: D, version: v + 1 }).eq('id', plan.id).eq('version', v).select('version,updated_at');
     if (error) throw error;
     if (!data.length) await conflit();
     else {
@@ -168,7 +168,7 @@ async function sauverMaintenant(){
   }
 }
 async function conflit(){
-  const { data } = await sb.from('plans').select('*').eq('id', plan.id).single();
+  const { data } = await sb.from('mo_plans').select('*').eq('id', plan.id).single();
   if (!data) return;
   if (confirm('Ce plan vient d\'être modifié sur un autre appareil (Olivier ? Marie ?).\n\nOK : garder VOTRE version et écraser l\'autre.\nAnnuler : charger l\'autre version (vos dernières modifications seront perdues).')) {
     plan.version = data.version; sauvegarde.sale = true; return sauverMaintenant();
@@ -968,14 +968,14 @@ async function actionPlan(act){
     const id = await creerPlan(nom.trim(), JSON.parse(JSON.stringify(D))); if (id) ouvrirPlan(id);
   } else if (act === 'renommer') {
     const nom = prompt('Nouveau nom :', plan.nom); if (!nom) return;
-    const { error } = await sb.from('plans').update({ nom: nom.trim() }).eq('id', plan.id);
+    const { error } = await sb.from('mo_plans').update({ nom: nom.trim() }).eq('id', plan.id);
     if (error) return alert(error.message);
     plan.nom = nom.trim(); plans.find(p => p.id === plan.id).nom = plan.nom; rendreSelecteurPlans();
   } else if (act === 'supprimer') {
     if (plans.length <= 1) return alert('C\'est le seul plan : il ne peut pas être supprimé.');
     if (!confirm(`Supprimer définitivement le plan « ${plan.nom} » ?`)) return;
     sauvegarde.sale = false; clearTimeout(sauvegarde.minuterie);
-    const { error } = await sb.from('plans').delete().eq('id', plan.id);
+    const { error } = await sb.from('mo_plans').delete().eq('id', plan.id);
     if (error) return alert(error.message);
     plans = plans.filter(p => p.id !== plan.id); ouvrirPlan(plans[0].id);
   } else if (act === 'exporter') {
@@ -995,8 +995,8 @@ async function publier(){
   const on = $('#chk-publier').checked;
   if (on && !confirm('Publier ce plan ? Les invités qui ont le lien « Trouver ma table » pourront y chercher leur nom et voir leur table et leurs voisins.')) { $('#chk-publier').checked = false; return; }
   await sauverMaintenant();
-  if (on) { const { error } = await sb.from('plans').update({ publie: false }).neq('id', plan.id).eq('publie', true); if (error) { alert(error.message); $('#chk-publier').checked = false; return; } }
-  const { error } = await sb.from('plans').update({ publie: on }).eq('id', plan.id);
+  if (on) { const { error } = await sb.from('mo_plans').update({ publie: false }).neq('id', plan.id).eq('publie', true); if (error) { alert(error.message); $('#chk-publier').checked = false; return; } }
+  const { error } = await sb.from('mo_plans').update({ publie: on }).eq('id', plan.id);
   if (error) { alert(error.message); $('#chk-publier').checked = !on; return; }
   plan.publie = on; plans.forEach(p => p.publie = on ? p.id === plan.id : (p.id === plan.id ? false : p.publie)); rendreSelecteurPlans();
   toast(on ? 'Publié : « Trouver ma table » montre ce plan' : 'Dépublié : les invités ne voient plus rien', 3000);

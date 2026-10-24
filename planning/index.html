@@ -133,7 +133,7 @@ function rendreOutils(){
 }
 
 async function charger(){
-  const { data, error } = await sb.from('programme').select('*').order('jour').order('debut');
+  const { data, error } = await sb.from('mo_programme').select('*').order('jour').order('debut');
   if (error) { $('#frise').innerHTML = `<p class="vide">Erreur de chargement : ${echap(error.message)}</p>`; return; }
   items = data; rendre();
 }
@@ -208,14 +208,14 @@ $('#fiche').addEventListener('submit', async e => {
     categorie: ($('#f-cats input:checked') || {}).value || 'autre'
   };
   if (!champs.titre || !champs.debut) { toast('Titre et heure de début sont nécessaires'); return; }
-  const q = enEdition ? sb.from('programme').update(champs).eq('id', enEdition.id) : sb.from('programme').insert(champs);
+  const q = enEdition ? sb.from('mo_programme').update(champs).eq('id', enEdition.id) : sb.from('mo_programme').insert(champs);
   const { error } = await q;
   if (error) { toast('Erreur : ' + error.message, 4000); return; }
   $('#dlg').close(); jourActif = jourDeMoment(champs); toast('Enregistré'); charger();
 });
 $('#f-suppr').onclick = async () => {
   if (!enEdition || !confirm(`Supprimer « ${enEdition.titre} » ?`)) return;
-  const { error } = await sb.from('programme').delete().eq('id', enEdition.id);
+  const { error } = await sb.from('mo_programme').delete().eq('id', enEdition.id);
   if (error) { toast('Erreur : ' + error.message, 4000); return; }
   $('#dlg').close(); toast('Supprimé'); charger();
 };

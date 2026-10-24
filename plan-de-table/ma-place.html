@@ -62,7 +62,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style=
 
 (async () => {
   if (!sbInvite) return;
-  const { data } = await sbInvite.rpc('plan_public');
+  const { data } = await sbInvite.rpc('mo_plan_public');
   geo = data;
   if (!geo) { $('#info').textContent = 'Le plan de table sera dévoilé très bientôt.'; $('#q').disabled = true; }
 })();
@@ -73,7 +73,7 @@ async function chercher(){
   if (q === derniere) return; derniere = q;
   const r = $('#resultats');
   if (q.length < 3) { r.innerHTML = ''; $('#info').textContent = q ? 'Encore une lettre ou deux…' : ''; return; }
-  const { data, error } = await sbInvite.rpc('trouver_ma_place', { recherche: q });
+  const { data, error } = await sbInvite.rpc('mo_trouver_ma_place', { recherche: q });
   if (q !== $('#q').value.trim()) return;
   if (error) { $('#info').textContent = 'La recherche est indisponible pour le moment.'; return; }
   $('#info').textContent = data.length ? '' : 'Personne à ce nom… essayez votre nom de famille, ou demandez aux témoins !';

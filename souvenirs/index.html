@@ -214,7 +214,7 @@ $('#form').addEventListener('submit', async e => {
     if (!envoiId) {
       envoiId = crypto.randomUUID();
       await reessayer(async () => {
-        const { error } = await sbInvite.from('envois').insert({ id: envoiId, invite_nom: nom, message: message || null, appareil: mobile ? 'mobile' : 'ordinateur', nb_fichiers: fichiers.length });
+        const { error } = await sbInvite.from('mo_envois').insert({ id: envoiId, invite_nom: nom, message: message || null, appareil: mobile ? 'mobile' : 'ordinateur', nb_fichiers: fichiers.length });
         if (error) throw new Error(error.message);
       });
     }
@@ -234,7 +234,7 @@ $('#form').addEventListener('submit', async e => {
     const aJournaliser = fichiers.filter(f => f.chemin && !f.journalise);
     if (aJournaliser.length) {
       await reessayer(async () => {
-        const { error } = await sbInvite.from('fichiers').insert(aJournaliser.map(f => ({
+        const { error } = await sbInvite.from('mo_fichiers').insert(aJournaliser.map(f => ({
           envoi_id: envoiId, chemin: f.chemin, nom_original: f.file.name, taille: f.file.size,
           type_mime: f.file.type || null, message: f.msg.trim() || null
         })));

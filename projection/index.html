@@ -87,7 +87,7 @@ async function demarrer(){
 const cache = new Map(); let octetsCache = 0;
 async function charger(){
   let data, error;
-  try { ({ data, error } = await sb.from('envois').select('*, fichiers(*)').order('created_at', { ascending: true })); }
+  try { ({ data, error } = await sb.from('mo_envois').select('*, fichiers:mo_fichiers(*)').order('created_at', { ascending: true })); }
   catch (e) { error = e; }
   if (error) { console.warn('hors ligne, on continue avec la mémoire', error.message || error); majEtatCache(items, true); return; }
   const liste = [];

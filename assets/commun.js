@@ -1,13 +1,15 @@
 /* ============================================================
    Commun à toutes les pages : connexion Supabase, outils, ornements.
+   Projet Supabase partagé avec le site d'Aude & Jérémie : les tables et
+   espaces de stockage de ce mariage sont préfixés mo_ / mo-.
    La clé "anon / publishable" est publique par conception : ce que
    chacun peut lire ou écrire est décidé par les règles RLS en base.
    ============================================================ */
 const CONFIG = {
-  SUPABASE_URL: 'https://VOTRE-PROJET.supabase.co',
-  SUPABASE_ANON_KEY: 'VOTRE-CLE-ANON',
-  BUCKET_SOUVENIRS: 'souvenirs',
-  BUCKET_PLANS: 'plans',
+  SUPABASE_URL: 'https://wrcjthhrouditgbpjegy.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyY2p0aGhyb3VkaXRnYnBqZWd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0MTIxNDAsImV4cCI6MjEwNDk4ODE0MH0.8Tubv77Ugz5fhPLUl1ZJCa8QA3JVXKtagkeD-0TBXWk',
+  BUCKET_SOUVENIRS: 'mo-souvenirs',
+  BUCKET_PLANS: 'mo-plans',
   COUPLE: 'Marie & Olivier',
   DATE_ISO: '2026-12-05',
   DATE_LONGUE: 'Samedi 5 décembre 2026'
