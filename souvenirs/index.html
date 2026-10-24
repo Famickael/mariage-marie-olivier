@@ -7,12 +7,6 @@
 <link rel="stylesheet" href="../assets/charte.css">
 <style>
   main{max-width:600px;margin:0 auto;padding:34px 16px 60px}
-  .entete{text-align:center;position:relative;padding:34px 18px 30px;overflow:hidden}
-  .entete .monogramme{font-size:clamp(3.6rem,16vw,5rem);margin:6px 0 4px}
-  .entete h1{font-size:clamp(1.9rem,7vw,2.5rem);font-style:italic}
-  .entete .o1{position:absolute;width:110px;left:-12px;top:-8px;opacity:.85;transform:rotate(-6deg)}
-  .entete .o2{position:absolute;width:120px;right:-8px;bottom:-10px;opacity:.85;transform:rotate(176deg)}
-  .entete .o3{position:absolute;width:66px;right:20px;top:22px;opacity:.8}
   .note{max-width:460px;margin:22px auto 0;text-align:center;font-size:1rem;color:var(--encre-douce)}
   .cta{text-align:center;margin-top:30px}
   h2.titre-section{font-size:clamp(2rem,8vw,2.6rem);text-align:center;font-style:italic}
@@ -57,15 +51,7 @@
 <main>
 
 <section id="home">
-  <div class="entete carte-papier cadre">
-    <span id="o"></span>
-    <p class="capitales">Notre mariage</p>
-    <div class="monogramme">M<span class="et">&amp;</span>O</div>
-    <p class="capitales" style="letter-spacing:.3em">05.12.2026</p>
-    <div class="filet-or"><span>✦</span></div>
-    <h1>Partagez vos souvenirs</h1>
-    <p class="doux" style="margin:10px 0 0">Photos, vidéos, petits mots :<br>tout ce que vous avez saisi de cette journée.</p>
-  </div>
+  <header class="entete-site" data-titre="Partagez vos souvenirs" data-sous="Photos, vidéos, petits mots :<br>tout ce que vous avez saisi de cette journée."></header>
   <p class="note">Vos envois pourront être projetés pendant la soirée.<br>Seuls Marie et Olivier y ont accès : les autres invités ne voient pas vos fichiers.</p>
   <div class="cta"><button class="btn" id="btn-vers-envoi">Partager mes souvenirs</button></div>
 </section>
@@ -116,16 +102,17 @@
 </section>
 
 </main>
+<footer class="pied-bleu" id="pied"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.1.0/dist/tus.min.js"></script>
+<script src="../assets/ornements.js"></script>
 <script src="../assets/commun.js"></script>
 <script>
 /* Page invités : aucun lien vers le reste du site.
    Client sans session : un invité dépose toujours en anonyme (droit d'écrire, jamais de lire). */
 Object.assign(CONFIG, { CHUNK: 6 * 1024 * 1024, MAX_FILE_MB: 4096, PARALLELE: 3, RETOUR_ACCUEIL_S: 10 });
 const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }) : null;
-$('#o').outerHTML = ornement('branche', 'o1') + ornement('mimosa', 'o2') + ornement('colibri', 'o3');
 const vues = { home: $('#home'), upload: $('#upload'), done: $('#done') };
 let fichiers = [];
 let envoiEnCours = false;
@@ -135,6 +122,7 @@ function montrer(nom){
   Object.entries(vues).forEach(([k,el]) => el.hidden = (k !== nom));
   window.scrollTo({top:0, behavior:'instant'});
 }
+$('#pied').innerHTML = piedBleu('');
 $('#btn-vers-envoi').onclick = () => montrer('upload');
 $('#btn-retour').onclick = () => { if (!envoiEnCours) { reinitialiser(); montrer('home'); } };
 $('#btn-accueil').onclick = () => { clearInterval(compteur); reinitialiser(); montrer('upload'); };

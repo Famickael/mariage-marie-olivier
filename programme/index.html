@@ -7,11 +7,6 @@
 <link rel="stylesheet" href="../assets/charte.css">
 <style>
   main{max-width:560px;margin:0 auto;padding:30px 16px 70px}
-  .entete{text-align:center;position:relative;padding:40px 20px 30px;overflow:hidden}
-  .entete .monogramme{font-size:clamp(3.4rem,15vw,4.6rem);margin:6px 0}
-  .entete h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.4rem)}
-  .entete .o1{position:absolute;width:100px;left:-10px;top:-6px;opacity:.85;transform:rotate(-8deg)}
-  .entete .o2{position:absolute;width:110px;right:-8px;bottom:-10px;opacity:.85;transform:rotate(176deg)}
   .jour{margin-top:40px;text-align:center}
   .jour h2{font-size:1.9rem;font-style:italic}
   ol{list-style:none;padding:0;margin:20px 0 0}
@@ -29,22 +24,18 @@
 </head>
 <body>
 <main>
-  <div class="entete carte-papier cadre">
-    <span id="o"></span>
-    <p class="capitales">Notre mariage</p>
-    <div class="monogramme">M<span class="et">&amp;</span>O</div>
-    <div class="filet-or"><span>✦</span></div>
-    <h1>Le programme</h1>
-  </div>
+  <header class="entete-site" data-titre="Le programme"></header>
   <div id="jours"></div>
   <span id="pap"></span>
 </main>
+<footer class="pied-bleu" id="pied"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/ornements.js"></script>
 <script src="../assets/commun.js"></script>
 <script src="../assets/programme.js"></script>
 <script>
-$('#o').outerHTML = ornement('branche', 'o1') + ornement('mimosa', 'o2');
 $('#pap').outerHTML = ornement('papillon', 'papillon');
+$('#pied').innerHTML = piedBleu('');
 /* Page invités : client sans session, seuls les moments « visibles des invités ». */
 const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
 let items = [];

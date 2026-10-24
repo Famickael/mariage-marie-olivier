@@ -8,11 +8,6 @@
 <link rel="stylesheet" href="plan.css">
 <style>
   main{max-width:620px;margin:0 auto;padding:30px 16px 60px}
-  .entete{text-align:center;position:relative;padding:34px 20px 28px;overflow:hidden}
-  .entete .monogramme{font-size:clamp(3.2rem,14vw,4.4rem);margin:4px 0}
-  .entete h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.4rem)}
-  .entete .o1{position:absolute;width:96px;left:-10px;top:-6px;opacity:.85;transform:rotate(-8deg)}
-  .entete .o2{position:absolute;width:60px;right:20px;top:20px;opacity:.8}
   .recherche{margin:26px auto 0;max-width:420px;text-align:center}
   .recherche input{font-size:1.25rem;text-align:center;padding:12px 8px;font-family:"Cormorant Garamond",serif}
   .resultats{margin-top:18px;display:flex;flex-direction:column;gap:14px}
@@ -33,13 +28,7 @@
 </head>
 <body>
 <main>
-  <div class="entete carte-papier cadre">
-    <span id="o"></span>
-    <p class="capitales">Notre mariage</p>
-    <div class="monogramme">M<span class="et">&amp;</span>O</div>
-    <div class="filet-or"><span>✦</span></div>
-    <h1>Trouvez votre table</h1>
-  </div>
+  <header class="entete-site" data-titre="Trouvez votre table"></header>
   <div class="recherche">
     <label class="champ" for="q" style="text-align:center">Votre prénom ou votre nom</label>
     <input type="search" id="q" autocomplete="off" placeholder="Ex. Jeanne" enterkeyhint="search">
@@ -48,14 +37,16 @@
   <div class="resultats" id="resultats"></div>
   <span id="pap"></span>
 </main>
+<footer class="pied-bleu" id="pied"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/ornements.js"></script>
 <script src="../assets/commun.js"></script>
 <script src="../assets/plan-geometrie.js"></script>
 <script>
 /* Page invités : aucun lien vers le reste du site, client sans session.
    Les données viennent de deux fonctions en base qui ne renvoient que le plan publié. */
-$('#o').outerHTML = ornement('branche', 'o1') + ornement('colibri', 'o2');
 $('#pap').outerHTML = ornement('papillon', 'papillon');
+$('#pied').innerHTML = piedBleu('');
 const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
 let geo = null, minuterie = null, derniere = '';
 document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${defsPlan()}</svg>`);

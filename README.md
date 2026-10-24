@@ -2,15 +2,14 @@
 
 Site statique (HTML/CSS/JS, sans compilation) + Supabase pour les données. Charte du faire-part : blanc satiné, bleu de toile de Jouy, une touche d'or.
 
-- Site : https://famickael.github.io/mariage-marie-olivier/ (GitHub Pages, branche `main`)
+- Site : https://famickael.github.io/mariage-marie-olivier/ (GitHub Pages, branche `main`). Les dessins « toile de Jouy » sont dans `assets/ornements.js`, la charte dans `assets/charte.css`.
 - Base : projet Supabase `wrcjthhrouditgbpjegy`, **partagé avec le site d'Aude & Jérémie**. Les tables, fonctions et espaces de stockage de ce mariage sont préfixés `mo_` / `mo-` ; ceux d'Aude et Jérémie (`envois`, `fichiers`, `programme`, bucket `mariage`) sont intacts.
 
 ## Les pages
 
 | Adresse | Pour qui | Rôle |
 |---|---|---|
-| `/` | personne en particulier | Couverture « M & O », sans aucun lien |
-| `/coulisses/` | famille, Marie & Olivier | Point d'entrée : tous les outils, avec « Copier le lien » et QR code |
+| `/` | famille, Marie & Olivier | Page principale : tous les outils, avec « Ouvrir », « Copier le lien » et « QR code » (`/coulisses/` y renvoie) |
 | `/souvenirs/` | invités | Dépôt de photos, vidéos et mots (envoi par morceaux, reprise en cas de coupure) |
 | `/plan-de-table/ma-place.html` | invités | « Trouver ma table » : nom → table, voisins, mini-plan (seulement si un plan est publié) |
 | `/programme/` | invités | Le déroulé, uniquement les moments cochés « visibles des invités » |
@@ -28,7 +27,7 @@ Aucune page invité ne contient de lien vers une autre page : chacun ne voit que
 3. **Configuration** : `assets/commun.js` contient déjà l'URL et la clé `anon` du projet. Cette clé est publique par conception ; ce que chacun peut faire est décidé par les règles en base (RLS).
 4. **Hébergement** : Settings > Pages > *Deploy from a branch* > `main` / `(root)`. Il faut une adresse en https, la page ne fonctionne pas ouverte en local.
 5. **Test avant diffusion** : depuis un téléphone, déposer une photo et une vidéo sur `/souvenirs/`, vérifier dans `/souvenirs/admin.html`, puis publier un plan de table et chercher un nom dans `/plan-de-table/ma-place.html`.
-6. Ouvrir `/coulisses/` et distribuer les liens.
+6. Ouvrir la page principale et distribuer les liens.
 
 ## La salle
 
