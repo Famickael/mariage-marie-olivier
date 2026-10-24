@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Marie &amp; Olivier · Le programme</title>
+<title>Marie &amp; Olivier</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="stylesheet" href="../assets/charte.css">
 <style>
   main{max-width:560px;margin:0 auto;padding:30px 16px 70px}
@@ -27,10 +29,12 @@
   <header class="entete-site" data-titre="Le programme"></header>
   <div id="jours"></div>
   <span id="pap"></span>
+  <img class="motif frise-bas" src="../assets/motifs/frise-bas.png" alt="" onerror="this.remove()">
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="../assets/commun.js"></script>
+<script src="../assets/ouverture.js"></script>
 <script src="../assets/programme.js"></script>
 <script>
 $('#pap').outerHTML = ornement('papillon', 'papillon');

@@ -105,11 +105,15 @@ textarea{resize:vertical}
 .motif{display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
 .motif.blanc{filter:brightness(0) invert(1)}   /* encre blanche sur fond bleu */
 /* Colonnes latérales fixes (grands écrans) : les deux panneaux du faire-part ouvert */
-.cote{position:fixed;top:0;bottom:0;width:min(17vw,300px);z-index:0;pointer-events:none;display:none;overflow:hidden}
-.cote img{position:absolute;top:50%;transform:translateY(-50%);width:100%;height:auto;max-height:100%;object-fit:contain}
-.cote.gauche{left:max(0px,calc(50vw - 640px - min(17vw,300px)))}
-.cote.droite{right:max(0px,calc(50vw - 640px - min(17vw,300px)))}
-@media (min-width:1180px){.cote{display:block}}
+.cote{position:fixed;top:0;bottom:0;width:min(19vw,340px);z-index:0;pointer-events:none;display:none;overflow:hidden}
+.cote img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.cote.gauche{left:0;object-position:left top}
+.cote.droite{right:0}
+.cote.droite img{object-position:right top}
+@media (min-width:980px){.cote{display:block}}
+.frise-bas{display:block;width:min(1000px,96%);margin:40px auto -30px;position:relative;z-index:1}
+.entete-site .orn.c{width:min(200px,34vw);left:-24px;bottom:-30px;opacity:.95}
+@media (max-width:520px){.entete-site .orn.c{display:none}}
 body > main,body > footer,body > header{position:relative;z-index:1}
 
 /* En-tête commun des pages invités */
@@ -143,6 +147,69 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .bandeau-orga .publier input:checked + .interrupteur::after{left:20px}
 .bandeau-orga .publier .etat{color:#fff;font-weight:500}
 @media (max-width:720px){ .bandeau-orga .titre-bandeau,.bandeau-orga .lib{display:none} .bandeau-orga{gap:8px;padding:0 10px} }
+
+/* ---- Ouverture du faire-part (assets/ouverture.js) ---- */
+body.fp-en-cours{overflow:hidden}
+#ouverture{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--satin);perspective:1600px;overflow:hidden}
+#ouverture::before{content:"";position:absolute;inset:0;transition:opacity 1.4s ease .1s;background:
+  repeating-linear-gradient(118deg,rgba(255,255,255,.35) 0 1px,rgba(255,255,255,0) 1px 3px),
+  radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.95),transparent 55%),
+  radial-gradient(ellipse at 92% 100%,rgba(214,208,194,.5),transparent 55%)}
+#ouverture.ouvre{background:transparent}
+#ouverture.ouvre::before{opacity:0}
+#ouverture.fin{animation:fp-fondu .7s ease forwards}
+@keyframes fp-fondu{to{opacity:0;visibility:hidden}}
+#ouverture .passer{position:absolute;right:18px;bottom:16px;font:inherit;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;background:none;border:0;color:var(--encre-douce);cursor:pointer}
+.fp{position:relative;width:min(520px,84vw);aspect-ratio:1500/2016;max-height:86vh;transform-style:preserve-3d;transition:transform .5s ease}
+.fp.glisse{animation:fp-respire .9s ease}
+@keyframes fp-respire{30%{transform:rotateX(2.5deg) translateY(-4px)}}
+.fp .volet{position:absolute;top:0;bottom:0;width:50%;transform-style:preserve-3d;transition:transform 1.7s cubic-bezier(.65,0,.35,1)}
+.fp .volet.g{left:0;transform-origin:left center}
+.fp .volet.d{right:0;transform-origin:right center;transition-delay:.18s}
+.fp.ouvert .volet.g{transform:rotateY(-160deg)}
+.fp.ouvert .volet.d{transform:rotateY(160deg)}
+.fp .face{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:linear-gradient(125deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.9) 48%,rgba(255,255,255,0) 66%),repeating-linear-gradient(118deg,rgba(255,255,255,.4) 0 1px,rgba(255,255,255,0) 1px 3px),linear-gradient(160deg,#fdfcfa,#f3f0e8)}
+.fp .face.recto{box-shadow:0 30px 50px rgba(27,38,82,.28)}
+.fp .face.dos{transform:rotateY(180deg);background:linear-gradient(160deg,#fcfbf8,#f1eee6)}
+.fp .volet.g .face.dos{box-shadow:inset -14px 0 30px -20px rgba(27,38,82,.25)}
+.fp .volet.d .face.dos{box-shadow:inset 14px 0 30px -20px rgba(27,38,82,.25)}
+.fp .m{position:absolute;display:block;pointer-events:none}
+.fp .m img{width:100%;height:auto;display:block}
+.fp .m.miroir img{transform:scaleX(-1)}
+.fp .g .m1{width:64%;left:-16%;top:-8%} .fp .g .m2{width:70%;left:-6%;bottom:-6%} .fp .g .m3{width:40%;right:-4%;bottom:22%}
+.fp .d .m1{width:88%;right:-10%;top:-3%} .fp .d .m2{width:80%;right:-4%;bottom:-3%} .fp .d .m3{width:40%;left:8%;top:38%}
+.fp .cartouche{position:absolute;left:54%;top:36%;transform:translate(-50%,-50%);text-align:center;white-space:nowrap}
+.fp .cartouche .capitales{font-size:.6rem;letter-spacing:.3em}
+.fp .cartouche .monogramme{font-size:clamp(2rem,7vw,3rem);margin:4px 0}
+.fp .cartouche .date{font-size:.62rem;letter-spacing:.28em}
+/* ruban gros-grain */
+.ruban{position:absolute;left:-6%;right:-6%;top:51%;height:7%;transform:translateY(-50%) translateZ(6px);
+  background:repeating-linear-gradient(90deg,#1b2652 0 2px,#243271 2px 3px);box-shadow:0 6px 14px rgba(27,38,82,.35);transition:transform 1.1s cubic-bezier(.6,0,.8,.6),opacity .6s ease .55s}
+.fp.glisse .ruban{transform:translateY(60vh) rotate(-3deg) translateZ(6px);opacity:0}
+/* nœud : chaque brin a sa propre animation */
+.noeud{position:absolute;left:42%;top:50%;width:52%;transform:translate(-50%,-50%) translateZ(8px);transition:transform .9s cubic-bezier(.6,0,.8,.6),opacity .5s ease .4s}
+.noeud svg{width:100%;height:auto;display:block;overflow:visible}
+.fp.glisse .noeud{transform:translate(-50%,-50%) translateZ(8px) translateY(70vh);opacity:0}
+.noeud .boucle,.noeud .pan,.noeud .centre{transform-box:fill-box;transition:transform 1.1s cubic-bezier(.5,0,.6,1),opacity .8s ease}
+.noeud .boucle.a{transform-origin:100% 50%}
+.noeud .boucle.b{transform-origin:0% 50%}
+.noeud .pan.a{transform-origin:100% 0%}
+.noeud .pan.b{transform-origin:0% 0%}
+.noeud .centre{transform-origin:50% 50%}
+.noeud .boucle{animation:fp-souffle 3s ease-in-out infinite alternate}
+.noeud .boucle.b{animation-delay:-1.5s}
+@keyframes fp-souffle{to{transform:scale(1.03) rotate(1deg)}}
+/* 1. on tire sur le pan gauche : il s'allonge, la boucle droite se resserre */
+.fp.tire .pan.a{transform:translate(-14px,22px) rotate(-10deg) scaleY(1.25)}
+.fp.tire .boucle.b{animation:none;transform:scaleX(.72) rotate(6deg)}
+/* 2. les boucles se défont l'une après l'autre, le nœud lâche, les pans tombent */
+.fp.denoue .boucle.b{animation:none;transform:scaleX(.04) rotate(14deg);opacity:0;transition-duration:.9s}
+.fp.denoue .boucle.a{animation:none;transform:scaleX(.04) rotate(-16deg);opacity:0;transition-duration:1s;transition-delay:.35s}
+.fp.denoue .centre{transform:scale(1.5,.35);opacity:0;transition-delay:.6s}
+.fp.denoue .pan.a{transform:translate(-30px,120px) rotate(-22deg) scaleY(1.4);opacity:0;transition-duration:1.2s;transition-delay:.5s}
+.fp.denoue .pan.b{transform:translate(40px,110px) rotate(24deg) scaleY(1.4);opacity:0;transition-duration:1.2s;transition-delay:.7s}
+@media (prefers-reduced-motion:reduce){#ouverture{display:none}}
 
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}

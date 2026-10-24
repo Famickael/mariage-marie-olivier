@@ -99,7 +99,7 @@ function colonnesCote(){
 /* En-tête commun des pages invités : <header class="entete-site" data-titre="…" data-sous="…"> */
 function enteteSite(el){
   el.classList.add('carte-papier', 'cadre');
-  el.innerHTML = `${motif('motif-a', 'orn a')}${motif('couv-droite-haut', 'orn b')}
+  el.innerHTML = `${motif('motif-a', 'orn a')}${motif('couv-droite-haut', 'orn b')}${motif('coin-bas-gauche', 'orn c').replace('alt=""', 'alt="" onerror="this.remove()"')}
     <p class="capitales">Notre mariage</p>
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <p class="capitales" style="letter-spacing:.3em">05.12.2026</p>
