@@ -17,6 +17,7 @@
   --bleu-voile:#e6e9f3;
   --or:#b8913f;            /* avec parcimonie */
   --or-clair:#d9bf7f;
+  --or-texte:#8a6a24;      /* or lisible pour du texte */
   --encre:#1e1e22;         /* texte courant : noir doux, comme le faire-part */
   --encre-douce:#5c5c63;   /* texte secondaire */
   --ok:#3f6b55;
@@ -86,7 +87,7 @@ input[type=text],input[type=email],input[type=password],input[type=search],input
   border:0;border-bottom:1px solid var(--bleu-pale);padding:8px 6px;border-radius:0}
 input:focus,textarea:focus,select:focus{outline:none;border-bottom-color:var(--bleu);background:#fff}
 textarea{resize:vertical}
-::placeholder{color:var(--bleu-pale)}
+::placeholder{color:var(--bleu-doux)}
 
 /* Carte « papier satiné » */
 .carte-papier{position:relative;border:1px solid rgba(154,163,199,.35);box-shadow:var(--ombre);
@@ -96,10 +97,6 @@ textarea{resize:vertical}
     linear-gradient(160deg,#fdfcfa,#f3f0e8)}
 .carte-papier.cadre::before{content:"";position:absolute;inset:8px;border:1px solid rgba(38,53,111,.22);pointer-events:none}
 
-/* Ornements au trait (SVG injectés) : la couleur suit `color` */
-.orne{color:var(--bleu);fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
-.orne .plein{fill:currentColor;stroke:none}
-.orne .or{color:var(--or)}
 
 /* Motifs du faire-part (PNG détourés, encre bleue sur fond transparent) */
 .motif{display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
@@ -111,7 +108,6 @@ textarea{resize:vertical}
 .cote.droite{right:0}
 .cote.droite img{object-position:right top}
 @media (min-width:980px){.cote{display:block}}
-.frise-bas{display:block;width:min(1000px,96%);margin:40px auto -30px;position:relative;z-index:1}
 .entete-site .orn.c{width:min(130px,24vw);left:-14px;bottom:-16px;opacity:.95}
 @media (max-width:520px){.entete-site .orn.c{display:none}}
 body > main,body > footer,body > header{position:relative;z-index:1}
@@ -124,7 +120,7 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .entete-site .sous{margin:8px 0 0;color:var(--encre-douce)}
 .entete-site .orn{position:absolute;pointer-events:none}
 .entete-site .orn.a{width:min(120px,22vw);left:-16px;top:-12px;opacity:.92}
-.entete-site .orn.b{width:min(150px,26vw);right:-14px;bottom:-16px;opacity:.95}
+.entete-site .orn.b{width:min(150px,26vw);right:-40px;bottom:-40px;opacity:.9}
 @media (max-width:520px){.entete-site .orn.b{right:-34px;bottom:-44px;opacity:.8}}
 .entete-site > *:not(.orn):not(.ruban-coin){position:relative}
 
@@ -147,7 +143,8 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .bandeau-orga .publier input:checked + .interrupteur{background:var(--or)}
 .bandeau-orga .publier input:checked + .interrupteur::after{left:20px}
 .bandeau-orga .publier .etat{color:#fff;font-weight:500}
-@media (max-width:720px){ .bandeau-orga .titre-bandeau,.bandeau-orga .lib{display:none} .bandeau-orga{gap:8px;padding:0 10px} }
+@media (max-width:720px){ .bandeau-orga .titre-bandeau,.bandeau-orga .lib{display:none} .bandeau-orga{gap:8px;padding:0 10px} .bandeau-orga .actions-bandeau{min-width:0;flex-wrap:wrap} }
+@media (max-width:480px){ .bandeau-orga .publier .etat,.bandeau-orga .pub-etat .lib{display:none} }
 
 /* ---- Ouverture du faire-part (assets/ouverture.js) ---- */
 /* Séquence pilotée par classes : .approche → .tire → .denoue → .glisse → .ouvert → .sortie → .fin
@@ -264,8 +261,8 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.16s}
 .fp .m{position:absolute;display:block;pointer-events:none}
 .fp .m img{width:100%;height:auto;display:block}
 .fp .m.miroir img{transform:scaleX(-1)}
-.fp .g .m1{width:64%;left:-16%;top:-8%} .fp .g .m2{width:70%;left:-6%;bottom:-6%} .fp .g .m3{width:40%;right:-4%;bottom:22%}
-.fp .d .m1{width:88%;right:-10%;top:-3%} .fp .d .m2{width:80%;right:-4%;bottom:-3%} .fp .d .m3{width:40%;left:8%;top:38%}
+.fp .g .m1{width:70%;left:0;top:0} .fp .g .m2{width:70%;left:0;bottom:0}
+.fp .d .m1{width:70%;right:0;top:0} .fp .d .m2{width:70%;right:0;bottom:0}
 .fp .cartouche{position:absolute;left:54%;top:36%;transform:translate(-50%,-50%);text-align:center;white-space:nowrap}
 .fp .cartouche .capitales{font-size:.6rem;letter-spacing:.3em}
 .fp .cartouche .monogramme{font-size:clamp(2rem,7vw,3rem);margin:4px 0}
@@ -347,6 +344,24 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.16s}
 .ruban-coin svg{position:absolute;top:26px;right:26px;width:104px;height:auto;transform:rotate(45deg);filter:drop-shadow(0 2px 3px rgba(27,38,82,.35))}
 @media (max-width:520px){.entete-site .ruban-coin{width:140px;height:140px}.ruban-coin::before{top:32px;right:-56px;height:24px;width:260px}.ruban-coin svg{width:68px;top:18px;right:18px}}
 
+/* Branches encadrant le titre de l'accueil (enfants directs de body, avant main) */
+.branche-titre{position:absolute;top:-20px;width:34vw;max-width:520px;pointer-events:none;z-index:0}
+.branche-titre.g{left:-3vw} .branche-titre.d{right:-3vw}
+html{overflow-x:hidden} body{overflow-x:clip}
+@media (max-width:979px){.branche-titre{width:40vw;top:-24px;opacity:.9} .branche-titre.g{left:-8vw} .branche-titre.d{right:-8vw}}
+/* Petits écrans : les panneaux latéraux n'ont pas de place ; des motifs discrets habillent le fond */
+.fond-mobile{display:none}
+@media (max-width:979px){
+  .fond-mobile{display:block;position:absolute;pointer-events:none;z-index:0;opacity:.6;width:52vw}
+  .fond-mobile.a{right:-18vw;transform:scaleX(-1)}
+  .fond-mobile.b{left:-18vw}
+  .fond-mobile.c{right:-20vw}
+  .fond-mobile.d{left:-18vw;transform:scaleX(-1)}
+}
+
+/* Impression : jamais de décor */
+@media print{ .cote,.pied-bleu,.bandeau-orga,.outils,.ruban-coin{display:none!important} body::before,body::after{display:none} }
+
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}
 .pied-bleu .monogramme{color:#fff;font-size:2.2rem}
@@ -354,16 +369,11 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.16s}
 .pied-bleu p{margin:8px 0 0;color:rgba(255,255,255,.8);font-style:italic}
 .pied-bleu .capitales{color:var(--or-clair)}
 .pied-bleu .orn{position:absolute;opacity:.55;pointer-events:none}
-.pied-bleu .orn.a{width:min(260px,40vw);left:-10px;bottom:-30px}
-.pied-bleu .orn.b{width:min(170px,30vw);right:10px;bottom:-12px}
-@media (max-width:720px){.pied-bleu .orn.b{display:none} .pied-bleu .orn.a{width:150px;left:-50px;bottom:-60px;opacity:.35}}
+.pied-bleu .orn.a{width:min(300px,34vw);left:0;bottom:0}
+.pied-bleu .orn.b{width:min(300px,34vw);right:0;bottom:0}
+@media (max-width:720px){.pied-bleu .orn.a,.pied-bleu .orn.b{width:min(190px,46vw);opacity:.32}}
 .pied-bleu > *:not(.orn){position:relative}
 
-/* Connexion organisateur */
-.connexion{max-width:380px;margin:12vh auto;padding:38px 32px;text-align:center}
-.connexion h1{font-size:2.4rem}
-.connexion form{text-align:left;margin-top:10px}
-.connexion .err{color:var(--erreur);font-style:italic;min-height:1.4em;margin-top:10px;text-align:center}
 
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--bleu-nuit);color:#fff;
   padding:10px 20px;border-radius:2px;opacity:0;transition:.25s;pointer-events:none;z-index:999;font-size:.95rem;box-shadow:var(--ombre)}

@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/charte.css?v=202610241720">
+<link rel="stylesheet" href="../assets/charte.css?v=202610241742">
 <style>
   main{max-width:1000px;margin:0 auto;padding:10px 16px 90px}
   header.tete{text-align:center;position:relative}
@@ -71,7 +71,7 @@
     <p class="capitales" style="margin-top:20px">Qui fait quoi, où et quand</p>
     <h1 style="font-size:2.2rem;font-style:italic">Le programme du week-end</h1>
     <p class="doux" style="margin:6px 0 0">Le minute par minute pour les témoins et la famille. Cochez « Montrer aux invités » sur les moments qui doivent apparaître dans leur programme, puis publiez-le avec l'interrupteur en haut à droite.</p>
-    <p class="capitales" id="compte-public" style="margin:10px 0 0;font-size:.66rem;color:var(--or)"></p>
+    <p class="capitales" id="compte-public" style="margin:10px 0 0;font-size:.66rem;color:var(--or-texte)"></p>
     <div class="outils" id="outils" style="justify-content:flex-start;margin-top:16px"></div>
   </section>
 
@@ -103,9 +103,9 @@
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../assets/commun.js?v=202610241720"></script>
-<script src="../assets/programme.js?v=202610241720"></script>
+<script src="../assets/vendor/supabase.min.js"></script>
+<script src="../assets/commun.js?v=202610241742"></script>
+<script src="../assets/programme.js?v=202610241742"></script>
 <script>
 let items = [], jourActif = null, edition = false, enEdition = null;
 $('#pied').innerHTML = piedBleu('');

@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/charte.css?v=202610241720">
+<link rel="stylesheet" href="../assets/charte.css?v=202610241742">
 <style>
   main{max-width:1000px;margin:0 auto;padding:10px 16px 60px}
   .barre-outils{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0}
@@ -26,7 +26,8 @@
   .carte .apercu img,.carte .apercu video{width:100%;height:100%;object-fit:cover;display:block}
   .carte .infos{padding:8px 10px;font-size:.88rem;flex:1}
   .carte .infos .nom{word-break:break-all}
-  .carte .actions{display:flex;gap:6px;padding:0 10px 10px;align-items:center}
+  .carte .actions{display:flex;gap:6px;padding:0 10px 10px;align-items:center;flex-wrap:wrap}
+  @media (pointer:coarse){ .lien-modif,.interrupteur,.carte .actions a,.carte .actions button{min-height:36px;padding:6px 10px} .galerie{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))} }
   .carte .actions a,.carte .actions button{font:inherit;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;background:none;border:0;padding:4px 0;cursor:pointer;color:var(--bleu);text-decoration:none}
   .carte .actions .suppr{margin-left:auto;color:var(--encre-douce)}
   .carte .actions .suppr:hover{color:var(--erreur)}
@@ -50,11 +51,12 @@
   <section id="app">
     <p class="capitales" style="margin-top:20px">Ce que les invités ont déposé</p>
     <h1 style="font-size:2.2rem;font-style:italic">Les souvenirs</h1>
-    <p class="doux" style="margin:6px 0 0">Tout est projeté par défaut. Décochez ce que vous préférez garder pour vous, ajoutez ou corrigez un mot, téléchargez l'ensemble.</p>
+    <p class="doux" style="margin:6px 0 0">Tout est projeté par défaut. Passez en « Non projeté » ce que vous préférez garder pour vous, ajoutez ou corrigez un mot, téléchargez l'ensemble. Ce que vous supprimez va dans la corbeille, rien n'est perdu.</p>
     <div class="barre-outils">
       <button class="btn petit" id="btn-zip">Tout télécharger (zip)</button>
       <button class="btn clair petit" id="btn-csv">Exporter les mots (CSV)</button>
       <button class="btn clair petit" id="btn-refresh">Actualiser</button>
+      <button class="btn clair petit" id="btn-corbeille">Corbeille</button>
       
       <span class="spacer"></span>
       <span class="stat" id="stat"></span>
@@ -65,11 +67,12 @@
   <div id="visionneuse" hidden><button class="fermer" aria-label="Fermer">×</button><div id="vis-contenu"></div><div class="legende" id="vis-legende"></div></div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="../assets/commun.js?v=202610241720"></script>
+<script src="../assets/vendor/supabase.min.js"></script>
+<script src="../assets/vendor/jszip.min.js"></script>
+<script src="../assets/commun.js?v=202610241742"></script>
 <script>
-let envois = [];
+let envois = [], tous = [], corbeille = false;
+$('#btn-corbeille').onclick = () => { corbeille = !corbeille; rendreListe(); };
 $('#btn-refresh').onclick = charger;
 (async () => {
   bandeauOrga($('#bandeau'), { titre: 'Souvenirs', actions: '<a class="btn petit clair" href="../projection/" target="_blank" rel="noopener">Lancer la projection</a>',
@@ -81,13 +84,21 @@ async function charger(){
   $('#info').textContent = 'Chargement...';
   const { data, error } = await sb.from('mo_envois').select('*, fichiers:mo_fichiers(*)').order('created_at', { ascending: false });
   if (error) { $('#info').textContent = 'Erreur : ' + error.message; return; }
-  envois = data; $('#info').textContent = '';
+  tous = data; $('#info').textContent = '';
+  rendreListe();
+}
+async function rendreListe(){
+  // corbeille : envois supprimés, ou fichiers supprimés d'envois conservés
+  envois = tous.filter(e => corbeille ? (e.supprime || e.fichiers.some(f => f.supprime)) : !e.supprime).map(e => ({ ...e, fichiers: e.fichiers.filter(f => corbeille ? (e.supprime || f.supprime) : !f.supprime) }));
+  const nbCorb = tous.filter(e => e.supprime).length + tous.filter(e => !e.supprime).reduce((a, e) => a + e.fichiers.filter(f => f.supprime).length, 0);
+  $('#btn-corbeille').textContent = corbeille ? 'Retour aux souvenirs' : `Corbeille${nbCorb ? ' (' + nbCorb + ')' : ''}`;
   majStat();
   const cont = $('#liste'); cont.innerHTML = '';
-  if (!envois.length) { cont.innerHTML = '<p class="vide">Rien pour le moment : les souvenirs des invités apparaîtront ici dès le premier envoi.</p>'; return; }
+  if (corbeille) cont.innerHTML = '<p class="msg">Ce qui est ici n\'est ni projeté ni compté. Vous pouvez tout restaurer. Rien n\'est effacé définitivement : le ménage se fera après le mariage.</p>';
+  if (!envois.length) { cont.insertAdjacentHTML('beforeend', `<p class="vide">${corbeille ? 'La corbeille est vide.' : 'Rien pour le moment : les souvenirs des invités apparaîtront ici dès le premier envoi.'}</p>`); return; }
   for (const e of envois) {
     const sec = document.createElement('section'); sec.className = 'envoi carte-papier';
-    sec.innerHTML = `<header><h2>${echap(e.invite_nom || 'Invité anonyme')} <button class="lien-modif" data-modif-nom>modifier</button></h2><span class="date">${dateFr(e.created_at)} · ${e.appareil || ''}</span><span class="actions-envoi"><button class="interrupteur ${e.visible !== false ? 'actif' : ''}" data-vis-envoi>${e.visible !== false ? 'Projeté' : 'Non projeté'}</button><button class="btn clair petit" data-suppr-envoi>Supprimer l'envoi</button></span></header>`
+    sec.innerHTML = `<header><h2>${echap(e.invite_nom || 'Invité anonyme')} <button class="lien-modif" data-modif-nom>modifier</button></h2><span class="date">${dateFr(e.created_at)} · ${e.appareil || ''}</span><span class="actions-envoi"><button class="interrupteur ${e.visible !== false ? 'actif' : ''}" data-vis-envoi>${e.visible !== false ? 'Projeté' : 'Non projeté'}</button><button class="btn clair petit" data-suppr-envoi>${corbeille && e.supprime ? 'Restaurer l\'envoi' : 'Supprimer l\'envoi'}</button></span></header>`
       + `<div class="mot-ligne">${e.message ? `<div class="mot">${echap(e.message)}</div>` : '<span class="msg">Pas de mot global.</span>'}<button class="lien-modif" data-modif-mot>${e.message ? 'modifier' : 'ajouter'}</button></div>`;
     sec.querySelector('[data-modif-nom]').onclick = async () => {
       const v = prompt('Nom affiché avec ces souvenirs :', e.invite_nom || ''); if (v === null) return;
@@ -102,58 +113,59 @@ async function charger(){
       const { error } = await sb.from('mo_envois').update({ visible: vis }).eq('id', e.id); if (error) { alert(error.message); return; } charger();
     };
     sec.querySelector('[data-suppr-envoi]').onclick = async () => {
-      if (!confirm(`Supprimer tout l'envoi de ${e.invite_nom || 'cet invité'} (${e.fichiers.length} fichier(s)) ? Cette action est définitive.`)) return;
-      if (e.fichiers.length) { const { error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).remove(e.fichiers.map(f => f.chemin)); if (error) { alert(error.message); return; } }
-      const { error } = await sb.from('mo_envois').delete().eq('id', e.id); if (error) { alert(error.message); return; }
+      const restaurer = corbeille && e.supprime;
+      if (!restaurer && !confirm(`Mettre à la corbeille tout l'envoi de ${e.invite_nom || 'cet invité'} (${e.fichiers.length} fichier(s)) ? Il ne sera plus projeté ; vous pourrez le restaurer.`)) return;
+      const { error } = await sb.from('mo_envois').update({ supprime: !restaurer }).eq('id', e.id); if (error) { alert(erreurBase(error)); return; }
       charger();
     };
     if (e.fichiers.length) {
       const gal = document.createElement('div'); gal.className = 'galerie';
       e.fichiers.sort((a, b) => a.created_at.localeCompare(b.created_at));
-      const { data: signes } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrls(e.fichiers.map(f => f.chemin), 3600);
+      // vignettes réduites (400 px) : l'original n'est chargé qu'en plein écran ou au téléchargement
+      const signes = await Promise.all(e.fichiers.map(f => sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(f.chemin, 3600, (f.type_mime || '').startsWith('image/') ? { transform: { width: 400, quality: 70 } } : undefined).then(r => r.data).catch(() => null)));
       e.fichiers.forEach((f, i) => {
         const url = signes && signes[i] && signes[i].signedUrl;
         const carte = document.createElement('div'); carte.className = 'carte';
         const ap = document.createElement('div'); ap.className = 'apercu';
         const type = f.type_mime || '';
         if (type.startsWith('image/') && url) { const img = document.createElement('img'); img.loading = 'lazy'; img.src = url; img.alt = ''; img.onerror = () => { ap.textContent = 'aperçu indisponible'; }; ap.appendChild(img); }
-        else if (type.startsWith('video/') && url) { const v = document.createElement('video'); v.src = url; v.muted = true; v.preload = 'metadata'; v.playsInline = true; ap.appendChild(v); }
-        else ap.textContent = type.startsWith('audio/') ? 'audio' : 'fichier';
-        ap.onclick = () => voir(f, url);
+        else if (type.startsWith('video/') && url) { const v = document.createElement('video'); v.src = url; v.muted = true; v.preload = 'none'; v.playsInline = true; ap.appendChild(v); }
+        else ap.textContent = /heic|heif/i.test(type + f.nom_original) ? 'HEIC · non projetable' : type.startsWith('audio/') ? 'audio' : 'fichier';
+        ap.onclick = async () => { const { data } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(f.chemin, 3600); voir(f, data && data.signedUrl); };
         const infos = document.createElement('div'); infos.className = 'infos';
         infos.innerHTML = `<div class="nom">${echap(f.nom_original)}</div><div class="msg">${taille(f.taille || 0)}</div>` + (f.message ? `<div class="mot" style="margin:6px 0 0;padding:4px 8px">${echap(f.message)}</div>` : '');
         if (f.visible === false) carte.classList.add('masque');
         const ligne2 = document.createElement('div'); ligne2.className = 'actions';
         const inter = document.createElement('button'); inter.className = 'interrupteur' + (f.visible === false ? '' : ' actif'); inter.textContent = f.visible === false ? 'Non projeté' : 'Projeté';
-        inter.onclick = async () => { const vis = f.visible === false; const { error } = await sb.from('mo_fichiers').update({ visible: vis }).eq('id', f.id); if (error) { alert(error.message); return; } f.visible = vis; inter.className = 'interrupteur' + (vis ? ' actif' : ''); inter.textContent = vis ? 'Projeté' : 'Non projeté'; carte.classList.toggle('masque', !vis); };
+        inter.onclick = async () => { const vis = f.visible === false; const { error } = await sb.from('mo_fichiers').update({ visible: vis }).eq('id', f.id); if (error) { alert(error.message); return; } f.visible = vis; inter.className = 'interrupteur' + (vis ? ' actif' : ''); inter.textContent = vis ? 'Projeté' : 'Non projeté'; carte.classList.toggle('masque', !vis); majStat(); };
         const mod = document.createElement('button'); mod.className = 'lien-modif'; mod.textContent = f.message ? 'modifier le mot' : 'ajouter un mot'; mod.style.marginLeft = 'auto';
         mod.onclick = async () => { const v = prompt('Mot affiché sous ce souvenir :', f.message || ''); if (v === null) return; const { error } = await sb.from('mo_fichiers').update({ message: v.trim() || null }).eq('id', f.id); if (error) { alert(error.message); return; } charger(); };
         ligne2.append(inter, mod);
         const act = document.createElement('div'); act.className = 'actions';
         const dl = document.createElement('a'); dl.href = '#'; dl.textContent = 'Télécharger';
         dl.onclick = async ev => { ev.preventDefault(); const { data, error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(f.chemin, 3600, { download: f.nom_original }); if (error) { alert(error.message); return; } window.open(data.signedUrl, '_blank'); };
-        const sup = document.createElement('button'); sup.className = 'suppr'; sup.textContent = 'Supprimer';
+        const sup = document.createElement('button'); sup.className = 'suppr'; sup.textContent = corbeille ? 'Restaurer' : 'Supprimer';
         sup.onclick = async () => {
-          if (!confirm(`Supprimer « ${f.nom_original} » ? Cette action est définitive.`)) return;
-          carte.classList.add('supprime');
-          const { error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).remove([f.chemin]); if (error) { alert(error.message); carte.classList.remove('supprime'); return; }
-          const { error: e2 } = await sb.from('mo_fichiers').delete().eq('id', f.id); if (e2) { alert(e2.message); return; }
-          e.fichiers = e.fichiers.filter(x => x.id !== f.id); carte.remove(); majStat();
+          if (!corbeille && !confirm(`Mettre « ${f.nom_original} » à la corbeille ? Vous pourrez le restaurer.`)) return;
+          const { error } = await sb.from('mo_fichiers').update({ supprime: !corbeille }).eq('id', f.id); if (error) { alert(erreurBase(error)); return; }
+          charger();
         };
         act.append(dl, sup); carte.append(ap, infos, ligne2, act); gal.appendChild(carte);
       });
       sec.appendChild(gal);
-    } else sec.insertAdjacentHTML('beforeend', '<p class="msg">Mot seul, sans fichier.</p>');
+    } else sec.insertAdjacentHTML('beforeend', `<p class="msg">${e.nb_fichiers > 0 && !corbeille ? `Envoi interrompu : ${e.nb_fichiers} fichier${e.nb_fichiers > 1 ? 's' : ''} attendu${e.nb_fichiers > 1 ? 's' : ''}, aucun reçu.` : e.message ? 'Un mot, sans photo.' : 'Envoi vide.'}</p>`);
     cont.appendChild(sec);
   }
 }
 
+function erreurBase(err){ return /supprime/.test(err.message) ? 'La base de données n\'est pas encore à jour : la corbeille sera disponible après l\'exécution du fichier supabase/migrations/20261024_mo_garde_fous.sql (voir le README).' : err.message; }
 function majStat(){
-  const nbF = envois.reduce((a, e) => a + e.fichiers.length, 0);
-  const vol = envois.reduce((a, e) => a + e.fichiers.reduce((b, f) => b + (f.taille || 0), 0), 0);
-  $('#stat').textContent = `${envois.length} envoi${envois.length > 1 ? 's' : ''}, ${nbF} fichier${nbF > 1 ? 's' : ''}, ${taille(vol)}`;
-  const proj = envois.filter(e => e.visible !== false).reduce((a, e) => a + e.fichiers.filter(f => f.visible !== false).length, 0);
-  $('#stat').textContent += ` · ${proj} projeté${proj > 1 ? 's' : ''}`;
+  const vivants = tous.filter(e => !e.supprime).map(e => ({ ...e, fichiers: e.fichiers.filter(f => !f.supprime) }));
+  const nbF = vivants.reduce((a, e) => a + e.fichiers.length, 0);
+  const vol = vivants.reduce((a, e) => a + e.fichiers.reduce((b, f) => b + (f.taille || 0), 0), 0);
+  const proj = vivants.filter(e => e.visible !== false).reduce((a, e) => a + e.fichiers.filter(f => f.visible !== false).length, 0);
+  const mots = vivants.filter(e => e.message).length;
+  $('#stat').textContent = `${vivants.length} envoi${vivants.length > 1 ? 's' : ''}, ${nbF} fichier${nbF > 1 ? 's' : ''}, ${taille(vol)} · ${proj} projeté${proj > 1 ? 's' : ''}${mots ? ` · ${mots} mot${mots > 1 ? 's' : ''}` : ''}`;
 }
 
 /* Visionneuse plein écran */

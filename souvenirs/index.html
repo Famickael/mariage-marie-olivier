@@ -6,7 +6,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/charte.css?v=202610241720">
+<link rel="stylesheet" href="../assets/charte.css?v=202610241742">
 <style>
   main{max-width:600px;margin:0 auto;padding:34px 16px 60px}
   .note{max-width:460px;margin:22px auto 0;text-align:center;font-size:1rem;color:var(--encre-douce)}
@@ -65,20 +65,22 @@
   <div class="depot" id="depot">
     <label class="zone" id="zone-depot" for="input-fichiers" tabindex="0">
       <svg class="fleche" viewBox="0 0 48 48"><path d="M24 34V12M14 22l10-10 10 10"/><path d="M8 34v6h32v-6"/></svg>
-      <strong id="depot-titre">Choisir des fichiers</strong>
+      <strong id="depot-titre">Choisir des photos ou vidéos</strong>
       <small id="depot-sous">ou glissez-les ici</small>
     </label>
-    <input type="file" id="input-fichiers" multiple accept="image/*,video/*,audio/*,.pdf">
+    <input type="file" id="input-fichiers" multiple accept="image/*,video/*">
   </div>
 
   <form id="form" novalidate>
     <label class="champ" for="nom">Votre nom <span class="italique" style="text-transform:none;letter-spacing:0">· il sera affiché avec vos souvenirs</span></label>
     <input type="text" id="nom" autocomplete="name" placeholder="Prénom et nom">
+    <label class="champ" for="mot-global">Un mot pour Marie et Olivier <span class="italique" style="text-transform:none;letter-spacing:0">· facultatif, il sera projeté avec votre nom</span></label>
+    <textarea id="mot-global" rows="2" placeholder="Un souvenir, un vœu, une pensée… même sans photo."></textarea>
 
     <div id="bloc-fichiers" hidden>
       <label class="champ">Vos souvenirs <span class="italique" style="text-transform:none;letter-spacing:0">· ajoutez un mot à chacun si le cœur vous en dit</span></label>
       <ul class="fichiers" id="liste"></ul>
-      <p class="centre" style="margin-top:12px"><button type="button" class="btn clair petit" id="btn-ajouter">Ajouter d'autres fichiers</button></p>
+      <p class="centre" style="margin-top:12px"><button type="button" class="btn clair petit" id="btn-ajouter">Ajouter d'autres photos ou vidéos</button></p>
     </div>
 
     <div class="progression" id="progression" hidden>
@@ -106,15 +108,15 @@
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.1.0/dist/tus.min.js"></script>
-<script src="../assets/commun.js?v=202610241720"></script>
-<script src="../assets/ouverture.js?v=202610241720"></script>
+<script src="../assets/vendor/supabase.min.js"></script>
+<script src="../assets/vendor/tus.min.js"></script>
+<script src="../assets/commun.js?v=202610241742"></script>
+<script src="../assets/ouverture.js?v=202610241742"></script>
 <script>
 /* Page invités : aucun lien vers le reste du site.
    Client sans session : un invité dépose toujours en anonyme (droit d'écrire, jamais de lire). */
-Object.assign(CONFIG, { CHUNK: 6 * 1024 * 1024, MAX_FILE_MB: 4096, PARALLELE: 3, RETOUR_ACCUEIL_S: 10 });
-const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }) : null;
+Object.assign(CONFIG, { CHUNK: 6 * 1024 * 1024, MAX_FILE_MB: 500, PARALLELE: 3, RETOUR_ACCUEIL_S: 25 });
+const sbInvite = (CONFIGURE && window.supabase && window.tus) ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }) : null;
 const vues = { home: $('#home'), upload: $('#upload'), done: $('#done') };
 let fichiers = [];
 let envoiEnCours = false;
@@ -160,7 +162,8 @@ function ajouterFichiers(liste){
     fichiers.push(f);
   });
   $('#bloc-fichiers').hidden = fichiers.length === 0;
-  if (trop.length) afficherEtat(`Fichier trop volumineux (max ${CONFIG.MAX_FILE_MB} Mo) : ${trop.join(', ')}`, true);
+  if (trop.length) afficherEtat(`${trop.length > 1 ? 'Ces vidéos sont trop lourdes' : 'Cette vidéo est trop lourde'} (plus de ${CONFIG.MAX_FILE_MB} Mo) : ${trop.join(', ')}. Coupez-la en plusieurs morceaux, ou envoyez-la directement à Marie et Olivier.`, true);
+  if ([...liste].some(f => /heic|heif/i.test(f.type + f.name))) afficherEtat('Photo au format HEIC (iPhone) : elle sera bien reçue, mais pourrait ne pas s\'afficher à la projection. Pour éviter cela : Réglages > Appareil photo > Formats > « Le plus compatible », ou envoyez-la depuis l\'app Photos.', true);
 }
 
 function rendreLigne(f){
@@ -194,10 +197,10 @@ $('#form').addEventListener('submit', async e => {
   e.preventDefault();
   if (envoiEnCours) return;
   const nom = $('#nom').value.trim();
-  const message = '';
+  const message = $('#mot-global').value.trim();
   if (!nom) { afficherEtat('Indiquez votre nom : il accompagnera vos souvenirs.', true); $('#nom').focus(); return; }
-  if (!fichiers.length) { afficherEtat('Choisissez au moins une photo ou une vidéo.', true); return; }
-  if (!sbInvite) { afficherEtat('La page n\'est pas encore reliée au serveur.', true); return; }
+  if (!fichiers.length && !message) { afficherEtat('Ajoutez une photo, une vidéo… ou écrivez simplement un petit mot.', true); return; }
+  if (!sbInvite) { afficherEtat('Le service d\'envoi n\'a pas pu se charger. Vérifiez votre connexion, puis rechargez la page.', true); return; }
 
   envoiEnCours = true; verrouiller(true); afficherEtat('');
   const aFaire = fichiers.filter(f => !f.chemin);
@@ -207,7 +210,7 @@ $('#form').addEventListener('submit', async e => {
   try {
     prog.etape('Préparation de l\'envoi');
     if (!envoiId) {
-      envoiId = crypto.randomUUID();
+      envoiId = uuid();
       await reessayer(async () => {
         const { error } = await sbInvite.from('mo_envois').insert({ id: envoiId, invite_nom: nom, message: message || null, appareil: mobile ? 'mobile' : 'ordinateur', nb_fichiers: fichiers.length });
         if (error) throw new Error(error.message);
@@ -220,7 +223,7 @@ $('#form').addEventListener('submit', async e => {
       while (index < aFaire.length) {
         const f = aFaire[index++];
         try { await envoyerFichier(f); }
-        catch (err) { f.etat.textContent = 'Échec : ' + err.message; f.etat.className = 'etat err'; f.barre.style.width = '0'; }
+        catch (err) { f.etat.textContent = humaniser(err, true); f.etat.className = 'etat err'; f.barre.style.width = '0'; }
       }
     };
     await Promise.all(Array.from({ length: CONFIG.PARALLELE }, travailleur));
@@ -242,19 +245,36 @@ $('#form').addEventListener('submit', async e => {
     const rates = fichiers.length - ok;
     prog.terminer();
     if (rates) {
-      afficherEtat(`${ok} fichier(s) envoyé(s), ${rates} en échec. Cliquez à nouveau sur Envoyer : seuls les fichiers en échec seront renvoyés.`, true);
+      afficherEtat(`${ok} souvenir${ok > 1 ? 's' : ''} bien arrivé${ok > 1 ? 's' : ''}, ${rates} à renvoyer. Cliquez à nouveau sur Envoyer : seuls ceux qui ont échoué repartiront.`, true);
     } else {
-      $('#done-texte').textContent = ok === 1 ? 'Votre fichier est bien arrivé.' : `Vos ${ok} fichiers sont bien arrivés.`;
+      $('#done-texte').textContent = ok === 0 ? 'Votre mot est bien arrivé, Marie et Olivier le découvriront bientôt.' : ok === 1 ? (message ? 'Votre souvenir et votre mot sont bien arrivés.' : 'Votre souvenir est bien arrivé.') : `Vos ${ok} souvenirs sont bien arrivés${message ? ', avec votre mot' : ''}.`;
       montrer('done'); lancerCompteur();
     }
   } catch (err) {
     prog.terminer();
-    afficherEtat('Envoi impossible : ' + err.message, true);
+    afficherEtat(humaniser(err), true);
   } finally {
     envoiEnCours = false; verrouiller(false);
     if (veille) { try { veille.release(); } catch {} }
   }
 });
+
+/* Enregistre un fichier envoyé dans la base (une seule fois) */
+async function journaliser(f){
+  if (f.journalise || !f.chemin) return;
+  const { error } = await sbInvite.from('mo_fichiers').insert({ envoi_id: envoiId, chemin: f.chemin, nom_original: f.file.name, taille: f.file.size, type_mime: f.file.type || null, message: f.msg.trim() || null });
+  if (!error || /duplicate|unique/i.test(error.message)) f.journalise = true;
+}
+/* Traduit une erreur technique en phrase compréhensible */
+function humaniser(err, court){
+  const m = String(err && err.message || err || '');
+  if (!navigator.onLine || /network|fetch|failed to upload|ProgressEvent|ERR_|timeout|connexion/i.test(m)) return court ? 'Connexion interrompue, reprise automatique dès que le réseau revient' : 'La connexion a été interrompue. Dès que le réseau revient, l\'envoi reprend tout seul ; sinon, cliquez à nouveau sur Envoyer.';
+  if (/exceeded|too large|size|payload/i.test(m)) return court ? 'Fichier trop lourd' : 'Ce fichier est trop lourd pour être envoyé (plus de ' + CONFIG.MAX_FILE_MB + ' Mo).';
+  if (/mime|type|not allowed/i.test(m)) return court ? 'Format non accepté' : 'Ce type de fichier n\'est pas accepté : seules les photos et les vidéos le sont.';
+  return court ? 'Échec de l\'envoi' : 'L\'envoi n\'a pas abouti. Réessayez dans un instant ; si cela persiste, envoyez vos souvenirs directement à Marie et Olivier.';
+}
+/* Reprise automatique quand le réseau revient */
+window.addEventListener('online', () => { if (!envoiEnCours && envoiId && fichiers.some(f => !f.chemin)) { afficherEtat('Connexion retrouvée : reprise de l\'envoi…'); setTimeout(() => $('#form').requestSubmit(), 800); } });
 
 async function reessayer(fn, n = 3){
   for (let i = 0; ; i++) {
@@ -269,7 +289,7 @@ function nomSur(n){ return n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').re
 function envoyerFichier(f){
   return new Promise((resolve, reject) => {
     f.barre.parentElement.hidden = false; f.etat.className = 'etat'; f.etat.textContent = 'Envoi...';
-    const chemin = `${envoiId}/${crypto.randomUUID().slice(0, 8)}-${nomSur(f.file.name)}`;
+    const chemin = `${envoiId}/${uuid().slice(0, 8)}-${nomSur(f.file.name)}`;
     const upload = new tus.Upload(f.file, {
       endpoint: `${CONFIG.SUPABASE_URL}/storage/v1/upload/resumable`,
       retryDelays: [0, 1000, 3000, 6000, 12000],
@@ -278,7 +298,7 @@ function envoyerFichier(f){
       removeFingerprintOnSuccess: true,
       metadata: { bucketName: CONFIG.BUCKET_SOUVENIRS, objectName: chemin, contentType: f.file.type || 'application/octet-stream', cacheControl: '3600' },
       chunkSize: CONFIG.CHUNK,
-      onError: err => reject(new Error((err && err.message || String(err)).replace(/^tus: /, '').slice(0, 120))),
+      onError: err => reject(err),
       onProgress: (fait) => {
         const pct = Math.round(fait / f.file.size * 100);
         f.barre.style.width = pct + '%'; f.etat.textContent = `Envoi ${pct} %`;
@@ -287,7 +307,8 @@ function envoyerFichier(f){
       onSuccess: () => {
         f.chemin = chemin;
         f.barre.style.width = '100%'; f.etat.textContent = 'Envoyé'; f.etat.className = 'etat ok';
-        prog.maj(f, f.file.size); resolve();
+        prog.maj(f, f.file.size);
+        journaliser(f).finally(resolve);   // enregistré tout de suite : rien n'est perdu si la page est fermée ensuite
       }
     });
     upload.start();
@@ -324,13 +345,13 @@ function duree(sec){ sec = Math.max(1, Math.round(sec)); return sec < 60 ? `${se
 
 function verrouiller(b){
   $('#btn-envoyer').disabled = b; $('#btn-retour').disabled = b; $('#btn-ajouter').disabled = b;
-  $('#nom').disabled = b;
+  $('#nom').disabled = b; $('#mot-global').disabled = b;
   fichiers.forEach(f => f.ta.disabled = b);
 }
 function afficherEtat(txt, err){ const el = $('#global-etat'); el.textContent = txt; el.className = 'global-etat' + (err ? ' err' : ''); }
 function reinitialiser(){
   fichiers = []; envoiId = null; $('#liste').innerHTML = ''; $('#bloc-fichiers').hidden = true;
-  $('#nom').value = ''; afficherEtat('');
+  $('#nom').value = ''; $('#mot-global').value = ''; afficherEtat('');
 }
 let compteur;
 function lancerCompteur(){

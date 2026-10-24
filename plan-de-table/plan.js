@@ -70,8 +70,9 @@ function normaliser(d){
   d.salle = Object.assign({ l: 2000, h: 1400, fond: null, grille: true }, d.salle || {});
   d.reglages = Object.assign({ affichage: 'prenom', police: 17 }, d.reglages || {});
   d.reglages.stock = Object.assign({}, STOCK_DEFAUT, d.reglages.stock || {});
-  d.groupes = d.groupes || []; d.invites = d.invites || []; d.tables = d.tables || []; d.decors = d.decors || [];
-  d.tables.forEach(t => { t.sieges = t.sieges || []; t.sieges.length = Math.max(t.n, 0); for (let i = 0; i < t.n; i++) if (t.sieges[i] === undefined) t.sieges[i] = null; });
+  for (const k of ['groupes', 'invites', 'tables', 'decors']) if (!Array.isArray(d[k])) d[k] = [];
+  d.tables.forEach(t => { t.n = Math.min(60, Math.max(0, parseInt(t.n, 10) || 0)); t.l = +t.l || 160; t.w = +t.w || t.l; t.x = +t.x || 0; t.y = +t.y || 0; t.sieges = Array.isArray(t.sieges) ? t.sieges : []; t.sieges.length = t.n; for (let i = 0; i < t.n; i++) if (t.sieges[i] === undefined) t.sieges[i] = null; });
+  d.decors.forEach(x => { x.l = +x.l || 100; x.w = +x.w || 50; x.x = +x.x || 0; x.y = +x.y || 0; });
   return d;
 }
 
@@ -984,6 +985,7 @@ async function actionPlan(act){
 }
 async function importerSauvegarde(e){
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 2 * 1048576) { alert('Ce fichier est trop volumineux pour être un plan de table.'); return; }
   try {
     const j = JSON.parse(await f.text()); const data = normaliser(j.data || j);
     const id = await creerPlan((j.nom || 'Plan importé') + ' (importé)', data); if (id) ouvrirPlan(id);

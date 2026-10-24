@@ -6,7 +6,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/charte.css?v=202610241720">
+<link rel="stylesheet" href="../assets/charte.css?v=202610241742">
 <style>
   main{max-width:560px;margin:0 auto;padding:30px 16px 70px}
   .jour{margin-top:40px;text-align:center}
@@ -18,8 +18,8 @@
   .moment h3{font-size:1.7rem;margin-top:2px}
   .moment .lieu{font-style:italic;color:var(--encre-douce)}
   .moment .desc{max-width:420px;margin:6px auto 0;font-size:.98rem;white-space:pre-wrap}
-  .moment.encours h3{color:var(--or)}
-  .moment.encours .heure::after{content:" · en ce moment";letter-spacing:.1em;font-style:italic;color:var(--or)}
+  .moment.encours h3{color:var(--or-texte)}
+  .moment.encours .heure::after{content:" · en ce moment";letter-spacing:.1em;font-style:italic;color:var(--or-texte)}
   .vide{text-align:center;font-style:italic;color:var(--encre-douce);margin:40px 0}
   .papillon{display:block;width:44px;margin:40px auto 0;opacity:.8}
 </style>
@@ -31,10 +31,10 @@
   <span id="pap"></span>
 </main>
 <footer class="pied-bleu" id="pied"></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../assets/commun.js?v=202610241720"></script>
-<script src="../assets/ouverture.js?v=202610241720"></script>
-<script src="../assets/programme.js?v=202610241720"></script>
+<script src="../assets/vendor/supabase.min.js"></script>
+<script src="../assets/commun.js?v=202610241742"></script>
+<script src="../assets/ouverture.js?v=202610241742"></script>
+<script src="../assets/programme.js?v=202610241742"></script>
 <script>
 $('#pap').remove();
 $('#pied').innerHTML = piedBleu();

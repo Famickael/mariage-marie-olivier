@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241720">
+<link rel="stylesheet" href="assets/charte.css?v=202610241742">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -21,17 +21,19 @@
 
   /* ---- sections ---- */
   section.groupe{margin-top:54px;position:relative}
-  section.groupe > h2{font-size:2.1rem;text-align:center;font-style:italic;color:var(--or)}
+  section.groupe > h2{font-size:2.1rem;text-align:center;font-style:italic;color:var(--or-texte)}
   section.groupe > p{text-align:center;margin:4px auto 0;max-width:560px;color:var(--encre-douce)}
   .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:24px}
   .fonction{padding:24px 20px 18px;display:flex;flex-direction:column;gap:9px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-height:290px;cursor:pointer}
   .fonction:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(27,38,82,.16)}
   .fonction .deco{position:absolute;right:-10px;top:-6px;width:46%;max-height:46%;object-fit:contain;object-position:top right;opacity:.95}
   .fonction h3{font-size:1.5rem;font-style:italic;margin-top:70px;position:relative}
+  .etat-pub{position:absolute;left:20px;top:18px;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:12px;border:1px solid var(--perle-fonce);color:var(--encre-douce);background:rgba(255,255,255,.7)}
+  .etat-pub.ok{border-color:#9bbba6;color:var(--ok)} .etat-pub.non{border-color:#e0b4b8;color:var(--erreur)}
   .fonction p{margin:0;font-size:.95rem;color:var(--encre-douce);flex:1;position:relative;line-height:1.5}
   .actions{display:flex;gap:6px;margin-top:8px;flex-wrap:nowrap;position:relative}
   .actions .btn{flex:1;padding:9px 4px;font-size:.6rem;letter-spacing:.06em;min-width:0}
-  .ouvrir-indice{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or);margin-left:auto;padding:9px 0}
+  .ouvrir-indice{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--or-texte);margin-left:auto;padding:9px 0}
 
   /* ---- QR ---- */
   dialog{border:0;padding:0;background:transparent;max-width:94vw}
@@ -46,8 +48,10 @@
 </style>
 </head>
 <body data-ouverture="clic">
+<img class="motif branche-titre g" src="assets/motifs/branche-titre-gauche.png" alt="" draggable="false" decoding="async">
+<img class="motif branche-titre d" src="assets/motifs/branche-titre-droite.png" alt="" draggable="false" decoding="async">
 <main>
-  <header class="tete">
+  <header class="tete"
     <p class="capitales">Notre mariage</p>
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <h1>Marie &amp; Olivier</h1>
@@ -82,19 +86,19 @@
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241720"></script>
-<script src="assets/ouverture.js?v=202610241720"></script>
+<script src="assets/vendor/supabase.min.js"></script>
+<script src="assets/vendor/qrcode.min.js"></script>
+<script src="assets/commun.js?v=202610241742"></script>
+<script src="assets/ouverture.js?v=202610241742"></script>
 <script>
 const FONCTIONS = [
-  { groupe: 'invites', deco: 'carte-1', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
+  { groupe: 'invites', deco: 'carte-1', titre: 'Déposer ses souvenirs', chemin: 'souvenirs/', etat: 'depot', accroche: 'Partagez vos souvenirs',
     texte: 'Avant le grand jour, les invités déposent ici leurs photos, leurs vidéos et un petit mot pour les mariés. Tout ce qui est déposé sera projeté sur grand écran pendant la soirée, pour revivre ensemble ces années de souvenirs.' },
-  { groupe: 'invites', deco: 'carte-7', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
+  { groupe: 'invites', deco: 'carte-7', titre: 'Trouver ma table', etat: 'plan', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
     texte: 'À l\'entrée de la salle, chaque invité tape son prénom ou son nom et découvre aussitôt sa table, son emplacement sur le plan et les convives qui l\'entourent. Plus besoin de chercher son nom sur un panneau.' },
-  { groupe: 'invites', deco: 'carte-2', titre: 'Programme', chemin: 'programme/', accroche: 'Le programme',
+  { groupe: 'invites', deco: 'carte-2', titre: 'Programme', etat: 'programme', chemin: 'programme/', accroche: 'Le programme',
     texte: 'Le déroulé du week-end heure par heure : la cérémonie, le vin d\'honneur, le dîner, la soirée et le lendemain. Les lieux et horaires sont indiqués, et le moment en cours est mis en avant le jour J.' },
-  { groupe: 'orga', deco: 'carte-5', titre: 'Souvenirs', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
+  { groupe: 'orga', deco: 'carte-5', titre: 'Gérer les souvenirs', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
     texte: 'Tout ce que les invités ont déposé, envoi par envoi. Choisissez ce qui sera projeté, corrigez un mot, téléchargez l\'ensemble en un clic. C\'est aussi ici que vous ouvrez ou fermez le dépôt.' },
   { groupe: 'orga', deco: 'carte-4', titre: 'Projection', chemin: 'projection/', accroche: 'Projection',
     texte: 'Le diaporama de la soirée, à lancer sur l\'écran de la salle. Les photos et les mots défilent en boucle, les nouveaux souvenirs y arrivent au fil de l\'eau, et un QR code invite à en déposer d\'autres.' },
@@ -113,6 +117,7 @@ for (const f of FONCTIONS) {
   const el = document.createElement('article');
   el.className = 'fonction carte-papier';
   el.innerHTML = `${motif(f.deco, 'deco')}
+    ${f.etat ? `<span class="etat-pub" data-etat="${f.etat}">…</span>` : ''}
     <h3>${echap(f.titre)}</h3>
     <p>${echap(f.texte)}</p>
     ${f.groupe === 'invites' ? `<div class="actions">
@@ -138,6 +143,17 @@ for (const f of FONCTIONS) {
 $('#qr-fermer').onclick = () => $('#dlg-qr').close();
 $('#qr-affiche').onclick = () => fonctionQR && affiche(fonctionQR);
 $('#pied').innerHTML = piedBleu();
+
+/* État de publication des pages invités (pour savoir ce qu'on envoie vraiment) */
+(async () => {
+  if (!sb) return;
+  const poser = (k, ok, txt) => { const el = $(`.etat-pub[data-etat="${k}"]`); if (!el) return; el.textContent = txt; el.classList.add(ok ? 'ok' : 'non'); };
+  const [depot, prog, plans] = await Promise.all([reglage('depot_souvenirs', true), reglage('programme_publie', false), sb.from('mo_plans').select('id').eq('publie', true)]);
+  poser('depot', depot, depot ? 'Dépôt ouvert' : 'Dépôt fermé');
+  poser('programme', prog, prog ? 'Publié' : 'Non publié');
+  const planOk = !!(plans.data && plans.data.length);
+  poser('plan', planOk, planOk ? 'Plan publié' : 'Plan non publié');
+})();
 
 /* ---------- Affiche A5 à imprimer : QR code habillé aux couleurs du faire-part ---------- */
 async function affiche(f){
@@ -172,7 +188,7 @@ async function affiche(f){
   x.save(); x.shadowColor = 'rgba(27,38,82,.18)'; x.shadowBlur = 40; x.shadowOffsetY = 16; x.fillStyle = '#fff'; x.fillRect(qx - 40, qy - 40, taille + 80, taille + 80); x.restore();
   x.strokeStyle = 'rgba(38,53,111,.3)'; x.lineWidth = 1.5; x.strokeRect(qx - 24, qy - 24, taille + 48, taille + 48);
   if (qc) { x.imageSmoothingEnabled = false; x.drawImage(qc, qx, qy, taille, taille); x.imageSmoothingEnabled = true; }
-  if (colib) dessiner(colib, qx + taille - 20, qy - 150, 170);
+  if (colib) dessiner(colib, qx + taille + 30, qy + taille / 2 - 90, 170);
   x.fillStyle = '#1e1e22'; x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'SCANNEZ-MOI', W / 2, qy + taille + 100, 16);
   x.fillStyle = '#5c5c63'; x.font = 'italic 400 54px "EB Garamond", Georgia, serif'; x.textAlign = 'center'; x.fillText(f.titre === 'Souvenirs' ? 'Vos photos, vidéos et petits mots de la journée' : f.titre === 'Trouver ma table' ? 'Votre nom, votre table, vos voisins' : 'Avec l\'appareil photo de votre téléphone', W / 2, qy + taille + 170);
   if (oiseau) dessiner(oiseau, W - 110 - 240, 2000, 240);

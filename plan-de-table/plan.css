@@ -194,7 +194,7 @@ dialog::backdrop{background:rgba(27,38,82,.45)}
 #impression{display:none}
 @media print{
   body.editeur{overflow:visible;height:auto;background:#fff}
-  #app,dialog,.toast{display:none!important}
+  #app,dialog,.toast,.cote,.pied-bleu{display:none!important}
   #impression{display:block}
 }
 .imp-page{font-family:"EB Garamond",serif;color:#1d2240}
@@ -240,7 +240,8 @@ dialog::backdrop{background:rgba(27,38,82,.45)}
   .legende{max-width:90%}
 }
 @media (max-width:560px){
-  #b-zoom-moins,#b-zoom-plus,#b-refaire,.marque,.publier .lib{display:none}
+  #b-zoom-moins,#b-zoom-plus,#b-refaire,.marque,.publier,.groupe-btn{display:none}
+  #barre{overflow:hidden}
   .menu button.mobile-seul{display:block}
   .zoom #b-zoom-ajuster{min-width:46px}
   #sel-plan{max-width:100px}

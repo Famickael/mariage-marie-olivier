@@ -47,3 +47,16 @@ Disposition proposée : table d'honneur (2 tables 75×180) dos aux baies vitrée
 - **Publier** : l'interrupteur « Publié » rend la page *Trouver ma table* active pour ce plan.
 - **Imprimer** : plan de salle, convives par table, liste alphabétique pour l'entrée, marque-places à découper, récapitulatif traiteur (adultes, enfants, régimes), export CSV.
 - Enregistrement automatique ; Ctrl+Z / Ctrl+Y ; si deux personnes modifient en même temps, le site le signale au lieu d'écraser en silence.
+
+## Mise à jour de la base (à faire une fois)
+
+Le fichier `supabase/migrations/20261024_mo_garde_fous.sql` ajoute la corbeille des souvenirs, l'historique
+des plans de table et quelques protections. Pour l'appliquer : Supabase → projet *mariage-souvenirs* →
+**SQL Editor** → coller le contenu du fichier → **Run**. Tant qu'il n'est pas passé, tout fonctionne sauf
+« Supprimer / Corbeille » dans la gestion des souvenirs (un message l'indique).
+
+## Accès
+
+Pas de mot de passe : chaque page a son propre lien, Marie choisit à qui elle le donne. Les pages invités
+ne contiennent aucun lien vers les pages organisateurs. Tout vit dans le projet Supabase partagé avec le site
+d'Aude & Jérémie, préfixé `mo_` / `mo-` ; rien de leur côté n'est touché.

@@ -22,7 +22,8 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 function echap(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function taille(o){ return o < 1048576 ? (o/1024).toFixed(0) + ' Ko' : o < 1073741824 ? (o/1048576).toFixed(1) + ' Mo' : (o/1073741824).toFixed(2) + ' Go'; }
 function sansAccent(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
-function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 12); }
+function uuid(){ return crypto.randomUUID ? crypto.randomUUID() : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)); }
+function uid(){ return uuid().slice(0, 12); }
 function telecharger(blob, nom){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nom; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
 
 function toast(txt, ms = 2200){
@@ -36,8 +37,6 @@ function urlSite(chemin){ const base = location.href.replace(/[^/]*([?#].*)?$/, 
 /* ---------- Pages organisateurs ----------
    Pas de mot de passe : l'accès repose sur des liens distincts, donnés seulement à la famille.
    Chaque page organisateur porte le même bandeau, avec la zone « publication » toujours à droite. */
-async function exigerConnexion(titre, onOk){ onOk(null); }
-async function deconnecter(){ location.href = BASE_ASSETS + '../'; }
 
 /* bandeauOrga(el, { titre, publication }) : publication = { type:'interrupteur', actif, libelle, onChange }
    ou { type:'etat', texte, lien, lienTexte } */
@@ -80,11 +79,21 @@ async function publicationReglage(cle, libelle, aide, question){
 
 /* Motifs du faire-part : <img> détourées (assets/motifs/*.png). `base` = chemin relatif vers assets/. */
 const BASE_ASSETS = (document.currentScript && document.currentScript.src.replace(/commun\.js.*$/, '')) || 'assets/';
-function motif(nom, cls = '', style = ''){ return `<img class="motif ${cls}" style="${style}" src="${BASE_ASSETS}motifs/${nom}.png" alt="" draggable="false">`; }
+function motif(nom, cls = '', style = ''){ return `<img class="motif ${cls}" style="${style}" src="${BASE_ASSETS}motifs/${nom}.png" alt="" draggable="false" decoding="async">`; }
 
 /* Colonnes latérales (grands écrans) : les deux panneaux du faire-part ouvert, de part et d'autre du contenu. */
 function colonnesCote(){
-  document.body.insertAdjacentHTML('afterbegin', `<div class="cote gauche" aria-hidden="true">${motif('panneau-gauche')}</div><div class="cote droite" aria-hidden="true">${motif('panneau-droit')}</div>`);
+  // les grands panneaux ne sont chargés que si l'écran est assez large pour les afficher
+  const poser = () => { if ($('.cote') || !matchMedia('(min-width:980px)').matches) return; document.body.insertAdjacentHTML('afterbegin', `<div class="cote gauche" aria-hidden="true">${motif('panneau-gauche')}</div><div class="cote droite" aria-hidden="true">${motif('panneau-droit')}</div>`); };
+  poser(); matchMedia('(min-width:980px)').addEventListener('change', poser);
+  // petits écrans : quelques motifs du faire-part en fond, le long des bords
+  // (répartis sur la hauteur réelle de la page, en évitant le pied bleu)
+  if (!matchMedia('(min-width:980px)').matches && !$('.fond-mobile')) {
+    const pied = $('.pied-bleu'); const H = (pied ? pied.offsetTop : document.documentElement.scrollHeight) - innerWidth * .4;
+    const noms = [['couv-droite-haut', 'a'], ['couv-gauche-bas', 'b'], ['oiseau-branche', 'c'], ['motif-a', 'd']];
+    const n = Math.max(2, Math.min(4, Math.floor(H / (innerHeight * .5))));
+    noms.slice(0, n).forEach(([nom, cls], i) => document.body.insertAdjacentHTML('afterbegin', motif(nom, 'fond-mobile ' + cls, `top:${Math.round(innerHeight * .5 + (H - innerHeight * .5) * i / n)}px`)));
+  }
 }
 
 /* En-tête commun des pages invités : <header class="entete-site" data-titre="…" data-sous="…"> */
@@ -108,7 +117,7 @@ function enteteSite(el){
 document.addEventListener('DOMContentLoaded', () => { $$('header.entete-site').forEach(enteteSite); if (document.body.dataset.cotes !== 'non') colonnesCote(); });
 
 function piedBleu(){
-  return `${motif('couv-gauche-bas', 'blanc orn a')}${motif('oiseau-branche', 'blanc orn b')}
+  return `${motif('pied-gauche', 'blanc orn a')}${motif('pied-droit', 'blanc orn b')}
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <p class="capitales">Samedi 5 décembre 2026 · Ouvrouer-les-Champs</p>`;
 }

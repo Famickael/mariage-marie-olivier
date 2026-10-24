@@ -20,14 +20,14 @@
   <div class="fp" id="fp">
     <div class="volet g">
       <div class="face recto">
-        <span class="m m1">${M('motif-a')}</span><span class="m m2">${M('couv-gauche-bas')}</span><span class="m m3">${M('colibri')}</span>
+        <span class="m m1">${M('fp-hg')}</span><span class="m m2">${M('fp-bg')}</span>
         <div class="cartouche"><p class="capitales">Notre Mariage</p><div class="monogramme">M<span class="et">&amp;</span>O</div><p class="capitales date">05.12.2026</p></div>
       </div>
       <div class="face dos"></div>
     </div>
     <div class="volet d">
       <div class="face recto">
-        <span class="m m1">${M('couv-droite-haut')}</span><span class="m m2">${M('oiseau-branche')}</span><span class="m m3 miroir">${M('colibri')}</span>
+        <span class="m m1">${M('fp-hd')}</span><span class="m m2">${M('fp-bd')}</span>
       </div>
       <div class="face dos"></div>
     </div>
