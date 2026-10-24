@@ -15,6 +15,23 @@ const FORMES = {
   coeur:   { nom: 'Cœur (table des mariés)' }
 };
 
+/* Mobilier fourni par la salle : tables qu'on assemble bout à bout.
+   places = chaises par grand côté pour UNE table. */
+const MODULES = {
+  m120: { nom: '80 × 120', l: 120, w: 80, places: 2 },
+  m180: { nom: '75 × 180', l: 180, w: 75, places: 3 }
+};
+const STOCK_DEFAUT = { m120: 20, m180: 4, chaises: 100 };
+function placesModulaires(t){ const m = MODULES[t.module]; if (!m) return t.n; const k = t.nb || 1; return t.forme === 'honneur' ? m.places * k : 2 * m.places * k + 2 * (t.bouts | 0); }
+
+const MODELES_SALLE = [
+  { cle: 's120',   label: '1 table 80×120',    forme: 'rect',    module: 'm120', nb: 1, n: 4,  l: 120, w: 80, bouts: 0 },
+  { cle: 's120x2', label: '2 tables 80×120',   forme: 'rect',    module: 'm120', nb: 2, n: 8,  l: 240, w: 80, bouts: 0 },
+  { cle: 's120x4', label: 'Rangée de 4 · 80×120', forme: 'rect', module: 'm120', nb: 4, n: 18, l: 480, w: 80, bouts: 1 },
+  { cle: 's180',   label: '1 table 75×180',    forme: 'rect',    module: 'm180', nb: 1, n: 6,  l: 180, w: 75, bouts: 0 },
+  { cle: 's180h',  label: 'D\'honneur 2×180',  forme: 'honneur', module: 'm180', nb: 2, n: 6,  l: 360, w: 75 }
+];
+
 const MODELES_TABLES = [
   { cle: 'ronde8',   label: 'Ronde · 8',        forme: 'ronde',  n: 8,  l: 160, w: 160 },
   { cle: 'ronde10',  label: 'Ronde · 10',       forme: 'ronde',  n: 10, l: 180, w: 180 },
@@ -46,7 +63,10 @@ const TYPES_DECOR = {
   entree:    { nom: 'Entrée',         l: 160, w: 20 },
   mur:       { nom: 'Mur',            l: 400, w: 16 },
   pilier:    { nom: 'Pilier',         l: 50,  w: 50 },
+  meuble:    { nom: 'Meuble',         l: 120, w: 60 },
   fenetre:   { nom: 'Fenêtre',        l: 200, w: 14 },
+  ecran:     { nom: 'Écran',          l: 220, w: 12 },
+  porte:     { nom: 'Porte',          l: 90,  w: 14 },
   texte:     { nom: 'Texte libre',    l: 260, w: 50 }
 };
 
@@ -182,6 +202,10 @@ function renduTable(t, opts = {}){
     const inset = Math.min(10, Math.min(t.l, W) * .07);
     html += corpsTable({ ...t, l: t.l - inset * 2, w: W - inset * 2 }, `fill="none" stroke="#b8913f" stroke-width="1" stroke-dasharray="3 5" opacity=".75"`);
   }
+  if (MODULES[t.module] && (t.nb || 1) > 1) {
+    const m = MODULES[t.module];
+    for (let k = 1; k < t.nb; k++) { const x = -t.l / 2 + k * m.l; html += `<line x1="${x}" x2="${x}" y1="${-W / 2}" y2="${W / 2}" stroke="${nappe.trait}" stroke-width="1" opacity=".35"/>`; }
+  }
   if (t.chemin && (t.forme === 'rect' || t.forme === 'honneur' || t.forme === 'ovale')) {
     const ep = Math.min(30, W * .32);
     html += `<rect x="${-t.l / 2 + 4}" y="${-ep / 2}" width="${t.l - 8}" height="${ep}" fill="${t.nappe === 'bleu' ? '#b8913f' : '#26356f'}" opacity=".16"/>`;
@@ -215,8 +239,9 @@ function renduDecor(d, opts = {}){
       break;
     case 'mur': c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#1b2652"/>`; break;
     case 'fenetre': c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#e4e7f1" stroke="#1b2652" stroke-width="2"/><line x1="${x}" x2="${-x}" y1="0" y2="0" stroke="#1b2652"/>`; break;
-    case 'pilier': c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#5e6178"/>`; break;
-    case 'entree':
+    case 'pilier': c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#5e6178"/>` + (d.texte ? etiquette(14, Math.max(l, w) / 2 + 16, '#5e6178') : ''); break;
+    case 'ecran': c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#1b2652" opacity=".85"/>` + etiquette(16, -w / 2 - 18); break;
+    case 'entree': case 'porte':
       c = `<rect x="${x}" y="${y}" width="${l}" height="${w}" fill="#fcfbf8" stroke="#1b2652" stroke-width="2"/>
            <path d="M${x} ${w / 2} A ${l} ${l} 0 0 0 ${x + l} ${w / 2 + l}" fill="none" stroke="#26356f" stroke-dasharray="4 5" opacity=".6"/>
            <line x1="${x}" y1="${w / 2}" x2="${x}" y2="${w / 2 + l}" stroke="#26356f" opacity=".6"/>` + etiquette(18, -w / 2 - 10);

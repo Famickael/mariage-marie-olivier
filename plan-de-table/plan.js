@@ -69,6 +69,7 @@ function normaliser(d){
   d = d && typeof d === 'object' ? d : {};
   d.salle = Object.assign({ l: 2000, h: 1400, fond: null, grille: true }, d.salle || {});
   d.reglages = Object.assign({ affichage: 'prenom', police: 17 }, d.reglages || {});
+  d.reglages.stock = Object.assign({}, STOCK_DEFAUT, d.reglages.stock || {});
   d.groupes = d.groupes || []; d.invites = d.invites || []; d.tables = d.tables || []; d.decors = d.decors || [];
   d.tables.forEach(t => { t.sieges = t.sieges || []; t.sieges.length = Math.max(t.n, 0); for (let i = 0; i < t.n; i++) if (t.sieges[i] === undefined) t.sieges[i] = null; });
   return d;
@@ -80,6 +81,8 @@ async function creerPlan(nom, data){
   plans.push(row); return row.id;
 }
 
+/* Plan de départ : la grande salle de l'Espace Oratorien (140 m², 17,3 × 8 m),
+   relevée sur le plan d'architecte, avec une proposition de disposition. */
 function donneesExemple(){
   const g = [
     { id: 'g-maries', nom: 'Les mariés', couleur: '#b8913f' },
@@ -90,20 +93,33 @@ function donneesExemple(){
     { id: 'g-enfants', nom: 'Enfants', couleur: '#c98f6b' }
   ];
   const inv = [{ id: 'i-marie', nom: 'Marie Bertrand', groupe: 'g-maries' }, { id: 'i-olivier', nom: 'Olivier Nivesse', groupe: 'g-maries' }];
-  const tables = [{ id: uid(), forme: 'honneur', x: 1000, y: 190, rot: 0, l: 360, w: 80, n: 6, nom: 'Les mariés', numero: '', nappe: 'or', centre: 'bouquet', chemin: true, sieges: [null, null, 'i-marie', 'i-olivier', null, null] }];
-  const noms = ['Colibri', 'Mimosa', 'Hortensia', 'Pivoine', 'Glycine', 'Camélia'];
-  noms.forEach((nom, i) => tables.push({ id: uid(), forme: 'ronde', x: 330 + (i % 3) * 360 + (i >= 3 ? 0 : 0), y: 560 + Math.floor(i / 3) * 400, rot: 0, l: 180, w: 180, n: 10,
-    nom, numero: String(i + 1), nappe: 'satin', centre: i % 2 ? 'mimosa' : 'bouquet', sieges: Array(10).fill(null) }));
+  // Mobilier de la salle : 20 tables 80×120, 4 tables 75×180, 100 chaises.
+  // Proposition : table d'honneur (2 × 75×180) dos aux baies vitrées, 4 rangées de 4 tables 80×120.
+  const tables = [{ id: uid(), forme: 'honneur', module: 'm180', nb: 2, x: 957, y: 105, rot: 0, l: 360, w: 75, n: 6, nom: 'Les mariés', numero: '', nappe: 'or', centre: 'bouquet', chemin: true, sieges: [null, null, 'i-marie', 'i-olivier', null, null] }];
+  [[400, 'Colibri'], [650, 'Mimosa'], [1010, 'Hortensia'], [1260, 'Pivoine']].forEach(([x, nom], i) => tables.push({ id: uid(), forme: 'rect', module: 'm120', nb: 4, bouts: 1, x, y: 470, rot: 90, l: 480, w: 80, n: 18,
+    nom, numero: String(i + 1), nappe: 'satin', centre: i % 2 ? 'mimosa' : 'bouquet', chemin: true, sieges: Array(18).fill(null) }));
+  const d = (type, x, y, l, w, rot = 0, texte = '') => ({ id: uid(), type, x, y, l, w, rot, texte });
   const decors = [
-    { id: uid(), type: 'piste', x: 1580, y: 760, l: 450, w: 400, rot: 0 },
-    { id: uid(), type: 'gateau', x: 1580, y: 480, l: 90, w: 90, rot: 0 },
-    { id: uid(), type: 'buffet', x: 70, y: 700, l: 320, w: 80, rot: 90 },
-    { id: uid(), type: 'bar', x: 1580, y: 1290, l: 260, w: 70, rot: 0 },
-    { id: uid(), type: 'dj', x: 1900, y: 760, l: 200, w: 90, rot: 90 },
-    { id: uid(), type: 'entree', x: 700, y: 1392, l: 160, w: 20, rot: 180 },
-    { id: uid(), type: 'sapin', x: 120, y: 1260, l: 130, w: 130, rot: 0 }
+    // la salle telle qu'elle est
+    d('fenetre', 957, 0, 577, 14, 0, ''),
+    d('porte', 390, 0, 90, 14, 0, 'Sanitaires'),
+    d('porte', 1478, 0, 90, 14, 0, 'Rangement'),
+    d('porte', 0, 100, 90, 14, -90, 'Secours'),
+    d('entree', 872, 800, 160, 20, 180, 'Entrée'),
+    d('porte', 51, 800, 90, 14, 180, 'Office'),
+    d('bar', 177, 400, 470, 90, 90, 'Bar'),
+    d('meuble', 41, 120, 70, 150, 0, 'Frigo'),
+    d('ecran', 1724, 498, 220, 12, -90, 'Écran'),
+    d('pilier', 1445, 790, 50, 30, 0, 'Sono'),
+    // la fête
+    d('piste', 1530, 430, 320, 360),
+    d('dj', 1530, 722, 200, 80),
+    d('gateau', 1330, 110, 90, 90),
+    d('sapin', 600, 85, 110, 110)
   ];
-  return { salle: { l: 2000, h: 1400, fond: null, grille: true }, reglages: { affichage: 'prenom', police: 17 }, groupes: g, invites: inv, tables, decors };
+  const k = .611; // pixels du plan d'architecte par centimètre
+  const fond = { url: '../assets/plan-salle.webp', x: Math.round(-97 / k), y: Math.round(-281 / k), l: Math.round(1200 / k), h: Math.round(1041 / k), opacite: .3, verrou: true };
+  return { salle: { l: 1730, h: 800, fond, grille: true }, reglages: { affichage: 'prenom', police: 17, stock: { ...STOCK_DEFAUT } }, groupes: g, invites: inv, tables, decors };
 }
 
 /* ============================================================
@@ -173,6 +189,7 @@ function rendreTout(opts = {}){
   rendrePlan();
   rendreInvites();
   rendreLegende();
+  rendreStock();
   if (opts.panneau !== false) rendreProprietes();
 }
 
@@ -214,6 +231,17 @@ function zoomer(f, cx, cy){
 }
 function versMonde(clientX, clientY){ const r = svg.getBoundingClientRect(); return { x: (clientX - r.left - cam.x) / cam.s, y: (clientY - r.top - cam.y) / cam.s }; }
 function centreVue(){ const r = svg.getBoundingClientRect(); return versMonde(r.left + r.width / 2, r.top + r.height / 2); }
+
+function stockUtilise(){
+  const u = { m120: 0, m180: 0, chaises: 0 };
+  for (const t of D.tables) { if (MODULES[t.module]) u[t.module] += t.nb || 1; u.chaises += t.n; }
+  return u;
+}
+function rendreStock(){
+  const u = stockUtilise(), st = D.reglages.stock;
+  $('#stock').innerHTML = [['m120', 'tables 80×120'], ['m180', 'tables 75×180'], ['chaises', 'chaises']]
+    .map(([k, l]) => `<div class="${u[k] > st[k] ? 'trop' : ''}" title="${u[k] > st[k] ? 'Plus que ce que fournit la salle !' : 'Utilisées / disponibles dans la salle'}"><b>${u[k]}/${st[k]}</b><span>${l}</span></div>`).join('');
+}
 
 function rendreLegende(){
   const utilises = new Set(D.invites.filter(i => placeDe(i.id)).map(i => i.groupe));
@@ -291,9 +319,14 @@ function rendreTableProp(p, t){
     <div class="duo"><div><label class="champ" for="p-num">Numéro</label><input type="text" id="p-num" data-champ="numero" value="${echap(t.numero || '')}" placeholder="—"></div>
       <div><label class="champ">Places</label><div class="stepper"><button data-places="-1" aria-label="Une place de moins">−</button><span>${t.n}</span><button data-places="1" aria-label="Une place de plus">+</button></div></div></div>
 
+    ${['rect', 'honneur'].includes(t.forme) ? `<h4>Tables de la salle</h4>
+    <div class="modules">${Object.entries(MODULES).map(([k, m]) => `<button class="btn petit ${t.module === k ? '' : 'clair'}" data-module="${k}">${m.nom}</button>`).join('')}<button class="btn petit ${t.module ? 'clair' : ''}" data-module="">Libre</button></div>
+    ${t.module ? `<label class="champ">Nombre de tables ${MODULES[t.module].nom} mises bout à bout</label>
+      <div class="stepper"><button data-nb="-1" aria-label="Une table de moins">−</button><span>${t.nb || 1}</span><button data-nb="1" aria-label="Une table de plus">+</button></div>
+      <p class="aide">${(t.l / 100).toLocaleString('fr-FR')} m × ${(t.w / 100).toLocaleString('fr-FR')} m · ${placesModulaires(t)} places conseillées</p>` : ''}` : ''}
     <h4>Forme</h4>
     <div class="formes">${Object.entries(FORMES).map(([k, f]) => `<button data-forme="${k}" class="${t.forme === k ? 'actif' : ''}">${f.nom.split(' (')[0]}</button>`).join('')}</div>
-    <div class="duo">
+    <div class="duo" ${t.module ? 'hidden' : ''}>
       <div><label class="champ" for="p-l">${t.forme === 'ronde' ? 'Diamètre' : 'Longueur'} (cm)</label><input type="number" id="p-l" data-champ="l" data-num="1" min="40" step="10" value="${t.l}"></div>
       ${t.forme === 'ronde' ? '<div></div>' : `<div><label class="champ" for="p-w">Largeur (cm)</label><input type="number" id="p-w" data-champ="w" data-num="1" min="40" step="10" value="${t.w}"></div>`}
     </div>
@@ -327,6 +360,13 @@ function rendreTableProp(p, t){
     modifier(() => { t.nom = n; });
   };
   $$('[data-places]', p).forEach(b => b.onclick = () => changerPlaces(t, t.n + Number(b.dataset.places)));
+  $$('[data-module]', p).forEach(b => b.onclick = () => {
+    const k = b.dataset.module;
+    if (!k) return modifier(() => { t.module = null; });
+    const m = MODULES[k], nb = t.module === k ? t.nb : Math.max(1, Math.round(t.l / m.l));
+    redimModules(t, k, nb);
+  });
+  $$('[data-nb]', p).forEach(b => b.onclick = () => redimModules(t, t.module, Math.max(1, (t.nb || 1) + Number(b.dataset.nb))));
   $$('[data-forme]', p).forEach(b => b.onclick = () => modifier(() => {
     const f = b.dataset.forme; if (f === t.forme) return;
     if (f === 'ronde') t.w = t.l;
@@ -334,6 +374,7 @@ function rendreTableProp(p, t){
     if ((f === 'rect' || f === 'honneur') && t.w > 120) { t.l = Math.max(t.l, 220); t.w = 90; }
     if (f === 'ovale' && t.l === t.w) t.l = Math.round(t.l * 1.45);
     if (f === 'coeur') { t.l = 150; t.w = 130; }
+    if (!['rect', 'honneur'].includes(f)) t.module = null;
     t.forme = f;
   }));
   $$('[data-nappe]', p).forEach(b => b.onclick = () => modifier(() => { t.nappe = b.dataset.nappe; }));
@@ -345,6 +386,17 @@ function rendreTableProp(p, t){
   $('#p-suppr').onclick = supprimerSel;
 }
 function apercuNappe(k){ return { satin: 'linear-gradient(135deg,#fff,#ebe6da)', ivoire: '#f6efdf', bleu: '#1b2652', ciel: '#e4e7f1', or: 'linear-gradient(135deg,#f1e2b6,#d9bf7f)', toile: '#fbfaf6 radial-gradient(circle at 30% 30%,#26356f 0 2px,transparent 3px) 0 0/10px 10px' }[k]; }
+
+/* Assemble nb tables du modèle k bout à bout ; le nombre de places suit. */
+function redimModules(t, k, nb){
+  const m = MODULES[k]; nb = Math.min(nb, 30);
+  const n = placesModulaires({ ...t, module: k, nb });
+  if (n < t.n && t.sieges.slice(n).some(Boolean) && !confirm('Des invités sont assis sur les places retirées : ils retourneront dans la liste « à placer ». Continuer ?')) return;
+  modifier(() => {
+    t.module = k; t.nb = nb; t.l = m.l * nb; t.w = m.w;
+    t.sieges = t.sieges.slice(0, n); while (t.sieges.length < n) t.sieges.push(null); t.n = n;
+  });
+}
 
 function changerPlaces(t, n){
   n = Math.max(0, Math.min(40, n));
@@ -392,6 +444,14 @@ function rendreSalle(p){
     </div>
     <label class="case"><input type="checkbox" id="s-grille" ${D.salle.grille ? 'checked' : ''}> Grille (un point tous les 50 cm, aimantation à 10 cm)</label>
 
+    <h4>Mobilier fourni par la salle</h4>
+    <div class="duo" style="grid-template-columns:1fr 1fr 1fr">
+      <div><label class="champ" for="st-m120">80×120</label><input type="number" id="st-m120" min="0" value="${D.reglages.stock.m120}"></div>
+      <div><label class="champ" for="st-m180">75×180</label><input type="number" id="st-m180" min="0" value="${D.reglages.stock.m180}"></div>
+      <div><label class="champ" for="st-ch">Chaises</label><input type="number" id="st-ch" min="0" value="${D.reglages.stock.chaises}"></div>
+    </div>
+    <p class="aide">Le compteur en haut de l'onglet « Mobilier » passe en rouge si le plan en demande plus.</p>
+
     <h4>Plan de la salle en fond</h4>
     ${f ? `
       <label class="champ" for="f-op">Transparence</label><input type="range" id="f-op" min="0.1" max="1" step="0.05" value="${f.opacite}">
@@ -414,6 +474,7 @@ function rendreSalle(p){
   $('#s-grille', p).onchange = e => modifier(() => { D.salle.grille = e.target.checked; }, { panneau: false });
   $('#s-aff', p).onchange = e => modifier(() => { D.reglages.affichage = e.target.value; }, { panneau: false });
   num('#s-police', v => { D.reglages.police = v; });
+  for (const [id, k] of [['#st-m120', 'm120'], ['#st-m180', 'm180'], ['#st-ch', 'chaises']]) num(id, v => { D.reglages.stock[k] = Math.round(v); rendreStock(); });
   $('#f-changer', p).onclick = () => $('#in-fond').click();
   if (f) {
     num('#f-op', v => { f.opacite = v; });
@@ -438,7 +499,11 @@ function brancherChamps(p, obj){
       marquerSale(); rendrePlan();
       if (k === 'nom' || k === 'numero' || k === 'texte') { const h = $('h2', p); if (h) h.textContent = sel.type === 'table' ? libelleTable(obj) : (obj.texte || TYPES_DECOR[obj.type].nom); rendreInvites(); }
     });
-    el.addEventListener('change', () => { saisieEnCours = false; if (el.tagName === 'SELECT') rendreProprietes(); });
+    el.addEventListener('change', () => {
+      saisieEnCours = false;
+      if (el.dataset.champ === 'bouts' && obj.module) redimModules(obj, obj.module, obj.nb);
+      if (el.tagName === 'SELECT') rendreProprietes();
+    });
   });
 }
 
@@ -448,17 +513,19 @@ function brancherChamps(p, obj){
 function construirePalettes(){
   // une seule copie des dégradés et motifs, toujours affichée (un <defs> masqué rendrait les nappes invisibles)
   document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${defsPlan()}</svg>`);
-  $('#pal-tables').innerHTML = MODELES_TABLES.map(m => {
+  const bouton = m => {
     const t = { ...m, id: 'apercu', x: 0, y: 0, rot: 0, nappe: m.forme === 'coeur' ? 'or' : 'satin', sieges: [] };
     const R = rayonTable(t);
     return `<button data-modele="${m.cle}" title="Ajouter : ${echap(m.label)}"><svg viewBox="${-R - 4} ${-R * .78} ${2 * R + 8} ${R * 1.56}">${renduTable(t, { lecture: true })}</svg>${echap(m.label)}</button>`;
-  }).join('');
+  };
+  $('#pal-salle').innerHTML = MODELES_SALLE.map(bouton).join('');
+  $('#pal-tables').innerHTML = MODELES_TABLES.map(bouton).join('');
   $('#pal-decors').innerHTML = Object.entries(TYPES_DECOR).map(([k, T]) => {
     const d = { id: 'apercu', type: k, x: 0, y: 0, rot: 0, l: T.l, w: T.w, texte: k === 'texte' ? 'Aa' : '' };
     const L = Math.max(T.l, T.w) * .62 + 20;
     return `<button data-decor-type="${k}" title="Ajouter : ${echap(T.nom)}"><svg viewBox="${-L} ${-L * .74} ${2 * L} ${L * 1.48}">${renduDecor(d)}</svg>${echap(T.nom)}</button>`;
   }).join('');
-  $$('#pal-tables [data-modele]').forEach(b => b.onclick = () => ajouterTable(MODELES_TABLES.find(m => m.cle === b.dataset.modele)));
+  $$('#pal-salle [data-modele], #pal-tables [data-modele]').forEach(b => b.onclick = () => ajouterTable([...MODELES_SALLE, ...MODELES_TABLES].find(m => m.cle === b.dataset.modele)));
   $$('#pal-decors [data-decor-type]').forEach(b => b.onclick = () => ajouterDecor(b.dataset.decorType));
 }
 
@@ -477,12 +544,15 @@ function ajouterTable(m){
   const nums = D.tables.map(t => parseInt(t.numero, 10)).filter(n => !isNaN(n));
   const pris = new Set(D.tables.map(t => t.nom));
   const nom = m.cle === 'debout' ? '' : m.forme === 'coeur' ? 'Les mariés' : (NOMS_TABLES.find(n => !pris.has(n)) || '');
-  const t = { id: uid(), forme: m.forme, l: m.l, w: m.w, n: m.n, bouts: m.bouts || 0, rot: 0, nom,
+  const t = { id: uid(), forme: m.forme, l: m.l, w: m.w, n: m.n, bouts: m.bouts || 0, rot: 0, nom, module: m.module || null, nb: m.nb || 1,
     numero: m.cle === 'debout' || m.forme === 'coeur' ? '' : String((nums.length ? Math.max(...nums) : 0) + 1),
     nappe: m.forme === 'coeur' ? 'or' : 'satin', centre: m.cle === 'debout' ? 'aucun' : m.forme === 'coeur' ? 'bouquet' : 'bouquet', sieges: Array(m.n).fill(null) };
   Object.assign(t, positionLibre(rayonTable(t)));
   modifier(() => { D.tables.push(t); sel = { type: 'table', id: t.id }; });
   fermerTiroirs(); astuce('Table ajoutée : déplacez-la, puis glissez des invités sur ses places.');
+  const u = stockUtilise(), st = D.reglages.stock;
+  if (t.module && u[t.module] > st[t.module]) toast(`Attention : la salle n'a que ${st[t.module]} tables ${MODULES[t.module].nom}`, 3500);
+  else if (u.chaises > st.chaises) toast(`Attention : ${u.chaises} chaises pour ${st.chaises} disponibles`, 3500);
 }
 function ajouterDecor(type){
   const T = TYPES_DECOR[type], c = centreVue();
@@ -945,7 +1015,6 @@ async function importerFond(e){
     modifier(() => {
       const l = D.salle.l;
       D.salle.fond = { chemin, x: 0, y: 0, l, h: Math.round(l * ratio), opacite: .55, verrou: false };
-      if (Math.abs(D.salle.h - l * ratio) > 50) D.salle.h = Math.round(l * ratio / 10) * 10;
       sel = null;
     });
     urlFond = url; rendrePlan(); ajusterVue();
@@ -955,7 +1024,9 @@ async function importerFond(e){
 }
 async function chargerFond(){
   urlFond = null;
-  const f = D.salle.fond; if (!f || !f.chemin) return;
+  const f = D.salle.fond; if (!f) return;
+  if (f.url) { urlFond = f.url; return; }
+  if (!f.chemin) return;
   const { data } = await sb.storage.from(CONFIG.BUCKET_PLANS).createSignedUrl(f.chemin, 60 * 60 * 24);
   if (data) urlFond = data.signedUrl;
 }

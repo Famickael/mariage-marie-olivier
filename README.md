@@ -26,6 +26,13 @@ Aucune page invité ne contient de lien vers une autre page : chacun ne voit que
 4. **Hébergement** : GitHub Pages (Settings > Pages > branche `main`, dossier racine) ou Netlify. Il faut une adresse en https.
 5. Ouvrir `/coulisses/` et distribuer les liens.
 
+## La salle
+
+Grande salle de l'Espace Oratorien (Ouvrouer-les-Champs) : 140 m², environ 17,3 × 8 m. Le plan de départ reprend le plan d'architecte (`assets/plan-salle.webp`, en fond et à l'échelle) : bar à gauche, baies vitrées côté terrasse, entrée par le sas, écran cinéma, sono.
+Mobilier fourni : **20 tables 80×120, 4 tables 75×180, 100 chaises**. L'éditeur propose ces tables en premier, les assemble bout à bout et tient le compte (rouge si on dépasse).
+
+Disposition proposée : table d'honneur (2 tables 75×180) dos aux baies vitrées, 4 rangées de 4 tables 80×120 (18 places chacune), piste de danse côté écran près de la sono : 78 couverts. En réserve : 4 tables 80×120, 2 tables 75×180, 22 chaises.
+
 ## Plan de table : mode d'emploi rapide
 
 - **Mobilier** : touchez une table (ronde, ovale, carrée, rectangle, impériale, d'honneur, cœur, mange-debout) ou un décor (piste, buffet, bar, sapin, arche, entrée, murs…) : il apparaît au centre de la vue.

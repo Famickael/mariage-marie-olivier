@@ -52,6 +52,16 @@ body.editeur{overflow:hidden;font-size:16px;height:100vh;height:100dvh}
 .palette svg{width:64px;height:48px}
 .palette.decor svg{width:52px;height:38px}
 
+/* --- stock de mobilier --- */
+.stock{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;text-align:center}
+.stock div{background:#fff;border:1px solid var(--perle);padding:6px 2px}
+.stock b{display:block;font-family:"Cormorant Garamond",serif;font-size:1.35rem;font-weight:500;color:var(--bleu-nuit);line-height:1.1}
+.stock span{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--encre-douce)}
+.stock .trop{border-color:var(--erreur);background:#fbeeee}
+.stock .trop b{color:var(--erreur)}
+.onglet h3 small{font-family:"EB Garamond",serif;font-size:.75rem;font-style:normal}
+.modules{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
 /* --- invités --- */
 .compteurs{display:flex;gap:6px;text-align:center;margin-bottom:10px}
 .compteurs div{flex:1;background:#fff;border:1px solid var(--perle);padding:6px 2px}
