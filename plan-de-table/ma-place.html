@@ -6,8 +6,8 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/charte.css?v=202610241610">
-<link rel="stylesheet" href="plan.css?v=202610241610">
+<link rel="stylesheet" href="../assets/charte.css?v=202610241627">
+<link rel="stylesheet" href="plan.css?v=202610241627">
 <style>
   main{max-width:620px;margin:0 auto;padding:30px 16px 60px}
   .recherche{margin:26px auto 0;max-width:420px;text-align:center}
@@ -30,7 +30,7 @@
 </head>
 <body>
 <main>
-  <header class="entete-site" data-titre="Trouvez votre table"></header>
+  <header class="entete-site" data-titre="Trouvez votre table" data-sous="Tapez votre prénom ou votre nom :<br>votre table, sa place dans la salle et vos voisins apparaissent aussitôt."></header>
   <div class="recherche">
     <label class="champ" for="q" style="text-align:center">Votre prénom ou votre nom</label>
     <input type="search" id="q" autocomplete="off" placeholder="Ex. Jeanne, ou Bertrand" enterkeyhint="search">
@@ -42,9 +42,9 @@
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../assets/commun.js?v=202610241610"></script>
-<script src="../assets/ouverture.js?v=202610241610"></script>
-<script src="../assets/plan-geometrie.js?v=202610241610"></script>
+<script src="../assets/commun.js?v=202610241627"></script>
+<script src="../assets/ouverture.js?v=202610241627"></script>
+<script src="../assets/plan-geometrie.js?v=202610241627"></script>
 <script>
 /* Page invités : aucun lien vers le reste du site, client sans session.
    Les données viennent de deux fonctions en base qui ne renvoient que le plan publié. */
@@ -58,7 +58,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style=
   if (!sbInvite) return;
   const { data } = await sbInvite.rpc('mo_plan_public');
   geo = data;
-  if (!geo) { $('#info').textContent = 'Le plan de table sera dévoilé un peu avant le grand jour. Revenez bientôt !'; $('#q').disabled = true; }
+  if (!geo) { $('#info').innerHTML = 'Le plan de table est encore en train de se dessiner.<br>Il sera dévoilé quelques jours avant le mariage : revenez bientôt !'; $('#q').disabled = true; }
 })();
 
 $('#q').addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(chercher, 300); });
