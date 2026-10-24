@@ -119,7 +119,8 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .entete-site .sous{margin:8px 0 0;color:var(--encre-douce)}
 .entete-site .orn{position:absolute;pointer-events:none}
 .entete-site .orn.a{width:min(150px,28vw);left:-20px;top:-14px;opacity:.92}
-.entete-site .orn.b{width:min(230px,40vw);right:-20px;bottom:-24px;opacity:.95}
+.entete-site .orn.b{width:min(230px,36vw);right:-20px;bottom:-24px;opacity:.95}
+@media (max-width:520px){.entete-site .orn.b{right:-34px;bottom:-44px;opacity:.8}}
 .entete-site > *:not(.orn){position:relative}
 
 /* Bandeau des pages organisateurs : titre à gauche, publication toujours à droite */
@@ -152,6 +153,7 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .pied-bleu .orn{position:absolute;opacity:.55;pointer-events:none}
 .pied-bleu .orn.a{width:min(260px,40vw);left:-10px;bottom:-30px}
 .pied-bleu .orn.b{width:min(170px,30vw);right:10px;bottom:-12px}
+@media (max-width:720px){.pied-bleu .orn.b{display:none} .pied-bleu .orn.a{width:150px;left:-50px;bottom:-60px;opacity:.35}}
 .pied-bleu > *:not(.orn){position:relative}
 
 /* Connexion organisateur */
