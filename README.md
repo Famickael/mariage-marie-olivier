@@ -2,7 +2,7 @@
 
 Site statique (HTML/CSS/JS, sans compilation) + Supabase pour les données. Charte du faire-part : blanc satiné, bleu de toile de Jouy, une touche d'or.
 
-- Site : https://mariage.antoine-bertrand.fr/ (sous-domaine OVH pointant sur GitHub Pages, branche `main` ; adresse technique https://famickael.github.io/mariage-marie-olivier/). Les motifs du faire-part sont dans `assets/motifs/`, la charte dans `assets/charte.css`.
+- Site : https://mariage-marieolivier.antoine-bertrand.fr/ (sous-domaine OVH pointant sur GitHub Pages, branche `main` ; adresse technique https://famickael.github.io/mariage-marie-olivier/). Les motifs du faire-part sont dans `assets/motifs/`, la charte dans `assets/charte.css`.
 - Base : projet Supabase `wrcjthhrouditgbpjegy`, **partagé avec le site d'Aude & Jérémie**. Les tables, fonctions et espaces de stockage de ce mariage sont préfixés `mo_` / `mo-` ; ceux d'Aude et Jérémie (`envois`, `fichiers`, `programme`, bucket `mariage`) sont intacts.
 
 ## Les pages
@@ -25,7 +25,7 @@ Aucune page invité ne contient de lien vers une autre page : chacun ne voit que
 1. **Supabase** : `supabase/schema.sql` est déjà appliqué (migration `mariage_marie_olivier`). Pour repartir de zéro sur un autre projet, l'exécuter dans l'éditeur SQL.
 2. **Comptes** : Authentication > Users > *Add user* pour Marie et Olivier. Attention : le projet étant partagé, **tout compte connecté peut modifier les deux sites** (celui d'Aude & Jérémie compris).
 3. **Configuration** : `assets/commun.js` contient déjà l'URL et la clé `anon` du projet. Cette clé est publique par conception ; ce que chacun peut faire est décidé par les règles en base (RLS).
-4. **Hébergement** : GitHub Pages (Settings > Pages > *Deploy from a branch* > `main` / `(root)`), domaine personnalisé `mariage.antoine-bertrand.fr` (fichier `CNAME`). Côté OVH, zone DNS du domaine : un enregistrement `CNAME`, sous-domaine `mariage`, cible `famickael.github.io.`. Puis Settings > Pages > *Custom domain* = `mariage.antoine-bertrand.fr`, attendre la vérification DNS, cocher *Enforce HTTPS*. La racine `antoine-bertrand.fr` reste libre pour d'autres usages.
+4. **Hébergement** : GitHub Pages (Settings > Pages > *Deploy from a branch* > `main` / `(root)`), domaine personnalisé `mariage-marieolivier.antoine-bertrand.fr` (fichier `CNAME`). Côté OVH, zone DNS du domaine : un enregistrement `CNAME`, sous-domaine `mariage-marieolivier`, cible `famickael.github.io.`. Puis Settings > Pages > *Custom domain* = `mariage-marieolivier.antoine-bertrand.fr`, attendre la vérification DNS, cocher *Enforce HTTPS*. La racine `antoine-bertrand.fr` reste libre pour d'autres usages.
 5. **Test avant diffusion** : depuis un téléphone, déposer une photo et une vidéo sur `/souvenirs/`, vérifier dans `/souvenirs/admin.html`, puis publier un plan de table et chercher un nom dans `/plan-de-table/ma-place.html`.
 6. Ouvrir la page principale et distribuer les liens.
 
