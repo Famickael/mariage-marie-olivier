@@ -175,7 +175,7 @@ body.fp-entree > :not(#ouverture){animation:fp-site 1.6s cubic-bezier(.3,.6,.2,1
   transform:translateY(2%) scale(.82) rotateX(6deg) rotateY(-4deg);will-change:transform}
 /* ombre portée séparée (pas de filter sur .fp : casserait le preserve-3d) */
 .fp::before{content:"";position:absolute;inset:2% 1%;border-radius:4px;transform:translateY(28px) translateZ(-2px) scale(1.07);opacity:.55;
-  background:radial-gradient(ellipse at 50% 60%,rgba(27,38,82,.28),rgba(27,38,82,.10) 40%,rgba(27,38,82,0) 62%);inset:4% -6% -12%;border-radius:50%;will-change:transform,opacity}
+  background:radial-gradient(ellipse at 50% 50%,rgba(27,38,82,.22),rgba(27,38,82,.06) 45%,rgba(27,38,82,0) 68%);inset:auto -4% -7% -4%;height:14%;border-radius:50%;will-change:transform,opacity}
 /* Plan 1 — approche : on grandit et on se redresse, l'ombre se resserre */
 .fp.approche{animation:fp-approche 1.6s cubic-bezier(.6,.02,.25,1) forwards}
 @keyframes fp-approche{0%{transform:translateY(2%) scale(.82) rotateX(6deg) rotateY(-4deg)}100%{transform:translateY(0) scale(1) rotateX(0) rotateY(0)}}
