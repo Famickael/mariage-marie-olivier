@@ -3,11 +3,12 @@
    Séquence cinématographique en quatre plans, pilotée par des classes
    (chaque classe déclenche des animations CSS, voir charte.css) :
      1. approche  (0 → 1,6 s)   la caméra s'approche du faire-part fermé
-     2. tire / denoue / glisse (1,6 → 4,5 s)  le ruban se dénoue brin par brin et tombe
-     3. ouvert    (4,5 → 6,6 s)  les volets s'ouvrent en 3D, la caméra avance ; le site est déjà là,
-                                 derrière : il est découvert par l'ouverture (body.fp-ouvre)
-     4. sortie    (6,6 → 8,3 s)  les volets continuent au-delà de 180° et sortent du cadre en tranches,
-                                 la caméra traverse, le voile se retire ; fin à 8,3 s
+     2. tire / denoue / glisse (1,6 → 4,3 s)  le ruban se dénoue brin par brin et tombe (en fondu)
+     3. ouvert    (4,3 → 6,4 s)  les volets s'ouvrent en 3D, la caméra avance ; le site est déjà là,
+                                 derrière, et apparaît en fondu (body.fp-ouvre) tandis qu'il est découvert
+     4. sortie    (6,4 → 8,2 s)  les volets continuent au-delà de 180°, sortent du cadre et s'effacent,
+                                 la caméra traverse, le voile se retire ; fin à 8,2 s (+ 0,5 s de fondu)
+   Les étapes se chevauchent légèrement (chaque classe est posée un peu avant la fin de la précédente).
    À charger après commun.js.
    ============================================================ */
 (function(){
@@ -17,6 +18,7 @@
   ov.id = 'ouverture'; ov.setAttribute('aria-hidden', 'true');
   ov.innerHTML = `
   <i class="voile vg"></i><i class="voile vd"></i><i class="voile vh"></i><i class="voile vb"></i>
+  <i class="halo"></i>
   <div class="fp" id="fp">
     <div class="volet g">
       <div class="face recto">
@@ -36,37 +38,43 @@
       <svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <!-- gros-grain : fines côtes perpendiculaires au sens du ruban -->
-          <pattern id="gg" width="3" height="3" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
-          <pattern id="gg-pa" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(72)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
-          <pattern id="gg-pb" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(118)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
-          <pattern id="gg-ba" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-52)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
-          <pattern id="gg-bb" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(56)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
+          <pattern id="gg-pa" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(76)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
+          <pattern id="gg-pb" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(108)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
+          <pattern id="gg-ba" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(-50)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
+          <pattern id="gg-bb" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(54)"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2d3c7e"/></pattern>
+          <!-- modelé : dégradés posés sur les MÊMES tracés que la matière (aucun décalage possible) -->
+          <linearGradient id="om-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#0f1838" stop-opacity="0"/><stop offset="1" stop-color="#0f1838" stop-opacity=".3"/></linearGradient>
+          <linearGradient id="om-d" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#0f1838" stop-opacity="0"/><stop offset="1" stop-color="#0f1838" stop-opacity=".3"/></linearGradient>
+          <linearGradient id="om-h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#0f1838" stop-opacity=".12"/></linearGradient>
+          <linearGradient id="om-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1838" stop-opacity=".06"/><stop offset="1" stop-color="#0f1838" stop-opacity=".34"/></linearGradient>
+          <radialGradient id="om-c" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#0f1838" stop-opacity="0"/><stop offset="1" stop-color="#0f1838" stop-opacity=".4"/></radialGradient>
         </defs>
-        <!-- pans (derrière) -->
-        <g class="pan a">
-          <path d="M170 140 L 226 146 C 224 212, 204 272, 168 330 L 112 320 L 134 316 C 158 262, 172 200, 170 140 Z" fill="url(#gg-pa)"/>
-          <path d="M226 146 C 224 212, 204 272, 168 330 L 150 326 C 184 270, 206 212, 206 146 Z" fill="#0f1838" fill-opacity=".22"/>
-          <path d="M170 140 C 172 200, 158 262, 134 316 L 142 318 C 166 262, 182 200, 182 142 Z" fill="#fff" fill-opacity=".08"/>
-        </g>
-        <g class="pan b">
-          <path d="M240 146 L 296 142 C 300 200, 318 250, 348 296 L 306 318 L 322 300 C 292 254, 264 206, 240 146 Z" fill="url(#gg-pb)"/>
-          <path d="M240 146 C 264 206, 292 254, 322 300 L 302 306 C 272 260, 250 208, 240 146 Z" fill="#0f1838" fill-opacity=".2"/>
-        </g>
-        <!-- boucle gauche : deux brins (haut / bas) -->
-        <g class="boucle a">
-          <g class="brin bas"><path d="M44 72 C 22 112, 98 154, 206 154 L 206 122 C 134 118, 84 106, 62 90 Z" fill="url(#gg-ba)"/><path d="M62 90 C 84 106, 134 118, 206 122 L 206 132 C 130 130, 80 118, 54 100 Z" fill="#0f1838" fill-opacity=".28"/></g>
-          <g class="brin haut"><path d="M206 92 C 160 40, 72 30, 40 68 L 62 90 C 92 64, 150 76, 204 120 Z" fill="url(#gg-ba)"/><path d="M206 92 C 160 40, 72 30, 40 68 L 48 76 C 80 46, 156 54, 204 104 Z" fill="#fff" fill-opacity=".10"/></g>
-        </g>
-        <!-- boucle droite : deux brins (haut / bas), plus grande -->
-        <g class="boucle b">
-          <g class="brin bas"><path d="M412 52 C 436 98, 362 142, 258 152 L 258 120 C 332 112, 386 90, 392 76 Z" fill="url(#gg-bb)"/><path d="M392 76 C 386 90, 332 112, 258 120 L 258 130 C 336 124, 392 102, 402 86 Z" fill="#0f1838" fill-opacity=".28"/></g>
-          <g class="brin haut"><path d="M254 88 C 300 30, 384 10, 412 52 L 392 76 C 366 48, 310 70, 258 120 Z" fill="url(#gg-bb)"/><path d="M254 88 C 300 30, 384 10, 412 52 L 404 62 C 376 24, 302 42, 258 100 Z" fill="#fff" fill-opacity=".10"/></g>
-        </g>
-        <!-- nœud central -->
+        <!-- Toutes les jonctions sont SOUS le ventre (ellipse x 191-279, y 70-166, dessinée en dernier) :
+             le haut des pans (y 116, sur l'axe du ruban) et les racines des boucles (x 235, au cœur du ventre).
+             Les pans sont tirés / allongés depuis ce point d'ancrage ; les boucles se replient vers lui. -->
+        <g class="pan b"><g class="osc">
+          <path d="M218 116 L258 116 C270 180,290 244,318 312 L300 300 L282 324 C262 254,236 186,218 116 Z" fill="url(#gg-pb)"/>
+          <path d="M218 116 L258 116 C270 180,290 244,318 312 L300 300 L282 324 C262 254,236 186,218 116 Z" fill="url(#om-d)"/>
+        </g></g>
+        <g class="pan a"><g class="osc">
+          <path d="M212 116 L252 116 C250 190,232 258,176 338 L158 318 L128 330 C180 254,206 190,212 116 Z" fill="url(#gg-pa)"/>
+          <path d="M212 116 L252 116 C250 190,232 258,176 338 L158 318 L128 330 C180 254,206 190,212 116 Z" fill="url(#om-g)"/>
+        </g></g>
+        <!-- boucle gauche (petite) : deux brins, haut et bas, qui se recouvrent à la pointe et à la racine -->
+        <g class="boucle a"><g class="resp">
+          <g class="brin bas"><path d="M34 56 C8 98,100 150,235 152 L235 124 C130 122,70 108,54 78 Z" fill="url(#gg-ba)"/><path d="M34 56 C8 98,100 150,235 152 L235 124 C130 122,70 108,54 78 Z" fill="url(#om-b)"/></g>
+          <g class="brin haut"><path d="M235 84 C170 40,80 28,30 60 L50 82 C90 56,160 72,235 112 Z" fill="url(#gg-ba)"/><path d="M235 84 C170 40,80 28,30 60 L50 82 C90 56,160 72,235 112 Z" fill="url(#om-h)"/></g>
+        </g></g>
+        <!-- boucle droite (grande, relevée) -->
+        <g class="boucle b"><g class="resp">
+          <g class="brin bas"><path d="M428 32 C456 94,372 142,235 152 L235 124 C340 118,394 94,398 64 Z" fill="url(#gg-bb)"/><path d="M428 32 C456 94,372 142,235 152 L235 124 C340 118,394 94,398 64 Z" fill="url(#om-b)"/></g>
+          <g class="brin haut"><path d="M235 84 C300 22,382 2,424 40 L404 70 C374 36,310 56,235 112 Z" fill="url(#gg-bb)"/><path d="M235 84 C300 22,382 2,424 40 L404 70 C374 36,310 56,235 112 Z" fill="url(#om-h)"/></g>
+        </g></g>
+        <!-- le ventre : recouvre toutes les jonctions -->
         <g class="centre">
-          <path d="M214 76 C 230 66, 252 68, 264 82 C 276 108, 276 138, 262 160 C 248 172, 226 172, 212 160 C 198 136, 198 104, 214 76 Z" fill="#141d4a"/>
-          <path d="M222 86 C 236 80, 250 82, 258 90 M 220 150 C 236 156, 250 156, 258 148" fill="none" stroke="#33438a" stroke-width="3" stroke-linecap="round"/>
-          <path d="M214 76 C 230 66, 252 68, 264 82 C 268 92, 270 102, 270 112 C 258 96, 236 90, 212 96 C 212 88, 212 82, 214 76 Z" fill="#fff" fill-opacity=".08"/>
+          <path d="M235 70 C264 70,280 90,280 118 C280 146,264 166,235 166 C206 166,190 146,190 118 C190 90,206 70,235 70 Z" fill="#141d4a"/>
+          <path d="M235 70 C264 70,280 90,280 118 C280 146,264 166,235 166 C206 166,190 146,190 118 C190 90,206 70,235 70 Z" fill="url(#om-c)"/>
+          <path d="M212 92 C226 84,246 84,260 94 M210 146 C226 154,246 154,262 144" fill="none" stroke="#33438a" stroke-width="3" stroke-linecap="round" opacity=".8"/>
         </g>
       </svg>
     </div>
@@ -83,17 +91,18 @@
   const fin = () => {
     if (fini) return; fini = true;
     t.forEach(clearTimeout);
-    if (!document.body.classList.contains('fp-ouvre')) document.body.classList.add('fp-ouvre');
+    // « Passer » avant l'ouverture : la page apparaît vite (fp-vite raccourcit son fondu)
+    if (!document.body.classList.contains('fp-ouvre')) document.body.classList.add('fp-ouvre', 'fp-vite');
     ov.classList.add('sortie', 'fin');
     document.body.classList.remove('fp-en-cours');
     setTimeout(() => ov.remove(), 500);
-    setTimeout(() => document.body.classList.remove('fp-ouvre'), 1600);   // libère les will-change
+    setTimeout(() => document.body.classList.remove('fp-ouvre', 'fp-vite'), 1700);   // libère les will-change
   };
   // Plan 1 : approche
-  requestAnimationFrame(() => fp.classList.add('approche'));
+  requestAnimationFrame(() => { fp.classList.add('approche'); ov.classList.add('approche'); });   // .halo suit la caméra
   // Plans 2 à 4, décalés par rapport au début du dénouage
-  const suite = [[() => fp.classList.add('tire'), 0], [() => fp.classList.add('denoue'), 600], [() => fp.classList.add('glisse'), 2300],
-                 [ouvre, 2900], [() => ov.classList.add('sortie'), 5000], [fin, 6700]];
+  const suite = [[() => fp.classList.add('tire'), 0], [() => fp.classList.add('denoue'), 520], [() => fp.classList.add('glisse'), 2150],
+                 [ouvre, 2700], [() => ov.classList.add('sortie'), 4800], [fin, 6600]];
   let lance = false;
   const lancer = () => { if (lance || fini) return; lance = true; ov.classList.remove('attente'); suite.forEach(([f, d]) => t.push(setTimeout(f, d))); };
   if (document.body.dataset.ouverture === 'clic') {
