@@ -71,7 +71,8 @@
     <span id="o"></span>
     <p class="capitales">Marie &amp; Olivier · l'équipe</p>
     <h1>Le planning du week-end</h1>
-    <p class="doux italique" style="margin:6px 0 0">Qui fait quoi, où et quand. Cochez « Montrer aux invités » sur les moments qui doivent apparaître dans leur programme.</p>
+    <p class="doux italique" style="margin:6px 0 0">Qui fait quoi, où et quand. Cochez « Montrer aux invités » sur les moments qui doivent apparaître dans leur programme, puis publiez-le avec l'interrupteur en haut à droite.</p>
+    <p class="capitales" id="compte-public" style="margin:10px 0 0;font-size:.66rem;color:var(--or)"></p>
     <div class="filet-or"><span>✦</span></div>
     <div class="outils" id="outils"></div>
   </header>
@@ -116,7 +117,8 @@ async function demarrer(){
   if (!sb) { $('#frise').innerHTML = '<p class="vide">Base de données non configurée.</p>'; return; }
   edition = true;
   document.body.classList.add('edition');
-  bandeauOrga($('#bandeau'), { titre: 'Planning', publication: { libelle: 'Programme des invités', texte: '…', lien: '../programme/', lienTexte: 'Voir leur programme' } });
+  bandeauOrga($('#bandeau'), { titre: 'Planning', actions: '<a class="btn petit clair" href="../programme/" target="_blank" rel="noopener">Voir leur programme</a>',
+    publication: await publicationReglage('programme_publie', 'Programme des invités', 'Publié : les invités voient, dans leur programme, les moments cochés « Montrer aux invités ».', 'Publier le programme ? Les invités verront les moments cochés « Montrer aux invités ».') });
   rendreOutils();
   JOURS.forEach(([v, l]) => $('#f-jour').insertAdjacentHTML('beforeend', `<option value="${v}">${l}</option>`));
   Object.entries(CATEGORIES).forEach(([k, c]) => $('#f-cats').insertAdjacentHTML('beforeend', `<label><input type="radio" name="cat" value="${k}"> ${c.icone} ${c.nom}</label>`));
@@ -139,7 +141,7 @@ async function charger(){
   if (error) { $('#frise').innerHTML = `<p class="vide">Erreur de chargement : ${echap(error.message)}</p>`; return; }
   items = data; rendre();
   const n = items.filter(i => i.public).length;
-  majBandeauPub(n ? `${n} moment${n > 1 ? 's' : ''} visible${n > 1 ? 's' : ''} par les invités` : 'Rien n\'est encore montré aux invités');
+  const c = $('#compte-public'); if (c) c.textContent = n ? `${n} moment${n > 1 ? 's' : ''} coché${n > 1 ? 's' : ''} « Montrer aux invités »` : 'Aucun moment coché « Montrer aux invités » pour l\'instant';
 }
 
 function rendre(){

@@ -71,8 +71,11 @@
 <script>
 let envois = [];
 $('#btn-refresh').onclick = charger;
-bandeauOrga($('#bandeau'), { titre: 'Souvenirs', publication: { libelle: 'Projection', texte: '…', lien: '../projection/', lienTexte: 'Lancer la projection' } });
-charger();
+(async () => {
+  bandeauOrga($('#bandeau'), { titre: 'Souvenirs', actions: '<a class="btn petit clair" href="../projection/" target="_blank" rel="noopener">Lancer la projection</a>',
+    publication: await publicationReglage('depot_souvenirs', 'Dépôt des invités', 'Publié : les invités peuvent déposer leurs souvenirs. Non publié : la page leur dit que le dépôt est fermé.', null) });
+  charger();
+})();
 
 async function charger(){
   $('#info').textContent = 'Chargement...';
@@ -150,7 +153,7 @@ function majStat(){
   const vol = envois.reduce((a, e) => a + e.fichiers.reduce((b, f) => b + (f.taille || 0), 0), 0);
   $('#stat').textContent = `${envois.length} envoi${envois.length > 1 ? 's' : ''}, ${nbF} fichier${nbF > 1 ? 's' : ''}, ${taille(vol)}`;
   const proj = envois.filter(e => e.visible !== false).reduce((a, e) => a + e.fichiers.filter(f => f.visible !== false).length, 0);
-  majBandeauPub(`${proj} souvenir${proj > 1 ? 's' : ''} projeté${proj > 1 ? 's' : ''} sur ${nbF}`);
+  $('#stat').textContent += ` · ${proj} projeté${proj > 1 ? 's' : ''}`;
 }
 
 /* Visionneuse plein écran */

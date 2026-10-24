@@ -14,9 +14,9 @@
   body.plein{cursor:none}
   #scene{position:absolute;inset:0}
   .coin{position:absolute;opacity:.9;pointer-events:none}
-  .coin.hg{width:24vmin;top:-1vmin;left:-1vmin;transform:rotate(-6deg)}
-  .coin.bd{width:22vmin;bottom:-1vmin;left:2vmin;transform:scaleX(-1) rotate(186deg)}
-  .coin.hd{width:12vmin;top:2vmin;right:3vmin}
+  .coin.hg{width:22vmin;top:-1vmin;left:-1vmin}
+  .coin.bd{width:24vmin;bottom:-2vmin;left:0}
+  .coin.hd{width:26vmin;top:1vmin;right:18vmin}
   .bandeau{position:absolute;left:0;right:0;bottom:1.2vmin;text-align:center;pointer-events:none}
   .bandeau .monogramme{font-size:4vmin}
   .bandeau .capitales{font-size:1.2vmin;margin-left:1.5vmin;vertical-align:.6vmin}
@@ -74,7 +74,7 @@ Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45
 let items = [], connus = new Set(), file = [], nouveaux = [];
 let position = -1, timer = null, enPause = false, avecVideos = true, premierChargement = true, courant = null;
 
-$('#coins').outerHTML = ornement('branche', 'coin hg') + ornement('mimosa', 'coin bd') + ornement('colibri', 'coin hd');
+$('#coins').outerHTML = motif('motif-a', 'coin hg') + motif('couv-gauche-bas', 'coin bd') + motif('colibri-droit', 'coin hd');
 qrDans($('#qr'), urlSite('../souvenirs/'), 256);
 demarrer();
 

@@ -30,7 +30,7 @@ body.editeur{overflow:hidden;font-size:16px;height:100vh;height:100dvh}
 .menu button:hover{background:var(--bleu-voile)}
 .menu hr{border:0;border-top:1px solid var(--perle);margin:4px 0}
 .danger{color:var(--erreur)!important}
-.publier{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.85)}
+.publier{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.85);white-space:nowrap}
 .publier .etat{color:#fff;font-weight:500}
 .publier input{display:none}
 .publier .interrupteur{width:40px;height:22px;border-radius:12px;background:rgba(255,255,255,.3);position:relative;transition:.2s}

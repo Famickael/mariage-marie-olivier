@@ -37,13 +37,15 @@
 <script src="../assets/ouverture.js?v=202610241610"></script>
 <script src="../assets/programme.js?v=202610241610"></script>
 <script>
-$('#pap').outerHTML = ornement('papillon', 'papillon');
-$('#pied').innerHTML = piedBleu('');
+$('#pap').remove();
+$('#pied').innerHTML = piedBleu();
 /* Page invités : client sans session, seuls les moments « visibles des invités ». */
 const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
 let items = [];
 async function charger(){
   if (!sbInvite) return;
+  const publie = await reglage('programme_publie', false);
+  if (!publie) { $('#jours').innerHTML = '<p class="vide">Le programme arrive bientôt, revenez dans quelques jours.</p>'; return; }
   const { data, error } = await sbInvite.from('mo_programme').select('jour,debut,duree,titre,lieu,description').eq('public', true).order('jour').order('debut');
   if (error) { $('#jours').innerHTML = '<p class="vide">Le programme n\'est pas disponible pour le moment, réessayez un peu plus tard.</p>'; return; }
   items = data; rendre();

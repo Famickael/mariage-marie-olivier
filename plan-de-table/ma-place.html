@@ -48,8 +48,8 @@
 <script>
 /* Page invités : aucun lien vers le reste du site, client sans session.
    Les données viennent de deux fonctions en base qui ne renvoient que le plan publié. */
-$('#pap').outerHTML = ornement('papillon', 'papillon');
-$('#pied').innerHTML = piedBleu('');
+$('#pap').remove();
+$('#pied').innerHTML = piedBleu();
 const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
 let geo = null, minuterie = null, derniere = '';
 document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${defsPlan()}</svg>`);

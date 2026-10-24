@@ -125,7 +125,12 @@ function montrer(nom){
   Object.entries(vues).forEach(([k,el]) => el.hidden = (k !== nom));
   window.scrollTo({top:0, behavior:'instant'});
 }
-$('#pied').innerHTML = piedBleu('');
+$('#pied').innerHTML = piedBleu();
+reglage('depot_souvenirs', true).then(ouvert => {
+  if (ouvert) return;
+  $('#btn-vers-envoi').hidden = true;
+  $('.note').innerHTML = 'Le dépôt des souvenirs est fermé pour le moment.<br>Merci à tous ceux qui ont partagé les leurs !';
+});
 $('#btn-vers-envoi').onclick = () => montrer('upload');
 $('#btn-retour').onclick = () => { if (!envoiEnCours) { reinitialiser(); montrer('home'); } };
 $('#btn-accueil').onclick = () => { clearInterval(compteur); reinitialiser(); montrer('upload'); };

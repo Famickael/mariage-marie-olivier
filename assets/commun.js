@@ -56,36 +56,27 @@ function bandeauOrga(el, o){
 }
 function majBandeauPub(texte){ const b = $('#bandeau-pub-texte'); if (b) b.textContent = texte; }
 
-/* ---------- Ornements « toile de Jouy » en trait bleu ---------- */
-const ORNEMENTS = {
-  branche: `<svg viewBox="0 0 120 120" class="orne" aria-hidden="true">
-    <path d="M10 112 C 34 86, 54 64, 64 34 S 84 8, 108 6"/>
-    <path d="M30 92 q-16 -4 -20 -20 q16 2 20 20z"/><path d="M30 92 q4 -16 20 -20 q-2 16 -20 20z"/>
-    <path d="M48 70 q-18 -2 -24 -18 q18 0 24 18z"/><path d="M48 70 q6 -16 22 -18 q-4 16 -22 18z"/>
-    <path d="M62 44 q-16 -6 -18 -22 q16 4 18 22z"/><path d="M62 44 q8 -14 24 -14 q-6 14 -24 14z"/>
-    <path d="M80 20 q-6 -12 0 -18 q8 8 0 18z"/><path d="M80 20 q12 -2 18 6 q-10 4 -18 -6z"/>
-    <circle class="plein" cx="108" cy="6" r="2.2"/></svg>`,
-  colibri: `<svg viewBox="0 0 120 80" class="orne" aria-hidden="true">
-    <path d="M6 40 L 34 37"/>
-    <path d="M34 37 c4 -6 12 -8 18 -4 c10 2 22 6 32 14 c8 6 18 10 30 12 c-12 4 -24 2 -34 -2 c-10 6 -24 8 -34 2 c-8 -4 -14 -12 -12 -22z"/>
-    <circle class="plein" cx="42" cy="36" r="1.6"/>
-    <path d="M56 36 c4 -14 14 -26 30 -32 c-4 10 -8 18 -16 26"/><path d="M62 38 c8 -10 22 -18 40 -18 c-8 8 -18 14 -30 18"/>
-    <path d="M60 50 c4 4 10 6 16 6"/></svg>`,
-  papillon: `<svg viewBox="0 0 60 50" class="orne" aria-hidden="true">
-    <path d="M30 14 v26"/><path d="M30 14 l-5 -9 M30 14 l5 -9"/>
-    <path d="M30 20 c-6 -14 -24 -18 -26 -8 c-2 8 10 14 26 12z"/><path d="M30 20 c6 -14 24 -18 26 -8 c2 8 -10 14 -26 12z"/>
-    <path d="M30 26 c-10 2 -18 10 -14 16 c4 4 12 -4 14 -12z"/><path d="M30 26 c10 2 18 10 14 16 c-4 4 -12 -4 -14 -12z"/></svg>`,
-  mimosa: `<svg viewBox="0 0 100 100" class="orne" aria-hidden="true">
-    <path d="M8 96 C 30 70, 50 50, 92 10"/><path d="M40 62 c-6 -10 -16 -14 -26 -12"/><path d="M62 40 c0 -12 -6 -22 -16 -26"/>
-    <g class="plein"><circle cx="14" cy="50" r="3"/><circle cx="20" cy="46" r="2.5"/><circle cx="26" cy="51" r="2.6"/><circle cx="46" cy="14" r="3"/><circle cx="52" cy="20" r="2.4"/>
-    <circle cx="44" cy="22" r="2.4"/><circle cx="92" cy="10" r="3"/><circle cx="86" cy="18" r="2.6"/><circle cx="78" cy="22" r="2.2"/><circle cx="70" cy="34" r="2.4"/></g></svg>`,
-  fleur: `<svg viewBox="0 0 60 60" class="orne" aria-hidden="true">
-    <g transform="translate(30 30)">
-    <path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z"/><path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(72)"/>
-    <path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(144)"/><path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(216)"/>
-    <path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(288)"/><circle r="4" class="or"/></g></svg>`
-};
-function ornement(nom, cls = '', style = ''){ return (ORNEMENTS[nom] || '').replace('class="orne"', `class="orne ${cls}" style="${style}"`); }
+/* ---------- Réglages de publication (table mo_reglages) ---------- */
+async function reglage(cle, defaut = false){
+  if (!sb) return defaut;
+  const { data } = await sb.from('mo_reglages').select('valeur').eq('cle', cle).maybeSingle();
+  return data ? data.valeur : defaut;
+}
+async function definirReglage(cle, valeur){
+  const { error } = await sb.from('mo_reglages').upsert({ cle, valeur, updated_at: new Date().toISOString() });
+  if (error) { toast('Enregistrement impossible : ' + error.message, 4000); return false; }
+  return true;
+}
+/* Interrupteur de publication standard du bandeau : lit le réglage, l'enregistre, confirme à la publication. */
+async function publicationReglage(cle, libelle, aide, question){
+  const actif = await reglage(cle, false);
+  return { type: 'interrupteur', libelle, aide, actif, onChange: async (v, retablir) => {
+    if (v && question && !confirm(question)) { retablir(false); return; }
+    const ok = await definirReglage(cle, v);
+    if (!ok) { retablir(!v); return; }
+    retablir(v); toast(v ? `${libelle} : publié` : `${libelle} : non publié`, 2500);
+  } };
+}
 
 /* Motifs du faire-part : <img> détourées (assets/motifs/*.png). `base` = chemin relatif vers assets/. */
 const BASE_ASSETS = (document.currentScript && document.currentScript.src.replace(/commun\.js.*$/, '')) || 'assets/';
