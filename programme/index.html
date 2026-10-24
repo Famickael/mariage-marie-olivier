@@ -41,7 +41,7 @@ let items = [];
 async function charger(){
   if (!sbInvite) return;
   const { data, error } = await sbInvite.from('mo_programme').select('jour,debut,duree,titre,lieu,description').eq('public', true).order('jour').order('debut');
-  if (error) { $('#jours').innerHTML = '<p class="vide">Le programme n\'est pas disponible pour le moment.</p>'; return; }
+  if (error) { $('#jours').innerHTML = '<p class="vide">Le programme n\'est pas disponible pour le moment, réessayez un peu plus tard.</p>'; return; }
   items = data; rendre();
 }
 function rendre(){
@@ -60,7 +60,7 @@ function rendre(){
     }
     cont.appendChild(sec);
   }
-  if (!cont.children.length) cont.innerHTML = '<p class="vide">Le programme sera bientôt dévoilé.</p>';
+  if (!cont.children.length) cont.innerHTML = '<p class="vide">Le programme arrive bientôt, revenez dans quelques jours.</p>';
 }
 charger(); setInterval(charger, 120000);
 </script>

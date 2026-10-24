@@ -74,7 +74,7 @@ let position = -1, timer = null, enPause = false, avecVideos = true, premierChar
 
 $('#coins').outerHTML = ornement('branche', 'coin hg') + ornement('mimosa', 'coin bd') + ornement('colibri', 'coin hd');
 qrDans($('#qr'), urlSite('../souvenirs/'), 256);
-exigerConnexion('Projection', demarrer);
+demarrer();
 
 async function demarrer(){
   $('#scene').hidden = false;

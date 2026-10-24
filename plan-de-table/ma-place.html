@@ -31,7 +31,7 @@
   <header class="entete-site" data-titre="Trouvez votre table"></header>
   <div class="recherche">
     <label class="champ" for="q" style="text-align:center">Votre prénom ou votre nom</label>
-    <input type="search" id="q" autocomplete="off" placeholder="Ex. Jeanne" enterkeyhint="search">
+    <input type="search" id="q" autocomplete="off" placeholder="Ex. Jeanne, ou Bertrand" enterkeyhint="search">
   </div>
   <p class="info" id="info"></p>
   <div class="resultats" id="resultats"></div>
@@ -54,7 +54,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style=
   if (!sbInvite) return;
   const { data } = await sbInvite.rpc('mo_plan_public');
   geo = data;
-  if (!geo) { $('#info').textContent = 'Le plan de table sera dévoilé très bientôt.'; $('#q').disabled = true; }
+  if (!geo) { $('#info').textContent = 'Le plan de table sera dévoilé un peu avant le grand jour. Revenez bientôt !'; $('#q').disabled = true; }
 })();
 
 $('#q').addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(chercher, 300); });
@@ -66,7 +66,7 @@ async function chercher(){
   const { data, error } = await sbInvite.rpc('mo_trouver_ma_place', { recherche: q });
   if (q !== $('#q').value.trim()) return;
   if (error) { $('#info').textContent = 'La recherche est indisponible pour le moment.'; return; }
-  $('#info').textContent = data.length ? '' : 'Personne à ce nom… essayez votre nom de famille, ou demandez aux témoins !';
+  $('#info').textContent = data.length ? '' : 'Personne à ce nom… essayez votre nom de famille, ou demandez à Marie et Olivier !';
   r.innerHTML = '';
   for (const p of data) {
     const el = document.createElement('div'); el.className = 'resultat carte-papier cadre';

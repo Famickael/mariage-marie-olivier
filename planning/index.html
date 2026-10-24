@@ -10,8 +10,8 @@
   main{max-width:860px;margin:0 auto;padding:30px 16px 90px}
   header.tete{text-align:center;position:relative}
   header.tete h1{font-size:clamp(2rem,7vw,2.8rem);font-style:italic}
-  header.tete .o1{position:absolute;width:130px;left:-10px;top:-30px}
-  header.tete .o2{position:absolute;width:150px;right:0;top:-10px}
+  header.tete .o1{position:absolute;width:110px;left:-30px;top:-40px;opacity:.9}
+  header.tete .o2{position:absolute;width:130px;right:-10px;top:-20px}
   @media (max-width:600px){header.tete .o1,header.tete .o2{width:70px}}
   .outils{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
   .jours{display:flex;justify-content:center;gap:0;margin:24px auto 0;border:1px solid var(--perle-fonce);width:max-content;max-width:100%;overflow-x:auto;background:#fff}
@@ -63,11 +63,13 @@
 </style>
 </head>
 <body>
+<header id="bandeau"></header>
 <main>
   <header class="tete">
     <span id="o"></span>
     <p class="capitales">Marie &amp; Olivier · l'équipe</p>
     <h1>Le planning du week-end</h1>
+    <p class="doux italique" style="margin:6px 0 0">Qui fait quoi, où et quand. Cochez « Montrer aux invités » sur les moments qui doivent apparaître dans leur programme.</p>
     <div class="filet-or"><span>✦</span></div>
     <div class="outils" id="outils"></div>
   </header>
@@ -89,7 +91,7 @@
       <label class="champ" for="f-qui">Qui s'en occupe</label><input type="text" id="f-qui" placeholder="Ex. Témoins, traiteur, DJ…">
       <label class="champ" for="f-desc">Détails</label><textarea id="f-desc" rows="3"></textarea>
       <label class="champ">Catégorie</label><div class="cats" id="f-cats"></div>
-      <label class="case"><input type="checkbox" id="f-public"> Visible des invités dans le programme</label>
+      <label class="case"><input type="checkbox" id="f-public"> Montrer aux invités dans leur programme</label>
       <div class="actions">
         <button type="button" class="btn clair petit gauche" id="f-suppr">Supprimer</button>
         <button type="button" class="btn clair petit" id="f-annuler">Annuler</button>
@@ -110,9 +112,9 @@ $('#pied').innerHTML = piedBleu('');
 
 async function demarrer(){
   if (!sb) { $('#frise').innerHTML = '<p class="vide">Base de données non configurée.</p>'; return; }
-  const { data } = await sb.auth.getSession();
-  edition = !!data.session;
-  document.body.classList.toggle('edition', edition);
+  edition = true;
+  document.body.classList.add('edition');
+  bandeauOrga($('#bandeau'), { titre: 'Planning', publication: { libelle: 'Programme des invités', texte: '…', lien: '../programme/', lienTexte: 'Voir leur programme' } });
   rendreOutils();
   JOURS.forEach(([v, l]) => $('#f-jour').insertAdjacentHTML('beforeend', `<option value="${v}">${l}</option>`));
   Object.entries(CATEGORIES).forEach(([k, c]) => $('#f-cats').insertAdjacentHTML('beforeend', `<label><input type="radio" name="cat" value="${k}"> ${c.icone} ${c.nom}</label>`));
@@ -124,15 +126,9 @@ async function demarrer(){
 }
 
 function rendreOutils(){
-  const o = $('#outils'); o.innerHTML = '';
-  if (edition) {
-    o.innerHTML = `<button class="btn petit" id="b-ajout">Ajouter un moment</button><button class="btn clair petit" id="b-imprimer">Imprimer</button><button class="btn clair petit" id="b-deco">Déconnexion</button>`;
-    $('#b-ajout').onclick = () => ouvrir(null);
-    $('#b-deco').onclick = deconnecter;
-  } else {
-    o.innerHTML = `<button class="btn clair petit" id="b-imprimer">Imprimer</button><button class="btn clair petit" id="b-co">Se connecter pour modifier</button>`;
-    $('#b-co').onclick = () => { $('main').hidden = true; exigerConnexion('Planning', () => location.reload()); };
-  }
+  const o = $('#outils');
+  o.innerHTML = `<button class="btn petit" id="b-ajout">Ajouter un moment</button><button class="btn clair petit" id="b-imprimer">Imprimer</button>`;
+  $('#b-ajout').onclick = () => ouvrir(null);
   $('#b-imprimer').onclick = () => print();
 }
 
@@ -140,6 +136,8 @@ async function charger(){
   const { data, error } = await sb.from('mo_programme').select('*').order('jour').order('debut');
   if (error) { $('#frise').innerHTML = `<p class="vide">Erreur de chargement : ${echap(error.message)}</p>`; return; }
   items = data; rendre();
+  const n = items.filter(i => i.public).length;
+  majBandeauPub(n ? `${n} moment${n > 1 ? 's' : ''} visible${n > 1 ? 's' : ''} par les invités` : 'Rien n\'est encore montré aux invités');
 }
 
 function rendre(){
@@ -167,7 +165,7 @@ function rendre(){
   }
 
   const ol = $('#frise'); ol.innerHTML = '';
-  if (!liste.length) { ol.innerHTML = `<p class="vide">Rien de prévu ce jour-là${edition ? ' pour le moment. « Ajouter un moment » pour commencer.' : '.'}</p>`; return; }
+  if (!liste.length) { ol.innerHTML = `<p class="vide">Rien de prévu ce jour-là pour le moment. Cliquez sur « Ajouter un moment » pour commencer.</p>`; return; }
   for (const it of liste) {
     const deb = minutes(it), fin = deb + (it.duree || 0);
     const cat = CATEGORIES[it.categorie] || CATEGORIES.autre;
@@ -177,7 +175,7 @@ function rendre(){
     li.innerHTML = `<div class="heure">${fmtH(deb)}${it.duree ? `<small>→ ${fmtH(fin)}</small>` : ''}</div>
       <div class="puce" title="${echap(cat.nom)}">${cat.icone}</div>
       <div class="corps">
-        <h3>${echap(it.titre)}${it.public ? '<span class="oeil">invités</span>' : ''}</h3>
+        <h3>${echap(it.titre)}${it.public ? '<span class="oeil">montré aux invités</span>' : ''}</h3>
         <div class="meta">${it.lieu ? `<span>📍 ${echap(it.lieu)}</span>` : ''}${it.qui ? `<span>👤 ${echap(it.qui)}</span>` : ''}${it.duree ? `<span>${fmtDuree(it.duree)}</span>` : ''}</div>
         ${it.description ? `<div class="desc">${echap(it.description)}</div>` : ''}
       </div>`;

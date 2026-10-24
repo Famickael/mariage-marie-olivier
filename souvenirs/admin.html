@@ -8,8 +8,6 @@
 <link rel="stylesheet" href="../assets/charte.css">
 <style>
   main{max-width:1000px;margin:0 auto;padding:30px 16px 60px}
-  header.tete{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-  header.tete h1{font-size:2.3rem;font-style:italic}
   .barre-outils{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0}
   .barre-outils .spacer{flex:1}
   .stat{color:var(--encre-douce);font-style:italic}
@@ -45,18 +43,17 @@
 </style>
 </head>
 <body>
+<header id="bandeau"></header>
 <main>
-  <section id="app" hidden>
-    <header class="tete">
-      <div><p class="capitales">Marie &amp; Olivier</p><h1>Les souvenirs des invités</h1></div>
-      <button class="btn clair petit" id="btn-logout">Déconnexion</button>
-    </header>
-    <div class="filet-or" style="justify-content:flex-start"><span>✦</span></div>
+  <section id="app">
+    <p class="capitales" style="margin-top:20px">Ce que les invités ont déposé</p>
+    <h1 style="font-size:2.2rem;font-style:italic">Les souvenirs</h1>
+    <p class="doux" style="margin:6px 0 0">Tout est projeté par défaut. Décochez ce que vous préférez garder pour vous, ajoutez ou corrigez un mot, téléchargez l'ensemble.</p>
     <div class="barre-outils">
       <button class="btn petit" id="btn-zip">Tout télécharger (zip)</button>
       <button class="btn clair petit" id="btn-csv">Exporter les mots (CSV)</button>
       <button class="btn clair petit" id="btn-refresh">Actualiser</button>
-      <a class="btn clair petit" href="../projection/" target="_blank">Ouvrir la projection</a>
+      
       <span class="spacer"></span>
       <span class="stat" id="stat"></span>
     </div>
@@ -71,9 +68,9 @@
 <script src="../assets/commun.js"></script>
 <script>
 let envois = [];
-$('#btn-logout').onclick = deconnecter;
 $('#btn-refresh').onclick = charger;
-exigerConnexion('Souvenirs', () => { $('#app').hidden = false; charger(); });
+bandeauOrga($('#bandeau'), { titre: 'Souvenirs', publication: { libelle: 'Projection', texte: '…', lien: '../projection/', lienTexte: 'Lancer la projection' } });
+charger();
 
 async function charger(){
   $('#info').textContent = 'Chargement...';
@@ -82,17 +79,17 @@ async function charger(){
   envois = data; $('#info').textContent = '';
   majStat();
   const cont = $('#liste'); cont.innerHTML = '';
-  if (!envois.length) { cont.innerHTML = '<p class="vide">Aucun envoi pour le moment.</p>'; return; }
+  if (!envois.length) { cont.innerHTML = '<p class="vide">Rien pour le moment : les souvenirs des invités apparaîtront ici dès le premier envoi.</p>'; return; }
   for (const e of envois) {
     const sec = document.createElement('section'); sec.className = 'envoi carte-papier';
     sec.innerHTML = `<header><h2>${echap(e.invite_nom || 'Invité anonyme')} <button class="lien-modif" data-modif-nom>modifier</button></h2><span class="date">${dateFr(e.created_at)} · ${e.appareil || ''}</span><span class="actions-envoi"><button class="interrupteur ${e.visible !== false ? 'actif' : ''}" data-vis-envoi>${e.visible !== false ? 'Projeté' : 'Non projeté'}</button><button class="btn clair petit" data-suppr-envoi>Supprimer l'envoi</button></span></header>`
       + `<div class="mot-ligne">${e.message ? `<div class="mot">${echap(e.message)}</div>` : '<span class="msg">Pas de mot global.</span>'}<button class="lien-modif" data-modif-mot>${e.message ? 'modifier' : 'ajouter'}</button></div>`;
     sec.querySelector('[data-modif-nom]').onclick = async () => {
-      const v = prompt('Nom de l\'invité affiché à la projection :', e.invite_nom || ''); if (v === null) return;
+      const v = prompt('Nom affiché avec ces souvenirs :', e.invite_nom || ''); if (v === null) return;
       const { error } = await sb.from('mo_envois').update({ invite_nom: v.trim() || null }).eq('id', e.id); if (error) { alert(error.message); return; } charger();
     };
     sec.querySelector('[data-modif-mot]').onclick = async () => {
-      const v = prompt('Mot global de l\'invité (vide pour le retirer de la projection) :', e.message || ''); if (v === null) return;
+      const v = prompt('Mot de l\'invité (laisser vide pour ne pas l\'afficher) :', e.message || ''); if (v === null) return;
       const { error } = await sb.from('mo_envois').update({ message: v.trim() || null }).eq('id', e.id); if (error) { alert(error.message); return; } charger();
     };
     sec.querySelector('[data-vis-envoi]').onclick = async () => {
@@ -125,7 +122,7 @@ async function charger(){
         const inter = document.createElement('button'); inter.className = 'interrupteur' + (f.visible === false ? '' : ' actif'); inter.textContent = f.visible === false ? 'Non projeté' : 'Projeté';
         inter.onclick = async () => { const vis = f.visible === false; const { error } = await sb.from('mo_fichiers').update({ visible: vis }).eq('id', f.id); if (error) { alert(error.message); return; } f.visible = vis; inter.className = 'interrupteur' + (vis ? ' actif' : ''); inter.textContent = vis ? 'Projeté' : 'Non projeté'; carte.classList.toggle('masque', !vis); };
         const mod = document.createElement('button'); mod.className = 'lien-modif'; mod.textContent = f.message ? 'modifier le mot' : 'ajouter un mot'; mod.style.marginLeft = 'auto';
-        mod.onclick = async () => { const v = prompt('Mot affiché sous ce fichier :', f.message || ''); if (v === null) return; const { error } = await sb.from('mo_fichiers').update({ message: v.trim() || null }).eq('id', f.id); if (error) { alert(error.message); return; } charger(); };
+        mod.onclick = async () => { const v = prompt('Mot affiché sous ce souvenir :', f.message || ''); if (v === null) return; const { error } = await sb.from('mo_fichiers').update({ message: v.trim() || null }).eq('id', f.id); if (error) { alert(error.message); return; } charger(); };
         ligne2.append(inter, mod);
         const act = document.createElement('div'); act.className = 'actions';
         const dl = document.createElement('a'); dl.href = '#'; dl.textContent = 'Télécharger';
@@ -150,6 +147,8 @@ function majStat(){
   const nbF = envois.reduce((a, e) => a + e.fichiers.length, 0);
   const vol = envois.reduce((a, e) => a + e.fichiers.reduce((b, f) => b + (f.taille || 0), 0), 0);
   $('#stat').textContent = `${envois.length} envoi${envois.length > 1 ? 's' : ''}, ${nbF} fichier${nbF > 1 ? 's' : ''}, ${taille(vol)}`;
+  const proj = envois.filter(e => e.visible !== false).reduce((a, e) => a + e.fichiers.filter(f => f.visible !== false).length, 0);
+  majBandeauPub(`${proj} souvenir${proj > 1 ? 's' : ''} projeté${proj > 1 ? 's' : ''} sur ${nbF}`);
 }
 
 /* Visionneuse plein écran */

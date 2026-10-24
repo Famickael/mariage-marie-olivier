@@ -122,6 +122,27 @@ body > main,body > footer,body > header{position:relative;z-index:1}
 .entete-site .orn.b{width:min(230px,40vw);right:-20px;bottom:-24px;opacity:.95}
 .entete-site > *:not(.orn){position:relative}
 
+/* Bandeau des pages organisateurs : titre à gauche, publication toujours à droite */
+.bandeau-orga{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:0 16px;height:58px;background:var(--bleu-nuit);color:#fff;box-shadow:0 2px 12px rgba(27,38,82,.25)}
+.bandeau-orga .retour{text-decoration:none}
+.bandeau-orga .monogramme{color:#fff;font-size:1.6rem}
+.bandeau-orga .monogramme .et{color:var(--or-clair)}
+.bandeau-orga .titre-bandeau{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:1.3rem;white-space:nowrap}
+.bandeau-orga .actions-bandeau{display:flex;gap:6px;align-items:center}
+.bandeau-orga .actions-bandeau .btn.clair{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.bandeau-orga .actions-bandeau .btn.clair:hover{background:rgba(255,255,255,.12)}
+.bandeau-orga .espace{flex:1}
+.bandeau-orga .publier,.bandeau-orga .pub-etat{display:flex;align-items:center;gap:10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.85);cursor:pointer;white-space:nowrap}
+.bandeau-orga .pub-etat{cursor:default}
+.bandeau-orga .pub-etat b{font-weight:500;color:#fff;text-transform:none;letter-spacing:0;font-size:.95rem}
+.bandeau-orga .publier input{display:none}
+.bandeau-orga .publier .interrupteur{width:40px;height:22px;border-radius:12px;background:rgba(255,255,255,.3);position:relative;transition:.2s;flex:none}
+.bandeau-orga .publier .interrupteur::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.bandeau-orga .publier input:checked + .interrupteur{background:var(--or)}
+.bandeau-orga .publier input:checked + .interrupteur::after{left:20px}
+.bandeau-orga .publier .etat{color:#fff;font-weight:500}
+@media (max-width:720px){ .bandeau-orga .titre-bandeau,.bandeau-orga .lib{display:none} .bandeau-orga{gap:8px;padding:0 10px} }
+
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}
 .pied-bleu .monogramme{color:#fff;font-size:2.2rem}

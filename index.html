@@ -35,14 +35,13 @@
   section.groupe > h2{font-size:2.1rem;text-align:center;font-style:italic}
   section.groupe > p{text-align:center;margin:4px auto 0;max-width:560px;color:var(--encre-douce)}
   .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:24px}
-  .fonction{padding:24px 20px 18px;display:flex;flex-direction:column;gap:9px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-height:290px}
+  .fonction{padding:24px 20px 18px;display:flex;flex-direction:column;gap:9px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-height:290px;cursor:pointer}
   .fonction:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(27,38,82,.16)}
   .fonction .deco{position:absolute;right:-10px;top:-6px;width:46%;max-height:46%;object-fit:contain;object-position:top right;opacity:.95}
   .fonction h3{font-size:1.5rem;font-style:italic;margin-top:70px;position:relative}
   .fonction p{margin:0;font-size:.95rem;color:var(--encre-douce);flex:1;position:relative}
   .actions{display:flex;gap:6px;margin-top:8px;flex-wrap:nowrap;position:relative}
   .actions .btn{flex:1;padding:9px 4px;font-size:.6rem;letter-spacing:.06em;min-width:0}
-  .actions .btn:nth-child(2){flex:1.5}
 
   /* ---- QR ---- */
   dialog{border:0;padding:0;background:transparent;max-width:94vw}
@@ -66,25 +65,22 @@
   <header class="tete">
     <p class="capitales">Notre mariage</p>
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
-    <h1>Marie &amp; Olivier, côté organisation</h1>
+    <h1>Marie &amp; Olivier</h1>
     <p class="capitales rebours" id="rebours"></p>
     <div class="filet-or"><span>✦</span></div>
   </header>
-  <p class="intro">Tous les outils du mariage sont réunis ici. Cette page est réservée à la famille et aux mariés ;
-    pour chaque outil, c'est vous qui choisissez à qui donner le lien.</p>
-  <div class="session" id="session"></div>
 
   <section class="groupe">
     <img class="motif motif-titre" src="assets/motifs/colibri-droit.png" alt="">
     <h2>Pour les invités</h2>
-    <p class="italique">Liens à imprimer sur les tables, le livret, ou à envoyer par message.</p>
+    <p class="italique">À envoyer aux invités ou à imprimer sur les tables.</p>
     <div class="grille" id="g-invites"></div>
   </section>
 
   <section class="groupe">
     <img class="motif motif-titre" src="assets/motifs/oiseau-branche.png" alt="" style="height:110px">
     <h2>Pour les organisateurs</h2>
-    <p class="italique">Marie, Olivier, les témoins et la famille proche. Les outils réservés demandent un mot de passe.</p>
+    <p class="italique">Pour Marie, Olivier et ceux qui les aident. Ces liens restent entre nous.</p>
     <div class="grille" id="g-orga"></div>
   </section>
 
@@ -109,19 +105,19 @@
 <script>
 const FONCTIONS = [
   { groupe: 'invites', deco: 'colibri', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
-    texte: 'Les invités déposent leurs photos, vidéos et petits mots, depuis leur téléphone. Eux seuls voient ce qu\'ils envoient.' },
+    texte: 'Avant le grand jour, les invités déposent leurs photos, vidéos et petits mots. Ils seront projetés pendant la soirée.' },
   { groupe: 'invites', deco: 'couv-droite-haut', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
-    texte: 'Chacun tape son nom et découvre sa table et ses voisins. Actif une fois le plan « publié » depuis l\'éditeur.' },
+    texte: 'Chaque invité tape son nom et découvre sa table et ses voisins.' },
   { groupe: 'invites', deco: 'motif-a', titre: 'Programme', chemin: 'programme/', accroche: 'Le programme',
-    texte: 'Le déroulé de la journée, avec uniquement les moments marqués « visibles des invités » dans le planning.' },
-  { groupe: 'orga', deco: 'colibri-droit', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
-    texte: 'Le minute par minute du week-end : qui fait quoi, où, quand. Lisible avec le lien, modifiable une fois connecté.' },
-  { groupe: 'orga', deco: 'oiseau-branche', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
-    texte: 'Dessinez la salle, assemblez les tables, habillez-les et glissez les invités à leur place.' },
-  { groupe: 'orga', deco: 'colibri', titre: 'Souvenirs · administration', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
-    texte: 'Voir, trier, masquer ou supprimer les envois des invités. Tout télécharger en un zip.' },
+    texte: 'Le déroulé de la journée, heure par heure.' },
+  { groupe: 'orga', deco: 'colibri', titre: 'Souvenirs', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
+    texte: 'Tout ce que les invités ont déposé. Choisissez ce qui sera projeté, téléchargez tout en un clic.' },
   { groupe: 'orga', deco: 'couv-gauche-bas', titre: 'Projection', chemin: 'projection/', accroche: 'Projection',
-    texte: 'Le diaporama de la soirée : les photos des invités s\'affichent au fil de l\'eau, avec leurs mots.' }
+    texte: 'Le diaporama de la soirée, à lancer sur l\'écran de la salle. Les nouveaux souvenirs y arrivent au fil de l\'eau.' },
+  { groupe: 'orga', deco: 'oiseau-branche', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
+    texte: 'La salle, les tables, les invités à leur place. Publiez-le quand il est prêt.' },
+  { groupe: 'orga', deco: 'colibri-droit', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
+    texte: 'Le minute par minute du week-end : qui fait quoi, où et quand. Choisissez ce que les invités en voient.' }
 ];
 
 const jours = Math.ceil((new Date(CONFIG.DATE_ISO + 'T16:30') - new Date()) / 86400000);
@@ -136,14 +132,18 @@ for (const f of FONCTIONS) {
     <h3>${echap(f.titre)}</h3>
     <p>${echap(f.texte)}</p>
     <div class="actions">
-      <a class="btn" href="${url}" target="_blank" rel="noopener">Ouvrir</a>
       <button class="btn clair" data-copier>Copier le lien</button>
       <button class="btn clair" data-qr>QR code</button>
     </div>`;
-  el.querySelector('[data-copier]').onclick = async () => {
+  el.tabIndex = 0; el.setAttribute('role', 'link'); el.title = 'Ouvrir ' + f.titre;
+  el.onclick = e => { if (e.target.closest('button')) return; window.open(url, '_blank', 'noopener'); };
+  el.onkeydown = e => { if (e.key === 'Enter' && !e.target.closest('button')) window.open(url, '_blank', 'noopener'); };
+  el.querySelector('[data-copier]').onclick = async e => {
+    e.stopPropagation();
     try { await navigator.clipboard.writeText(url); toast('Lien copié'); } catch { prompt('Copiez ce lien :', url); }
   };
-  el.querySelector('[data-qr]').onclick = () => {
+  el.querySelector('[data-qr]').onclick = e => {
+    e.stopPropagation();
     fonctionQR = { ...f, url };
     $('#qr-titre').textContent = f.titre;
     qrDans($('#qr'), url, 220); $('#dlg-qr').showModal();
@@ -152,7 +152,7 @@ for (const f of FONCTIONS) {
 }
 $('#qr-fermer').onclick = () => $('#dlg-qr').close();
 $('#qr-affiche').onclick = () => fonctionQR && affiche(fonctionQR);
-$('#pied').innerHTML = piedBleu('Une idée d\'outil en plus ? Demandez à Mickaël.');
+$('#pied').innerHTML = piedBleu();
 
 /* ---------- Affiche A5 à imprimer : QR code habillé aux couleurs du faire-part ---------- */
 async function affiche(f){
@@ -202,12 +202,6 @@ function espacer(x, txt, cx, y, esp){
   x.textAlign = 'center';
 }
 
-async function majSession(){
-  const s = $('#session'); if (!sb) return;
-  const { data } = await sb.auth.getSession();
-  if (data.session) { s.innerHTML = `<span class="doux">Connecté : ${echap(data.session.user.email)}</span> <button class="btn petit clair" id="btn-deco">Se déconnecter</button>`; $('#btn-deco').onclick = deconnecter; }
-}
-majSession();
 </script>
 </body>
 </html>

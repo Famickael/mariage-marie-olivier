@@ -22,7 +22,7 @@ const svg = $('#svg'), monde = $('#monde');
 /* ============================================================
    Démarrage
    ============================================================ */
-exigerConnexion('Plan de table', async () => {
+(async () => {
   $('#app').hidden = false;
   construirePalettes();
   brancherInterface();
@@ -30,7 +30,7 @@ exigerConnexion('Plan de table', async () => {
   const voulu = localStorage.getItem('plan-actif');
   if (!plans.length) await creerPlan('Plan principal', donneesExemple());
   await ouvrirPlan(plans.some(p => p.id === voulu) ? voulu : plans[0].id);
-});
+})();
 
 async function chargerListePlans(){
   const { data, error } = await sb.from('mo_plans').select('id,nom,publie,updated_at').order('created_at');
@@ -57,7 +57,7 @@ async function ouvrirPlan(id){
   } catch {}
   localStorage.setItem('plan-actif', id);
   pile.annuler = []; pile.refaire = []; sel = null; inviteActif = null;
-  $('#chk-publier').checked = !!plan.publie;
+  $('#chk-publier').checked = !!plan.publie; majEtatPublie();
   rendreSelecteurPlans();
   await chargerFond();
   rendreTout({ panneau: true });
@@ -621,7 +621,6 @@ function brancherInterface(){
   $('#b-zoom-moins').onclick = () => zoomer(.8);
   $('#b-zoom-ajuster').onclick = ajusterVue;
   $('#b-annuler').onclick = annuler; $('#b-refaire').onclick = refaire; majBoutonsHisto();
-  $('#b-deco').onclick = async () => { await sauverMaintenant(); deconnecter(); };
   $('#b-gauche').onclick = () => basculerTiroir('gauche');
   $('#b-droite').onclick = () => basculerTiroir('droite');
 
@@ -982,7 +981,6 @@ async function actionPlan(act){
     telecharger(new Blob([JSON.stringify({ nom: plan.nom, data: D }, null, 1)], { type: 'application/json' }), `plan-de-table-${sansAccent(plan.nom).replace(/[^a-z0-9]+/g, '-')}.json`);
   } else if (act === 'importer') $('#in-sauvegarde').click();
   else if (act === 'publier') { $('#chk-publier').checked = !$('#chk-publier').checked; publier(); }
-  else if (act === 'deco') { await sauverMaintenant(); deconnecter(); }
 }
 async function importerSauvegarde(e){
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -991,15 +989,16 @@ async function importerSauvegarde(e){
     const id = await creerPlan((j.nom || 'Plan importé') + ' (importé)', data); if (id) ouvrirPlan(id);
   } catch (err) { alert('Fichier illisible : ' + err.message); }
 }
+function majEtatPublie(){ const e = $('.publier .etat'); if (e) e.textContent = $('#chk-publier').checked ? 'Publié' : 'Non publié'; }
 async function publier(){
   const on = $('#chk-publier').checked;
-  if (on && !confirm('Publier ce plan ? Les invités qui ont le lien « Trouver ma table » pourront y chercher leur nom et voir leur table et leurs voisins.')) { $('#chk-publier').checked = false; return; }
+  if (on && !confirm('Publier ce plan ? Les invités pourront chercher leur nom sur la page « Trouver ma table » et voir leur table et leurs voisins.')) { $('#chk-publier').checked = false; majEtatPublie(); return; }
   await sauverMaintenant();
   if (on) { const { error } = await sb.from('mo_plans').update({ publie: false }).neq('id', plan.id).eq('publie', true); if (error) { alert(error.message); $('#chk-publier').checked = false; return; } }
   const { error } = await sb.from('mo_plans').update({ publie: on }).eq('id', plan.id);
-  if (error) { alert(error.message); $('#chk-publier').checked = !on; return; }
-  plan.publie = on; plans.forEach(p => p.publie = on ? p.id === plan.id : (p.id === plan.id ? false : p.publie)); rendreSelecteurPlans();
-  toast(on ? 'Publié : « Trouver ma table » montre ce plan' : 'Dépublié : les invités ne voient plus rien', 3000);
+  if (error) { alert(error.message); $('#chk-publier').checked = !on; majEtatPublie(); return; }
+  plan.publie = on; plans.forEach(p => p.publie = on ? p.id === plan.id : (p.id === plan.id ? false : p.publie)); rendreSelecteurPlans(); majEtatPublie();
+  toast(on ? 'Publié : les invités peuvent trouver leur table' : 'Non publié : les invités ne voient plus le plan', 3000);
 }
 
 async function importerFond(e){

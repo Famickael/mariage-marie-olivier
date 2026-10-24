@@ -51,14 +51,14 @@
 <main>
 
 <section id="home">
-  <header class="entete-site" data-titre="Partagez vos souvenirs" data-sous="Photos, vidéos, petits mots :<br>tout ce que vous avez saisi de cette journée."></header>
-  <p class="note">Vos envois pourront être projetés pendant la soirée.<br>Seuls Marie et Olivier y ont accès : les autres invités ne voient pas vos fichiers.</p>
+  <header class="entete-site" data-titre="Partagez vos souvenirs" data-sous="Une photo d'eux, une vidéo, un petit mot :<br>confiez-nous vos souvenirs de Marie et Olivier."></header>
+  <p class="note">Ce que vous déposez ici sera projeté sur grand écran pendant la soirée du 5 décembre.<br>Vous pouvez revenir autant de fois que vous voulez.</p>
   <div class="cta"><button class="btn" id="btn-vers-envoi">Partager mes souvenirs</button></div>
 </section>
 
 <section id="upload" hidden>
   <h2 class="titre-section">Vos souvenirs</h2>
-  <p class="centre doux" style="margin-top:4px">Photos, vidéos ou fichiers, un ou plusieurs à la fois.</p>
+  <p class="centre doux" style="margin-top:4px">Photos ou vidéos, une ou plusieurs à la fois.</p>
 
   <div class="depot" id="depot">
     <label class="zone" id="zone-depot" for="input-fichiers" tabindex="0">
@@ -70,11 +70,11 @@
   </div>
 
   <form id="form" novalidate>
-    <label class="champ" for="nom">Votre nom <span class="italique" style="text-transform:none;letter-spacing:0">· pour savoir de qui vient l'envoi</span></label>
+    <label class="champ" for="nom">Votre nom <span class="italique" style="text-transform:none;letter-spacing:0">· il sera affiché avec vos souvenirs</span></label>
     <input type="text" id="nom" autocomplete="name" placeholder="Prénom et nom">
 
     <div id="bloc-fichiers" hidden>
-      <label class="champ">Vos fichiers <span class="italique" style="text-transform:none;letter-spacing:0">· un petit mot pour chacun, si vous voulez</span></label>
+      <label class="champ">Vos souvenirs <span class="italique" style="text-transform:none;letter-spacing:0">· ajoutez un mot à chacun si le cœur vous en dit</span></label>
       <ul class="fichiers" id="liste"></ul>
       <p class="centre" style="margin-top:12px"><button type="button" class="btn clair petit" id="btn-ajouter">Ajouter d'autres fichiers</button></p>
     </div>
@@ -96,7 +96,7 @@
   <div class="monogramme" style="font-size:3rem">M<span class="et">&amp;</span>O</div>
   <h2 class="titre-section" style="margin-top:10px">Merci !</h2>
   <div class="filet-or"><span>✦</span></div>
-  <p id="done-texte">Vos souvenirs sont bien arrivés.</p>
+  <p id="done-texte">Vos souvenirs sont bien arrivés, Marie et Olivier les découvriront bientôt.</p>
   <p class="doux italique">Retour au début dans <span id="compte">10</span> secondes.</p>
   <p style="margin-top:20px"><button class="btn" id="btn-accueil">Envoyer d'autres souvenirs</button></p>
 </section>
@@ -165,7 +165,7 @@ function rendreLigne(f){
   const centre = document.createElement('div');
   centre.innerHTML = `<div class="fichier-nom">${echap(f.file.name)} <span>(${taille(f.file.size)})</span></div>`;
   const ta = document.createElement('textarea');
-  ta.className = 'fichier-msg'; ta.rows = 1; ta.placeholder = 'Message à afficher avec ce fichier (facultatif)';
+  ta.className = 'fichier-msg'; ta.rows = 1; ta.placeholder = 'Un petit mot à afficher avec ce souvenir (facultatif)';
   ta.oninput = () => f.msg = ta.value;
   centre.appendChild(ta);
   const barre = document.createElement('div'); barre.className = 'barre'; barre.innerHTML = '<i></i>'; barre.hidden = true;
@@ -187,8 +187,8 @@ $('#form').addEventListener('submit', async e => {
   if (envoiEnCours) return;
   const nom = $('#nom').value.trim();
   const message = '';
-  if (!nom) { afficherEtat('Indiquez votre nom pour que l\'organisateur sache de qui vient l\'envoi.', true); $('#nom').focus(); return; }
-  if (!fichiers.length) { afficherEtat('Ajoutez au moins un fichier.', true); return; }
+  if (!nom) { afficherEtat('Indiquez votre nom : il accompagnera vos souvenirs.', true); $('#nom').focus(); return; }
+  if (!fichiers.length) { afficherEtat('Choisissez au moins une photo ou une vidéo.', true); return; }
   if (!sbInvite) { afficherEtat('La page n\'est pas encore reliée au serveur.', true); return; }
 
   envoiEnCours = true; verrouiller(true); afficherEtat('');

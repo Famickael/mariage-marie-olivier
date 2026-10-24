@@ -13,7 +13,7 @@
 <div id="app" hidden>
   <header id="barre">
     <button class="icone-btn mobile-seul" id="b-gauche" title="Mobilier et invités">☰</button>
-    <div class="marque"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="titre-app">Plan de table</span></div>
+    <a class="marque" href="../" title="Retour à l'accueil" style="text-decoration:none"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="titre-app">Plan de table</span></a>
     <div class="choix-plan">
       <select id="sel-plan" title="Plan affiché"></select>
       <button class="icone-btn" id="b-menu-plan" title="Gérer les plans">⋯</button>
@@ -26,7 +26,6 @@
         <button data-act="publier" class="mobile-seul">Publier / dépublier pour les invités</button>
         <hr>
         <button data-act="supprimer" class="danger">Supprimer ce plan</button>
-        <button data-act="deco" class="mobile-seul">Se déconnecter</button>
       </div>
     </div>
     <span id="statut" class="statut"></span>
@@ -52,10 +51,9 @@
         <button data-imp="csv">Exporter la liste (tableur CSV)</button>
       </div>
     </div>
-    <label class="publier" title="Rend la page « Trouver ma table » utilisable par les invités">
-      <input type="checkbox" id="chk-publier"><span class="interrupteur"></span><span class="lib">Publié</span>
+    <label class="publier" title="Publié : les invités peuvent trouver leur table">
+      <span class="lib">Trouver ma table</span><input type="checkbox" id="chk-publier"><span class="interrupteur"></span><span class="lib etat">Publié</span>
     </label>
-    <button class="icone-btn" id="b-deco" title="Déconnexion">⏻</button>
     <button class="icone-btn mobile-seul" id="b-droite" title="Propriétés">✎</button>
   </header>
 

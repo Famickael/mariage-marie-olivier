@@ -33,36 +33,28 @@ function toast(txt, ms = 2200){
 /* URL absolue d'une page du site, pour partager un lien ou un QR code. */
 function urlSite(chemin){ const base = location.href.replace(/[^/]*([?#].*)?$/, ''); return new URL(chemin, base).href; }
 
-/* ---------- Connexion organisateur ----------
-   exigerConnexion(titre, onOk) : si une session existe, onOk() tout de suite ;
-   sinon affiche un petit formulaire, puis onOk() après connexion. */
-async function exigerConnexion(titre, onOk){
-  if (!CONFIGURE) { document.body.insertAdjacentHTML('afterbegin', '<p class="centre doux italique" style="padding:30px">Le site n\'est pas encore relié à sa base de données (assets/commun.js).</p>'); return; }
-  const { data } = await sb.auth.getSession();
-  if (data.session) return onOk(data.session);
-  const bloc = document.createElement('section');
-  bloc.className = 'connexion carte-papier cadre';
-  bloc.innerHTML = `
-    <div class="monogramme" style="font-size:2.6rem">M<span class="et">&amp;</span>O</div>
-    <div class="filet-or"><span>✦</span></div>
-    <h1>${echap(titre)}</h1>
-    <p class="capitales doux" style="margin:8px 0 0">Accès réservé</p>
-    <form>
-      <label class="champ" for="cx-email">E-mail</label><input id="cx-email" type="email" autocomplete="username" required>
-      <label class="champ" for="cx-mdp">Mot de passe</label><input id="cx-mdp" type="password" autocomplete="current-password" required>
-      <p class="centre" style="margin-top:24px"><button class="btn" type="submit">Entrer</button></p>
-      <p class="err" aria-live="polite"></p>
-    </form>`;
-  document.body.prepend(bloc);
-  bloc.querySelector('form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const err = bloc.querySelector('.err'); err.textContent = '';
-    const { data, error } = await sb.auth.signInWithPassword({ email: $('#cx-email').value.trim(), password: $('#cx-mdp').value });
-    if (error) { err.textContent = 'Connexion refusée : vérifiez l\'e-mail et le mot de passe.'; return; }
-    bloc.remove(); onOk(data.session);
-  });
+/* ---------- Pages organisateurs ----------
+   Pas de mot de passe : l'accès repose sur des liens distincts, donnés seulement à la famille.
+   Chaque page organisateur porte le même bandeau, avec la zone « publication » toujours à droite. */
+async function exigerConnexion(titre, onOk){ onOk(null); }
+async function deconnecter(){ location.href = BASE_ASSETS + '../'; }
+
+/* bandeauOrga(el, { titre, publication }) : publication = { type:'interrupteur', actif, libelle, onChange }
+   ou { type:'etat', texte, lien, lienTexte } */
+function bandeauOrga(el, o){
+  el.className = 'bandeau-orga';
+  let pub = '';
+  if (o.publication && o.publication.type === 'interrupteur') {
+    pub = `<label class="publier" title="${echap(o.publication.aide || '')}"><span class="lib">${echap(o.publication.libelle)}</span><input type="checkbox" id="bandeau-publier" ${o.publication.actif ? 'checked' : ''}><span class="interrupteur"></span><span class="etat">${o.publication.actif ? 'Publié' : 'Non publié'}</span></label>`;
+  } else if (o.publication) {
+    pub = `<span class="pub-etat"><span class="lib">${echap(o.publication.libelle || 'Publication')}</span><b id="bandeau-pub-texte">${echap(o.publication.texte || '')}</b>${o.publication.lien ? `<a class="btn petit or" href="${o.publication.lien}" target="_blank" rel="noopener">${echap(o.publication.lienTexte || 'Voir la page des invités')}</a>` : ''}</span>`;
+  }
+  el.innerHTML = `<a class="retour" href="${BASE_ASSETS}../" title="Retour à l'accueil"><span class="monogramme">M<span class="et">&amp;</span>O</span></a>
+    <span class="titre-bandeau">${echap(o.titre)}</span><span class="actions-bandeau">${o.actions || ''}</span><span class="espace"></span>${pub}`;
+  const c = el.querySelector('#bandeau-publier');
+  if (c && o.publication.onChange) c.onchange = () => { o.publication.onChange(c.checked, v => { c.checked = v; el.querySelector('.etat').textContent = v ? 'Publié' : 'Non publié'; }); };
 }
-async function deconnecter(){ await sb.auth.signOut(); location.reload(); }
+function majBandeauPub(texte){ const b = $('#bandeau-pub-texte'); if (b) b.textContent = texte; }
 
 /* ---------- Ornements « toile de Jouy » en trait bleu ---------- */
 const ORNEMENTS = {
@@ -117,11 +109,10 @@ function enteteSite(el){
 }
 document.addEventListener('DOMContentLoaded', () => { $$('header.entete-site').forEach(enteteSite); if (document.body.dataset.cotes !== 'non') colonnesCote(); });
 
-function piedBleu(texte){
+function piedBleu(){
   return `${motif('couv-gauche-bas', 'blanc orn a')}${motif('oiseau-branche', 'blanc orn b')}
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
-    <p class="capitales">Samedi 5 décembre 2026 · Ouvrouer-les-Champs</p>
-    ${texte ? `<p>${echap(texte)}</p>` : ''}`;
+    <p class="capitales">Samedi 5 décembre 2026 · Ouvrouer-les-Champs</p>`;
 }
 
 /* QR code (bibliothèque qrcodejs chargée par la page) */
