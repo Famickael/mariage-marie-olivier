@@ -9,17 +9,53 @@
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
-  /* ---- ouverture : le bandeau du faire-part se dévoile, les colibris arrivent ---- */
+  /* ---- bandeau illustré au-dessus du titre ---- */
   .scene{position:relative;width:min(1100px,100%);margin:0 auto;aspect-ratio:1120/454;max-height:52vh;pointer-events:none}
-  .scene .bande{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;
-    clip-path:inset(0 100% 0 0);animation:devoiler 2.4s cubic-bezier(.4,0,.2,1) .2s forwards}
-  @keyframes devoiler{to{clip-path:inset(0 0 0 0)}}
-  .scene .colibri{position:absolute;width:12%;left:70%;top:6%;opacity:0;animation:arrivee 2.2s cubic-bezier(.2,.8,.2,1) 1.6s forwards}
-  @keyframes arrivee{0%{opacity:0;transform:translate(60vw,-30vh) rotate(-12deg) scale(.7)}60%{opacity:1}100%{opacity:1;transform:none}}
-  .scene .colibri-2{position:absolute;width:9%;left:4%;top:28%;opacity:0;transform:scaleX(-1);animation:arrivee2 2s cubic-bezier(.2,.8,.2,1) 2.4s forwards}
-  @keyframes arrivee2{0%{opacity:0;transform:scaleX(-1) translate(40vw,-20vh) scale(.7)}100%{opacity:1;transform:scaleX(-1)}}
-  .scene .colibri img,.scene .colibri-2 img{width:100%;height:auto}
-  @media (prefers-reduced-motion:reduce){.scene .bande{clip-path:none;animation:none}.scene .colibri,.scene .colibri-2{opacity:1;animation:none}}
+  .scene .bande{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center}
+
+  /* ---- ouverture du faire-part (plein écran, une fois par visite) ---- */
+  #ouverture{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--satin);perspective:1600px;overflow:hidden}
+  #ouverture::before{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(118deg,rgba(255,255,255,.35) 0 1px,rgba(255,255,255,0) 1px 3px),
+    radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.95),transparent 55%),
+    radial-gradient(ellipse at 92% 100%,rgba(214,208,194,.5),transparent 55%)}
+  #ouverture,#ouverture::before{transition:background .1s}
+  #ouverture.ouvre{background:transparent}
+  #ouverture.ouvre::before{opacity:0;transition:opacity 1.3s ease .2s}
+  #ouverture::before{transition:opacity 1.3s ease}
+  #ouverture.fin{animation:fondu .7s ease forwards}
+  @keyframes fondu{to{opacity:0;visibility:hidden}}
+  .fp{position:relative;width:min(560px,86vw);aspect-ratio:1500/2016;transform-style:preserve-3d}
+  .fp .face.recto{box-shadow:0 30px 50px rgba(27,38,82,.28)}
+  .fp .volet{position:absolute;top:0;bottom:0;width:50%;transform-style:preserve-3d;transition:transform 1.6s cubic-bezier(.65,0,.35,1)}
+  .fp .volet.g{left:0;transform-origin:left center}
+  .fp .volet.d{right:0;transform-origin:right center}
+  .fp.ouvert .volet.g{transform:rotateY(-158deg)}
+  .fp.ouvert .volet.d{transform:rotateY(158deg)}
+  .fp .face{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:linear-gradient(125deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.9) 48%,rgba(255,255,255,0) 66%),repeating-linear-gradient(118deg,rgba(255,255,255,.4) 0 1px,rgba(255,255,255,0) 1px 3px),linear-gradient(160deg,#fdfcfa,#f3f0e8)}
+  .fp .face.dos{transform:rotateY(180deg);background:linear-gradient(160deg,#fcfbf8,#f1eee6)}
+  .fp .volet.g .face.dos{box-shadow:inset -14px 0 30px -20px rgba(27,38,82,.25)}
+  .fp .volet.d .face.dos{box-shadow:inset 14px 0 30px -20px rgba(27,38,82,.25)}
+  .fp .face img{position:absolute;pointer-events:none}
+  .fp .g .m1{width:64%;left:-16%;top:-8%} .fp .g .m2{width:70%;left:-6%;bottom:-6%} .fp .g .m3{width:40%;right:-4%;bottom:22%}
+  .fp .d .m1{width:88%;right:-10%;top:-3%} .fp .d .m2{width:80%;right:-4%;bottom:-3%} .fp .d .m3{width:40%;left:8%;top:38%}
+  .fp .cartouche{position:absolute;left:54%;top:36%;transform:translate(-50%,-50%);text-align:center;white-space:nowrap}
+  .fp .cartouche .capitales{font-size:.6rem;letter-spacing:.3em}
+  .fp .cartouche .monogramme{font-size:clamp(2rem,7vw,3rem);margin:4px 0}
+  .fp .cartouche .date{font-size:.62rem;letter-spacing:.28em}
+  /* ruban gros-grain et nœud */
+  .ruban{position:absolute;left:-6%;right:-6%;top:51%;height:7%;transform:translateY(-50%) translateZ(6px);
+    background:repeating-linear-gradient(90deg,#1b2652 0 2px,#243271 2px 3px);box-shadow:0 6px 14px rgba(27,38,82,.35);transition:transform 1s cubic-bezier(.6,0,.8,.6),opacity .6s ease .5s}
+  .fp.denoue .ruban{transform:translateY(60vh) rotate(-3deg) translateZ(6px);opacity:0}
+  .noeud{position:absolute;left:42%;top:50%;width:52%;transform:translate(-50%,-50%) translateZ(8px);transform-origin:50% 40%;transition:transform .9s cubic-bezier(.6,0,.8,.6),opacity .5s ease .3s}
+  .noeud svg{width:100%;height:auto;display:block;overflow:visible}
+  .fp.denoue .noeud{transform:translate(-50%,-50%) translateZ(8px) scale(.2,1.3) translateY(120%);opacity:0}
+  .noeud .boucle{transform-box:fill-box;transform-origin:center;animation:souffle 3s ease-in-out infinite alternate}
+  .noeud .boucle.b{animation-delay:-1.5s}
+  @keyframes souffle{to{transform:scale(1.03) rotate(1deg)}}
+  #ouverture .passer{position:absolute;right:18px;bottom:16px;font:inherit;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;background:none;border:0;color:var(--encre-douce);cursor:pointer}
+  @media (prefers-reduced-motion:reduce){#ouverture{display:none}}
 
   /* ---- titre ---- */
   .tete{text-align:center;margin-top:-10px}
@@ -56,11 +92,42 @@
 </style>
 </head>
 <body>
+<div id="ouverture" aria-hidden="true" hidden>
+  <div class="fp" id="fp">
+    <div class="volet g">
+      <div class="face recto">
+        <img class="m1 motif" src="assets/motifs/motif-a.png" alt=""><img class="m2 motif" src="assets/motifs/couv-gauche-bas.png" alt=""><img class="m3 motif" src="assets/motifs/colibri.png" alt="">
+        <div class="cartouche"><p class="capitales">Notre Mariage</p><div class="monogramme">M<span class="et">&amp;</span>O</div><p class="capitales date">05.12.2026</p></div>
+      </div>
+      <div class="face dos"></div>
+    </div>
+    <div class="volet d">
+      <div class="face recto">
+        <img class="m1 motif" src="assets/motifs/couv-droite-haut.png" alt=""><img class="m2 motif" src="assets/motifs/oiseau-branche.png" alt=""><img class="m3 motif" src="assets/motifs/colibri.png" alt="" style="transform:scaleX(-1)">
+      </div>
+      <div class="face dos"></div>
+    </div>
+    <div class="ruban"></div>
+    <div class="noeud">
+      <svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+        <defs><pattern id="gg" width="3" height="3" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#2b3b7c"/></pattern></defs>
+        <!-- pans qui retombent, bouts en pointe -->
+        <path d="M152 128 C 120 160, 96 200, 70 250 L 112 250 L 100 232 C 124 196, 146 164, 166 136 Z" fill="url(#gg)"/>
+        <path d="M168 128 C 196 150, 232 170, 268 180 L 274 212 L 246 204 C 216 190, 186 168, 162 142 Z" fill="url(#gg)"/>
+        <!-- boucles -->
+        <g class="boucle a"><path d="M158 122 C 110 70, 30 74, 26 118 C 22 164, 96 170, 158 128 Z" fill="url(#gg)"/><path d="M152 122 C 110 92, 56 94, 48 118 C 56 146, 112 146, 150 124" fill="none" stroke="#0f1838" stroke-opacity=".45" stroke-width="4"/></g>
+        <g class="boucle b"><path d="M162 122 C 206 60, 300 66, 298 112 C 296 160, 214 172, 162 128 Z" fill="url(#gg)"/><path d="M168 122 C 210 90, 268 90, 276 112 C 268 142, 212 146, 170 124" fill="none" stroke="#0f1838" stroke-opacity=".45" stroke-width="4"/></g>
+        <!-- nœud central -->
+        <path d="M136 104 C 148 98, 172 98, 184 104 C 194 118, 194 136, 184 148 C 170 156, 150 156, 136 148 C 126 136, 126 118, 136 104 Z" fill="#141d4a"/>
+        <path d="M144 112 C 156 108, 166 108, 176 112 M 142 138 C 156 142, 166 142, 178 138" fill="none" stroke="#33438a" stroke-width="2.5"/>
+      </svg>
+    </div>
+  </div>
+  <button class="passer" id="passer">Passer</button>
+</div>
 <main>
   <div class="scene" aria-hidden="true">
     <img class="bande motif" src="assets/motifs/bande-bas.png" alt="">
-    <span class="colibri"><img class="motif" src="assets/motifs/colibri.png" alt=""></span>
-    <span class="colibri-2"><img class="motif" src="assets/motifs/colibri.png" alt=""></span>
   </div>
   <header class="tete">
     <p class="capitales">Notre mariage</p>
@@ -119,6 +186,19 @@ const FONCTIONS = [
   { groupe: 'orga', deco: 'colibri-droit', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
     texte: 'Le minute par minute du week-end : qui fait quoi, où et quand. Choisissez ce que les invités en voient.' }
 ];
+
+/* Ouverture du faire-part : une fois par visite (sessionStorage) */
+(function(){
+  const ov = $('#ouverture'), fp = $('#fp');
+  const deja = sessionStorage.getItem('fp-ouvert');
+  if (deja || matchMedia('(prefers-reduced-motion: reduce)').matches) { ov.remove(); return; }
+  ov.hidden = false; document.body.style.overflow = 'hidden';
+  const fin = () => { ov.classList.add('fin'); document.body.style.overflow = ''; sessionStorage.setItem('fp-ouvert', '1'); setTimeout(() => ov.remove(), 800); };
+  const t1 = setTimeout(() => fp.classList.add('denoue'), 1400);    // le nœud se défait, le ruban glisse
+  const t2 = setTimeout(() => { fp.classList.add('ouvert'); ov.classList.add('ouvre'); }, 2500);    // les volets s'ouvrent, le site apparaît derrière
+  const t3 = setTimeout(fin, 4300);
+  $('#passer').onclick = () => { [t1, t2, t3].forEach(clearTimeout); fin(); };
+})();
 
 const jours = Math.ceil((new Date(CONFIG.DATE_ISO + 'T16:30') - new Date()) / 86400000);
 $('#rebours').textContent = jours > 1 ? `J − ${jours} · ${CONFIG.DATE_LONGUE}` : jours === 1 ? 'C\'est demain !' : jours === 0 ? 'C\'est aujourd\'hui !' : CONFIG.DATE_LONGUE;
