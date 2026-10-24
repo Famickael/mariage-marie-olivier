@@ -4,8 +4,10 @@
    (chaque classe déclenche des animations CSS, voir charte.css) :
      1. approche  (0 → 1,6 s)   la caméra s'approche du faire-part fermé
      2. tire / denoue / glisse (1,6 → 4,5 s)  le ruban se dénoue brin par brin et tombe
-     3. ouvert    (4,5 → 6,7 s)  les volets s'ouvrent en 3D, la caméra avance
-     4. entree    (6,3 → 8,5 s)  on traverse l'ouverture, le site arrive en fondu
+     3. ouvert    (4,5 → 6,6 s)  les volets s'ouvrent en 3D, la caméra avance ; le site est déjà là,
+                                 derrière : il est découvert par l'ouverture (body.fp-ouvre)
+     4. sortie    (6,6 → 8,3 s)  les volets continuent au-delà de 180° et sortent du cadre en tranches,
+                                 la caméra traverse, le voile se retire ; fin à 8,3 s
    À charger après commun.js.
    ============================================================ */
 (function(){
@@ -14,6 +16,7 @@
   const ov = document.createElement('div');
   ov.id = 'ouverture'; ov.setAttribute('aria-hidden', 'true');
   ov.innerHTML = `
+  <i class="voile vg"></i><i class="voile vd"></i><i class="voile vh"></i><i class="voile vb"></i>
   <div class="fp" id="fp">
     <div class="volet g">
       <div class="face recto">
@@ -28,7 +31,7 @@
       </div>
       <div class="face dos"></div>
     </div>
-    <div class="ruban"></div>
+    <div class="ruban"><i class="bord g"></i><i class="bord d"></i></div>
     <div class="noeud">
       <svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -75,28 +78,30 @@
   const fp = ov.querySelector('#fp');
   const t = [];
   let fini = false;
-  const entree = () => { fp.classList.add('entree'); ov.classList.add('entree'); document.body.classList.add('fp-entree'); };
+  // Plan 3 : les volets s'ouvrent ; le site devient visible derrière (caché par le voile et les volets)
+  const ouvre = () => { fp.classList.add('ouvert'); ov.classList.add('ouvre'); document.body.classList.add('fp-ouvre'); };
   const fin = () => {
     if (fini) return; fini = true;
     t.forEach(clearTimeout);
-    ov.classList.add('fin');
+    if (!document.body.classList.contains('fp-ouvre')) document.body.classList.add('fp-ouvre');
+    ov.classList.add('sortie', 'fin');
     document.body.classList.remove('fp-en-cours');
-    setTimeout(() => ov.remove(), 700);
-    setTimeout(() => document.body.classList.remove('fp-entree'), 1600);
+    setTimeout(() => ov.remove(), 500);
+    setTimeout(() => document.body.classList.remove('fp-ouvre'), 1600);   // libère les will-change
   };
   // Plan 1 : approche
   requestAnimationFrame(() => fp.classList.add('approche'));
-  // Plans 2 à 4, décalés par rapport au moment où le dénouage commence
+  // Plans 2 à 4, décalés par rapport au début du dénouage
   const suite = [[() => fp.classList.add('tire'), 0], [() => fp.classList.add('denoue'), 600], [() => fp.classList.add('glisse'), 2300],
-                 [() => { fp.classList.add('ouvert'); ov.classList.add('ouvre'); }, 2900], [entree, 4700], [fin, 6900]];
+                 [ouvre, 2900], [() => ov.classList.add('sortie'), 5000], [fin, 6700]];
   let lance = false;
-  const lancer = () => { if (lance) return; lance = true; ov.classList.remove('attente'); suite.forEach(([f, d]) => t.push(setTimeout(f, d))); };
+  const lancer = () => { if (lance || fini) return; lance = true; ov.classList.remove('attente'); suite.forEach(([f, d]) => t.push(setTimeout(f, d))); };
   if (document.body.dataset.ouverture === 'clic') {
     // page principale : le faire-part attend qu'on clique dessus
     t.push(setTimeout(() => ov.classList.add('attente'), 1500));
     fp.addEventListener('click', lancer); ov.querySelector('.indice').addEventListener('click', lancer);
     document.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') lancer(); }, { once: true });
   } else t.push(setTimeout(lancer, 1600));
-  // « Passer » : on saute directement à l'arrivée du site
-  ov.querySelector('.passer').onclick = () => { if (!fp.classList.contains('entree')) entree(); fin(); };
+  // « Passer » : on saute directement au site (les blocs se posent, l'overlay s'efface)
+  ov.querySelector('.passer').onclick = fin;
 })();
