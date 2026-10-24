@@ -1,0 +1,95 @@
+/* ============================================================
+   Charte Marie & Olivier · 5 décembre 2026
+   Blanc satiné, bleu de toile de Jouy, une touche d'or.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root{
+  --satin:#f7f5f0;
+  --satin-clair:#fcfbf8;
+  --perle:#ece8df;
+  --perle-fonce:#ddd7ca;
+  --bleu:#26356f;          /* encre des illustrations */
+  --bleu-nuit:#1b2652;     /* enveloppe */
+  --bleu-doux:#5b6799;
+  --bleu-voile:#e4e7f1;
+  --or:#b8913f;            /* à utiliser avec parcimonie */
+  --or-clair:#d9bf7f;
+  --encre:#1d2240;
+  --encre-douce:#5e6178;
+  --ok:#3f6b55;
+  --erreur:#9b2f3a;
+  --ombre:0 10px 30px rgba(27,38,82,.10),0 2px 6px rgba(27,38,82,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--satin);
+  background-image:
+    radial-gradient(ellipse at 15% 0%,rgba(255,255,255,.9),transparent 55%),
+    radial-gradient(ellipse at 90% 100%,rgba(221,215,202,.45),transparent 55%),
+    linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 60%);
+  background-attachment:fixed;
+  color:var(--encre);
+  font-family:"EB Garamond",Georgia,serif;font-size:18px;line-height:1.5;
+  min-height:100vh;
+}
+h1,h2,h3,.titre{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;color:var(--bleu-nuit);margin:0;line-height:1.1}
+.capitales{text-transform:uppercase;letter-spacing:.28em;font-size:.78rem;font-weight:500;color:var(--encre)}
+.italique{font-style:italic}
+.doux{color:var(--encre-douce)}
+.centre{text-align:center}
+a{color:var(--bleu)}
+
+/* Monogramme M & O */
+.monogramme{font-family:"Cormorant Garamond",serif;font-weight:400;color:var(--encre);letter-spacing:.04em;line-height:1;white-space:nowrap}
+.monogramme .et{font-size:.42em;vertical-align:.32em;margin:0 .22em;color:var(--or)}
+
+/* filet doré */
+.filet-or{display:flex;align-items:center;gap:12px;justify-content:center;color:var(--or);margin:18px auto}
+.filet-or::before,.filet-or::after{content:"";height:1px;width:min(90px,22vw);background:linear-gradient(90deg,transparent,var(--or-clair))}
+.filet-or::after{transform:scaleX(-1)}
+.filet-or span{font-size:.7rem;letter-spacing:.3em}
+
+/* Boutons */
+.btn{font:inherit;font-family:"EB Garamond",serif;text-transform:uppercase;letter-spacing:.2em;font-size:.78rem;font-weight:500;
+  cursor:pointer;border:1px solid var(--bleu-nuit);background:var(--bleu-nuit);color:#fff;padding:12px 24px;border-radius:2px;
+  transition:background .15s,color .15s,border-color .15s,box-shadow .15s;display:inline-flex;align-items:center;gap:8px;justify-content:center;text-decoration:none}
+.btn:hover{background:var(--bleu);box-shadow:0 0 0 3px rgba(184,145,63,.18)}
+.btn.clair{background:transparent;color:var(--bleu-nuit)}
+.btn.clair:hover{background:var(--bleu-voile)}
+.btn.or{background:var(--or);border-color:var(--or)}
+.btn.petit{padding:7px 12px;font-size:.68rem;letter-spacing:.14em}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+
+/* Champs */
+label.champ{display:block;text-transform:uppercase;letter-spacing:.18em;font-size:.68rem;font-weight:500;color:var(--encre-douce);margin:16px 0 4px}
+input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],input[type=time],input[type=date],textarea,select{
+  width:100%;font:inherit;font-size:1rem;color:var(--encre);background:rgba(255,255,255,.75);
+  border:0;border-bottom:1px solid var(--perle-fonce);padding:8px 6px;border-radius:0}
+input:focus,textarea:focus,select:focus{outline:none;border-bottom-color:var(--bleu);background:#fff}
+textarea{resize:vertical}
+
+/* Carte papier */
+.carte-papier{background:var(--satin-clair);box-shadow:var(--ombre);border:1px solid rgba(221,215,202,.7);position:relative}
+.carte-papier.cadre::before{content:"";position:absolute;inset:8px;border:1px solid var(--perle-fonce);pointer-events:none}
+
+/* Ornements (sprites SVG injectés par decor.js) */
+.orne{fill:none;stroke:var(--bleu);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+.orne .plein{fill:var(--bleu);stroke:none}
+.orne .or{stroke:var(--or)}
+
+/* Connexion organisateur */
+.connexion{max-width:380px;margin:12vh auto;padding:38px 32px;text-align:center}
+.connexion h1{font-size:2.4rem}
+.connexion form{text-align:left;margin-top:10px}
+.connexion .err{color:var(--erreur);font-style:italic;min-height:1.4em;margin-top:10px;text-align:center}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--bleu-nuit);color:#fff;
+  padding:10px 20px;border-radius:2px;opacity:0;transition:.25s;pointer-events:none;z-index:999;font-size:.95rem;box-shadow:var(--ombre)}
+.toast.vu{opacity:1;transform:translateX(-50%) translateY(0)}
+
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

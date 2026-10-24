@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Plan de table · Marie &amp; Olivier</title>
+<link rel="stylesheet" href="../assets/charte.css">
+<link rel="stylesheet" href="plan.css">
+</head>
+<body class="editeur">
+
+<div id="app" hidden>
+  <header id="barre">
+    <button class="icone-btn mobile-seul" id="b-gauche" title="Mobilier et invités">☰</button>
+    <div class="marque"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="titre-app">Plan de table</span></div>
+    <div class="choix-plan">
+      <select id="sel-plan" title="Plan affiché"></select>
+      <button class="icone-btn" id="b-menu-plan" title="Gérer les plans">⋯</button>
+      <div class="menu" id="menu-plan" hidden>
+        <button data-act="nouveau">Nouveau plan vierge</button>
+        <button data-act="dupliquer">Dupliquer ce plan (variante)</button>
+        <button data-act="renommer">Renommer</button>
+        <button data-act="exporter">Exporter (fichier de sauvegarde)</button>
+        <button data-act="importer">Importer un fichier de sauvegarde</button>
+        <button data-act="publier" class="mobile-seul">Publier / dépublier pour les invités</button>
+        <hr>
+        <button data-act="supprimer" class="danger">Supprimer ce plan</button>
+        <button data-act="deco" class="mobile-seul">Se déconnecter</button>
+      </div>
+    </div>
+    <span id="statut" class="statut"></span>
+    <span class="espace"></span>
+    <div class="groupe-btn">
+      <button class="icone-btn" id="b-annuler" title="Annuler (Ctrl+Z)">↶</button>
+      <button class="icone-btn" id="b-refaire" title="Rétablir (Ctrl+Y)">↷</button>
+    </div>
+    <div class="groupe-btn zoom">
+      <button class="icone-btn" id="b-zoom-moins" title="Dézoomer">−</button>
+      <button class="icone-btn texte" id="b-zoom-ajuster" title="Voir toute la salle"><span id="zoom-pct">100 %</span></button>
+      <button class="icone-btn" id="b-zoom-plus" title="Zoomer">+</button>
+    </div>
+    <div class="choix-plan">
+      <button class="btn petit clair" id="b-imprimer">Imprimer ▾</button>
+      <div class="menu droite" id="menu-imprimer" hidden>
+        <button data-imp="plan">Le plan de la salle</button>
+        <button data-imp="tables">Les convives, table par table</button>
+        <button data-imp="alpha">Liste alphabétique (entrée de salle)</button>
+        <button data-imp="cartons">Marque-places à découper</button>
+        <button data-imp="traiteur">Récapitulatif pour le traiteur</button>
+        <hr>
+        <button data-imp="csv">Exporter la liste (tableur CSV)</button>
+      </div>
+    </div>
+    <label class="publier" title="Rend la page « Trouver ma table » utilisable par les invités">
+      <input type="checkbox" id="chk-publier"><span class="interrupteur"></span><span class="lib">Publié</span>
+    </label>
+    <button class="icone-btn" id="b-deco" title="Déconnexion">⏻</button>
+    <button class="icone-btn mobile-seul" id="b-droite" title="Propriétés">✎</button>
+  </header>
+
+  <aside id="gauche" class="panneau">
+    <nav class="onglets">
+      <button data-onglet="mobilier" class="actif">Mobilier</button>
+      <button data-onglet="invites">Invités <span id="badge-invites" class="badge"></span></button>
+    </nav>
+    <section id="o-mobilier" class="onglet">
+      <p class="aide">Touchez un élément pour l'ajouter au centre de la vue, puis déplacez-le.</p>
+      <h3>Tables</h3>
+      <div class="palette" id="pal-tables"></div>
+      <h3>Décor &amp; salle</h3>
+      <div class="palette decor" id="pal-decors"></div>
+    </section>
+    <section id="o-invites" class="onglet" hidden>
+      <div class="compteurs" id="compteurs"></div>
+      <form id="f-ajout" class="ajout">
+        <input type="text" id="ajout-nom" placeholder="Prénom Nom" autocomplete="off" aria-label="Nom de l'invité">
+        <select id="ajout-groupe" aria-label="Groupe"></select>
+        <button class="btn petit" type="submit" title="Ajouter">+</button>
+      </form>
+      <div class="outils-invites">
+        <button class="btn petit clair" id="b-import">Coller une liste</button>
+        <button class="btn petit clair" id="b-groupes">Groupes &amp; couleurs</button>
+      </div>
+      <div class="filtres">
+        <input type="search" id="recherche" placeholder="Rechercher…" aria-label="Rechercher un invité">
+        <select id="filtre" aria-label="Filtrer">
+          <option value="tous">Tous</option>
+          <option value="libres" selected>À placer</option>
+          <option value="places">Placés</option>
+        </select>
+      </div>
+      <div id="actif-info" class="actif-info" hidden></div>
+      <ul id="liste-invites" class="liste-invites"></ul>
+    </section>
+  </aside>
+
+  <main id="toile">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+      <g id="monde"></g>
+    </svg>
+    <div id="legende" class="legende"></div>
+    <div id="astuce" class="astuce"></div>
+  </main>
+
+  <aside id="droite" class="panneau">
+    <div id="proprietes"></div>
+  </aside>
+
+  <div id="pop" class="pop" hidden></div>
+  <div id="fantome" class="fantome" hidden></div>
+</div>
+
+<dialog id="dlg-invite">
+  <form class="fiche carte-papier" method="dialog" id="form-invite">
+    <h2>Invité</h2>
+    <label class="champ" for="fi-nom">Prénom et nom</label><input type="text" id="fi-nom" required>
+    <label class="champ" for="fi-groupe">Groupe</label><select id="fi-groupe"></select>
+    <label class="champ" for="fi-regime">Régime, allergie</label>
+    <input type="text" id="fi-regime" list="regimes" placeholder="Ex. végétarien, sans gluten…">
+    <datalist id="regimes"><option>Végétarien</option><option>Végétalien</option><option>Sans gluten</option><option>Sans porc</option><option>Allergie fruits à coque</option><option>Sans lactose</option></datalist>
+    <label class="case"><input type="checkbox" id="fi-enfant"> Enfant (menu enfant)</label>
+    <label class="champ" for="fi-note">Note</label><textarea id="fi-note" rows="2" placeholder="Ex. chaise haute, fauteuil, à côté de sa sœur…"></textarea>
+    <p class="doux italique" id="fi-place"></p>
+    <div class="actions">
+      <button type="button" class="btn clair petit gauche danger" id="fi-suppr">Supprimer</button>
+      <button type="button" class="btn clair petit" id="fi-liberer">Libérer sa place</button>
+      <button type="button" class="btn clair petit" id="fi-annuler">Annuler</button>
+      <button type="submit" class="btn petit">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-import">
+  <form class="fiche carte-papier" method="dialog" id="form-import">
+    <h2>Coller une liste d'invités</h2>
+    <p class="doux">Un invité par ligne. Vous pouvez ajouter le groupe et le régime, séparés par un point-virgule
+      (copier-coller depuis Excel fonctionne aussi) :</p>
+    <pre class="exemple">Jeanne Bertrand ; Famille de Marie
+Paul Nivesse ; Famille d'Olivier ; végétarien
+Léa Martin ; Amis</pre>
+    <textarea id="imp-texte" rows="10" placeholder="Collez ici…"></textarea>
+    <label class="champ" for="imp-groupe">Groupe par défaut</label><select id="imp-groupe"></select>
+    <div class="actions">
+      <button type="button" class="btn clair petit" id="imp-annuler">Annuler</button>
+      <button type="submit" class="btn petit">Ajouter</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-groupes">
+  <form class="fiche carte-papier" method="dialog">
+    <h2>Groupes &amp; couleurs</h2>
+    <p class="doux">Les couleurs teintent les chaises sur le plan : on voit d'un coup d'œil qui est de quel côté.</p>
+    <ul id="liste-groupes" class="liste-groupes"></ul>
+    <p><button type="button" class="btn clair petit" id="grp-ajout">Ajouter un groupe</button></p>
+    <div class="actions"><button type="submit" class="btn petit">Fermer</button></div>
+  </form>
+</dialog>
+
+<input type="file" id="in-fond" accept="image/*" hidden>
+<input type="file" id="in-sauvegarde" accept="application/json,.json" hidden>
+<div id="impression"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/commun.js"></script>
+<script src="../assets/plan-geometrie.js"></script>
+<script src="plan.js"></script>
+</body>
+</html>

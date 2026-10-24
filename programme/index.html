@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marie &amp; Olivier · Le programme</title>
+<link rel="stylesheet" href="../assets/charte.css">
+<style>
+  main{max-width:560px;margin:0 auto;padding:30px 16px 70px}
+  .entete{text-align:center;position:relative;padding:40px 20px 30px;overflow:hidden}
+  .entete .monogramme{font-size:clamp(3.4rem,15vw,4.6rem);margin:6px 0}
+  .entete h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.4rem)}
+  .entete .o1{position:absolute;width:100px;left:-10px;top:-6px;opacity:.85;transform:rotate(-8deg)}
+  .entete .o2{position:absolute;width:110px;right:-8px;bottom:-10px;opacity:.85;transform:rotate(176deg)}
+  .jour{margin-top:40px;text-align:center}
+  .jour h2{font-size:1.9rem;font-style:italic}
+  ol{list-style:none;padding:0;margin:20px 0 0}
+  li.moment{text-align:center;padding:16px 0;position:relative}
+  li.moment + li.moment::before{content:"✦";display:block;color:var(--or);font-size:.7rem;margin:-6px 0 14px}
+  .moment .heure{letter-spacing:.3em;font-size:.95rem;color:var(--bleu)}
+  .moment h3{font-size:1.7rem;margin-top:2px}
+  .moment .lieu{font-style:italic;color:var(--encre-douce)}
+  .moment .desc{max-width:420px;margin:6px auto 0;font-size:.98rem;white-space:pre-wrap}
+  .moment.encours h3{color:var(--or)}
+  .moment.encours .heure::after{content:" · en ce moment";letter-spacing:.1em;font-style:italic;color:var(--or)}
+  .vide{text-align:center;font-style:italic;color:var(--encre-douce);margin:40px 0}
+  .papillon{display:block;width:44px;margin:40px auto 0;opacity:.8}
+</style>
+</head>
+<body>
+<main>
+  <div class="entete carte-papier cadre">
+    <span id="o"></span>
+    <p class="capitales">Notre mariage</p>
+    <div class="monogramme">M<span class="et">&amp;</span>O</div>
+    <div class="filet-or"><span>✦</span></div>
+    <h1>Le programme</h1>
+  </div>
+  <div id="jours"></div>
+  <span id="pap"></span>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/commun.js"></script>
+<script src="../assets/programme.js"></script>
+<script>
+$('#o').outerHTML = ornement('branche', 'o1') + ornement('mimosa', 'o2');
+$('#pap').outerHTML = ornement('papillon', 'papillon');
+/* Page invités : client sans session, seuls les moments « visibles des invités ». */
+const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
+let items = [];
+async function charger(){
+  if (!sbInvite) return;
+  const { data, error } = await sbInvite.from('programme').select('jour,debut,duree,titre,lieu,description').eq('public', true).order('jour').order('debut');
+  if (error) { $('#jours').innerHTML = '<p class="vide">Le programme n\'est pas disponible pour le moment.</p>'; return; }
+  items = data; rendre();
+}
+function rendre(){
+  const cont = $('#jours'); cont.innerHTML = '';
+  const auj = jourLogique(new Date()), now = minutesMaintenant();
+  for (const [v, l] of JOURS) {
+    const liste = items.filter(i => i.jour === v).sort((a, b) => minutes(a) - minutes(b));
+    if (!liste.length) continue;
+    const sec = document.createElement('section'); sec.className = 'jour';
+    sec.innerHTML = `<p class="capitales">${l.split(' ')[0]}</p><h2>${l.split(' ').slice(1).join(' ')}</h2><ol></ol>`;
+    for (const it of liste) {
+      const d = minutes(it), enCours = v === auj && now >= d && now < d + (it.duree || 0);
+      sec.querySelector('ol').insertAdjacentHTML('beforeend', `<li class="moment${enCours ? ' encours' : ''}">
+        <div class="heure">${fmtH(d)}</div><h3>${echap(it.titre)}</h3>
+        ${it.lieu ? `<div class="lieu">${echap(it.lieu)}</div>` : ''}${it.description ? `<div class="desc">${echap(it.description)}</div>` : ''}</li>`);
+    }
+    cont.appendChild(sec);
+  }
+  if (!cont.children.length) cont.innerHTML = '<p class="vide">Le programme sera bientôt dévoilé.</p>';
+}
+charger(); setInterval(charger, 120000);
+</script>
+</body>
+</html>

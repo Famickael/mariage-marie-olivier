@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Planning · Marie &amp; Olivier</title>
+<link rel="stylesheet" href="../assets/charte.css">
+<style>
+  main{max-width:860px;margin:0 auto;padding:30px 16px 90px}
+  header.tete{text-align:center;position:relative}
+  header.tete h1{font-size:clamp(2rem,7vw,2.8rem);font-style:italic}
+  header.tete .o1{position:absolute;width:90px;left:0;top:-10px;opacity:.8}
+  .outils{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  .jours{display:flex;justify-content:center;gap:0;margin:24px auto 0;border:1px solid var(--perle-fonce);width:max-content;max-width:100%;overflow-x:auto;background:#fff}
+  .jours button{font:inherit;background:none;border:0;padding:10px 18px;cursor:pointer;color:var(--encre-douce);border-right:1px solid var(--perle);white-space:nowrap}
+  .jours button:last-child{border-right:0}
+  .jours button.actif{background:var(--bleu-nuit);color:#fff}
+  .jours button .petit{display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+
+  .maintenant-bloc{margin:22px auto 0;padding:16px 20px;text-align:center}
+  .maintenant-bloc .h{font-family:"Cormorant Garamond",serif;font-size:2.2rem;color:var(--bleu-nuit);line-height:1}
+  .maintenant-bloc .encours{margin-top:4px}
+  .maintenant-bloc .ensuite{color:var(--encre-douce);font-style:italic;font-size:.95rem}
+
+  ol.frise{list-style:none;margin:28px 0 0;padding:0 0 0 0;position:relative}
+  ol.frise::before{content:"";position:absolute;left:94px;top:6px;bottom:6px;width:1px;background:linear-gradient(var(--perle-fonce),var(--bleu-doux),var(--perle-fonce))}
+  .moment{display:grid;grid-template-columns:80px 30px 1fr;gap:0 14px;align-items:start;padding:10px 0;position:relative}
+  .moment .heure{text-align:right;font-family:"Cormorant Garamond",serif;font-size:1.3rem;color:var(--bleu-nuit);line-height:1.2;padding-top:2px}
+  .moment .heure small{display:block;font-family:"EB Garamond",serif;font-size:.78rem;color:var(--encre-douce)}
+  .moment .puce{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid var(--c,var(--bleu));display:flex;align-items:center;justify-content:center;font-size:.95rem;z-index:1;margin-top:2px}
+  .moment .corps{background:rgba(255,255,255,.8);border:1px solid var(--perle);border-left:3px solid var(--c,var(--bleu));padding:10px 14px;cursor:default}
+  .edition .moment .corps{cursor:pointer}
+  .edition .moment .corps:hover{background:#fff;box-shadow:var(--ombre)}
+  .moment h3{font-size:1.35rem}
+  .moment .meta{font-size:.9rem;color:var(--encre-douce);display:flex;gap:14px;flex-wrap:wrap;margin-top:2px}
+  .moment .desc{font-size:.95rem;margin-top:6px;white-space:pre-wrap}
+  .moment .oeil{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:#8a6a24;border:1px solid var(--or-clair);padding:1px 7px;border-radius:12px;margin-left:8px;vertical-align:3px}
+  .moment.passe{opacity:.5}
+  .moment.encours .corps{box-shadow:0 0 0 2px var(--or-clair),var(--ombre);background:#fff}
+  .moment.encours .puce{background:var(--or);border-color:var(--or);color:#fff}
+  .vide{text-align:center;font-style:italic;color:var(--encre-douce);margin:40px 0}
+
+  dialog{border:0;padding:0;background:transparent;width:min(560px,94vw)}
+  dialog::backdrop{background:rgba(27,38,82,.45)}
+  .fiche{padding:26px 26px 20px;max-height:90vh;overflow:auto}
+  .fiche h2{font-size:1.8rem;font-style:italic}
+  .ligne{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .cats label{display:flex;align-items:center;gap:6px;border:1px solid var(--perle-fonce);padding:4px 10px;border-radius:16px;cursor:pointer;font-size:.9rem;background:#fff}
+  .cats input{display:none}
+  .cats label:has(input:checked){border-color:var(--bleu);background:var(--bleu-voile)}
+  .case{display:flex;gap:8px;align-items:center;margin-top:16px;cursor:pointer}
+  .fiche .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
+  .fiche .actions .gauche{margin-right:auto}
+  @media print{
+    body{background:#fff;font-size:12px} .outils,.jours,.maintenant-bloc,dialog,header.tete svg{display:none!important}
+    .moment{break-inside:avoid;padding:4px 0} .moment.passe{opacity:1}
+  }
+  @media (max-width:520px){ .moment{grid-template-columns:58px 24px 1fr;gap:0 10px} ol.frise::before{left:70px} .moment .puce{width:24px;height:24px;font-size:.8rem} }
+</style>
+</head>
+<body>
+<main>
+  <header class="tete">
+    <span id="o"></span>
+    <p class="capitales">Marie &amp; Olivier · l'équipe</p>
+    <h1>Le planning du week-end</h1>
+    <div class="filet-or"><span>✦</span></div>
+    <div class="outils" id="outils"></div>
+  </header>
+
+  <nav class="jours" id="jours" aria-label="Jours"></nav>
+  <div class="maintenant-bloc carte-papier" id="maintenant" hidden></div>
+  <ol class="frise" id="frise"></ol>
+
+  <dialog id="dlg">
+    <form class="fiche carte-papier" id="fiche" method="dialog">
+      <h2 id="fiche-titre">Nouveau moment</h2>
+      <label class="champ" for="f-titre">Titre</label><input type="text" id="f-titre" required placeholder="Ex. Cérémonie civile">
+      <div class="ligne">
+        <div><label class="champ" for="f-jour">Jour</label><select id="f-jour"></select></div>
+        <div><label class="champ" for="f-debut">Début</label><input type="time" id="f-debut" required></div>
+        <div><label class="champ" for="f-duree">Durée (min)</label><input type="number" id="f-duree" min="0" step="5" value="30"></div>
+      </div>
+      <label class="champ" for="f-lieu">Lieu</label><input type="text" id="f-lieu" placeholder="Ex. Mairie d'Ouvrouer-les-Champs">
+      <label class="champ" for="f-qui">Qui s'en occupe</label><input type="text" id="f-qui" placeholder="Ex. Témoins, traiteur, DJ…">
+      <label class="champ" for="f-desc">Détails</label><textarea id="f-desc" rows="3"></textarea>
+      <label class="champ">Catégorie</label><div class="cats" id="f-cats"></div>
+      <label class="case"><input type="checkbox" id="f-public"> Visible des invités dans le programme</label>
+      <div class="actions">
+        <button type="button" class="btn clair petit gauche" id="f-suppr">Supprimer</button>
+        <button type="button" class="btn clair petit" id="f-annuler">Annuler</button>
+        <button type="submit" class="btn petit" id="f-ok">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/commun.js"></script>
+<script src="../assets/programme.js"></script>
+<script>
+let items = [], jourActif = null, edition = false, enEdition = null;
+$('#o').outerHTML = ornement('branche', 'o1');
+
+async function demarrer(){
+  if (!sb) { $('#frise').innerHTML = '<p class="vide">Base de données non configurée.</p>'; return; }
+  const { data } = await sb.auth.getSession();
+  edition = !!data.session;
+  document.body.classList.toggle('edition', edition);
+  rendreOutils();
+  JOURS.forEach(([v, l]) => $('#f-jour').insertAdjacentHTML('beforeend', `<option value="${v}">${l}</option>`));
+  Object.entries(CATEGORIES).forEach(([k, c]) => $('#f-cats').insertAdjacentHTML('beforeend', `<label><input type="radio" name="cat" value="${k}"> ${c.icone} ${c.nom}</label>`));
+  const auj = jourLogique(new Date());
+  jourActif = JOURS.some(j => j[0] === auj) ? auj : CONFIG.DATE_ISO;
+  await charger();
+  setInterval(charger, 60000);
+  setInterval(rendre, 30000);
+}
+
+function rendreOutils(){
+  const o = $('#outils'); o.innerHTML = '';
+  if (edition) {
+    o.innerHTML = `<button class="btn petit" id="b-ajout">Ajouter un moment</button><button class="btn clair petit" id="b-imprimer">Imprimer</button><button class="btn clair petit" id="b-deco">Déconnexion</button>`;
+    $('#b-ajout').onclick = () => ouvrir(null);
+    $('#b-deco').onclick = deconnecter;
+  } else {
+    o.innerHTML = `<button class="btn clair petit" id="b-imprimer">Imprimer</button><button class="btn clair petit" id="b-co">Se connecter pour modifier</button>`;
+    $('#b-co').onclick = () => { $('main').hidden = true; exigerConnexion('Planning', () => location.reload()); };
+  }
+  $('#b-imprimer').onclick = () => print();
+}
+
+async function charger(){
+  const { data, error } = await sb.from('programme').select('*').order('jour').order('debut');
+  if (error) { $('#frise').innerHTML = `<p class="vide">Erreur de chargement : ${echap(error.message)}</p>`; return; }
+  items = data; rendre();
+}
+
+function rendre(){
+  const auj = jourLogique(new Date());
+  $('#jours').innerHTML = '';
+  JOURS.forEach(([v, l, court]) => {
+    const n = items.filter(i => jourDeMoment(i) === v).length;
+    const b = document.createElement('button');
+    b.className = v === jourActif ? 'actif' : '';
+    b.innerHTML = `<span class="petit">${v === auj ? 'aujourd\'hui' : n + ' moment' + (n > 1 ? 's' : '')}</span>${court}`;
+    b.onclick = () => { jourActif = v; rendre(); };
+    $('#jours').appendChild(b);
+  });
+  const liste = items.filter(i => jourDeMoment(i) === jourActif).sort((a, b) => minutes(a) - minutes(b));
+  const estAuj = auj === jourActif, now = minutesMaintenant();
+
+  const m = $('#maintenant');
+  m.hidden = !estAuj || !liste.length;
+  if (estAuj) {
+    const enCours = liste.filter(i => now >= minutes(i) && now < minutes(i) + (i.duree || 0));
+    const suivant = liste.find(i => minutes(i) > now);
+    m.innerHTML = `<div class="h">${fmtH(now)}</div>
+      <div class="encours">${enCours.length ? 'En ce moment : <strong>' + enCours.map(i => echap(i.titre)).join(', ') + '</strong>' : 'Pas de moment en cours.'}</div>
+      <div class="ensuite">${suivant ? `Ensuite : ${echap(suivant.titre)} à ${fmtH(minutes(suivant))}, dans ${fmtDuree(minutes(suivant) - now)}` : 'Plus rien de prévu ce jour-là.'}</div>`;
+  }
+
+  const ol = $('#frise'); ol.innerHTML = '';
+  if (!liste.length) { ol.innerHTML = `<p class="vide">Rien de prévu ce jour-là${edition ? ' pour le moment. « Ajouter un moment » pour commencer.' : '.'}</p>`; return; }
+  for (const it of liste) {
+    const deb = minutes(it), fin = deb + (it.duree || 0);
+    const cat = CATEGORIES[it.categorie] || CATEGORIES.autre;
+    const li = document.createElement('li');
+    li.className = 'moment' + (estAuj && now >= fin && it.duree ? ' passe' : '') + (estAuj && now >= deb && now < fin ? ' encours' : '');
+    li.style.setProperty('--c', cat.couleur);
+    li.innerHTML = `<div class="heure">${fmtH(deb)}${it.duree ? `<small>→ ${fmtH(fin)}</small>` : ''}</div>
+      <div class="puce" title="${echap(cat.nom)}">${cat.icone}</div>
+      <div class="corps">
+        <h3>${echap(it.titre)}${it.public ? '<span class="oeil">invités</span>' : ''}</h3>
+        <div class="meta">${it.lieu ? `<span>📍 ${echap(it.lieu)}</span>` : ''}${it.qui ? `<span>👤 ${echap(it.qui)}</span>` : ''}${it.duree ? `<span>${fmtDuree(it.duree)}</span>` : ''}</div>
+        ${it.description ? `<div class="desc">${echap(it.description)}</div>` : ''}
+      </div>`;
+    if (edition) li.querySelector('.corps').onclick = () => ouvrir(it);
+    ol.appendChild(li);
+  }
+}
+
+function ouvrir(it){
+  enEdition = it;
+  $('#fiche-titre').textContent = it ? 'Modifier le moment' : 'Nouveau moment';
+  $('#f-titre').value = it ? it.titre : '';
+  $('#f-jour').value = it ? it.jour : jourActif;
+  $('#f-debut').value = it ? it.debut.slice(0, 5) : '';
+  $('#f-duree').value = it ? it.duree : 30;
+  $('#f-lieu').value = it ? it.lieu || '' : '';
+  $('#f-qui').value = it ? it.qui || '' : '';
+  $('#f-desc').value = it ? it.description || '' : '';
+  $('#f-public').checked = it ? !!it.public : false;
+  const c = (it && it.categorie) || 'autre';
+  $$('#f-cats input').forEach(r => r.checked = r.value === c);
+  $('#f-suppr').hidden = !it;
+  $('#dlg').showModal(); $('#f-titre').focus();
+}
+$('#f-annuler').onclick = () => $('#dlg').close();
+$('#fiche').addEventListener('submit', async e => {
+  e.preventDefault();
+  const champs = {
+    titre: $('#f-titre').value.trim(), jour: $('#f-jour').value, debut: $('#f-debut').value,
+    duree: Number($('#f-duree').value) || 0, lieu: $('#f-lieu').value.trim() || null, qui: $('#f-qui').value.trim() || null,
+    description: $('#f-desc').value.trim() || null, public: $('#f-public').checked,
+    categorie: ($('#f-cats input:checked') || {}).value || 'autre'
+  };
+  if (!champs.titre || !champs.debut) { toast('Titre et heure de début sont nécessaires'); return; }
+  const q = enEdition ? sb.from('programme').update(champs).eq('id', enEdition.id) : sb.from('programme').insert(champs);
+  const { error } = await q;
+  if (error) { toast('Erreur : ' + error.message, 4000); return; }
+  $('#dlg').close(); jourActif = jourDeMoment(champs); toast('Enregistré'); charger();
+});
+$('#f-suppr').onclick = async () => {
+  if (!enEdition || !confirm(`Supprimer « ${enEdition.titre} » ?`)) return;
+  const { error } = await sb.from('programme').delete().eq('id', enEdition.id);
+  if (error) { toast('Erreur : ' + error.message, 4000); return; }
+  $('#dlg').close(); toast('Supprimé'); charger();
+};
+
+demarrer();
+</script>
+</body>
+</html>

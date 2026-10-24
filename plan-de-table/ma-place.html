@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marie &amp; Olivier · Trouver ma table</title>
+<link rel="stylesheet" href="../assets/charte.css">
+<link rel="stylesheet" href="plan.css">
+<style>
+  main{max-width:620px;margin:0 auto;padding:30px 16px 60px}
+  .entete{text-align:center;position:relative;padding:34px 20px 28px;overflow:hidden}
+  .entete .monogramme{font-size:clamp(3.2rem,14vw,4.4rem);margin:4px 0}
+  .entete h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.4rem)}
+  .entete .o1{position:absolute;width:96px;left:-10px;top:-6px;opacity:.85;transform:rotate(-8deg)}
+  .entete .o2{position:absolute;width:60px;right:20px;top:20px;opacity:.8}
+  .recherche{margin:26px auto 0;max-width:420px;text-align:center}
+  .recherche input{font-size:1.25rem;text-align:center;padding:12px 8px;font-family:"Cormorant Garamond",serif}
+  .resultats{margin-top:18px;display:flex;flex-direction:column;gap:14px}
+  .resultat{padding:22px 20px;text-align:center}
+  .resultat .qui{font-family:"Cormorant Garamond",serif;font-size:1.6rem;font-style:italic;color:var(--bleu-nuit)}
+  .resultat .table-nom{font-family:"Cormorant Garamond",serif;font-size:2.4rem;color:var(--bleu-nuit);line-height:1.1;margin-top:4px}
+  .resultat .table-num{letter-spacing:.3em;text-transform:uppercase;font-size:.78rem;color:#8a6a24}
+  .resultat .voisins{margin-top:12px;font-size:.98rem;color:var(--encre-douce)}
+  .resultat .voisins b{font-weight:500;color:var(--encre)}
+  .resultat button{margin-top:14px}
+  .mini{margin-top:12px;background:#fff;border:1px solid var(--perle)}
+  .mini svg{width:100%;height:auto;display:block}
+  .mini .table:not(.surb){opacity:.55}
+  .mini .table .siege.cible circle{stroke:#b8913f;stroke-width:6;fill:#f3e7c6}
+  .info{text-align:center;font-style:italic;color:var(--encre-douce);margin-top:18px}
+  .papillon{display:block;width:44px;margin:30px auto 0;opacity:.8}
+</style>
+</head>
+<body>
+<main>
+  <div class="entete carte-papier cadre">
+    <span id="o"></span>
+    <p class="capitales">Notre mariage</p>
+    <div class="monogramme">M<span class="et">&amp;</span>O</div>
+    <div class="filet-or"><span>✦</span></div>
+    <h1>Trouvez votre table</h1>
+  </div>
+  <div class="recherche">
+    <label class="champ" for="q" style="text-align:center">Votre prénom ou votre nom</label>
+    <input type="search" id="q" autocomplete="off" placeholder="Ex. Jeanne" enterkeyhint="search">
+  </div>
+  <p class="info" id="info"></p>
+  <div class="resultats" id="resultats"></div>
+  <span id="pap"></span>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../assets/commun.js"></script>
+<script src="../assets/plan-geometrie.js"></script>
+<script>
+/* Page invités : aucun lien vers le reste du site, client sans session.
+   Les données viennent de deux fonctions en base qui ne renvoient que le plan publié. */
+$('#o').outerHTML = ornement('branche', 'o1') + ornement('colibri', 'o2');
+$('#pap').outerHTML = ornement('papillon', 'papillon');
+const sbInvite = CONFIGURE ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: false } }) : null;
+let geo = null, minuterie = null, derniere = '';
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${defsPlan()}</svg>`);
+
+(async () => {
+  if (!sbInvite) return;
+  const { data } = await sbInvite.rpc('plan_public');
+  geo = data;
+  if (!geo) { $('#info').textContent = 'Le plan de table sera dévoilé très bientôt.'; $('#q').disabled = true; }
+})();
+
+$('#q').addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(chercher, 300); });
+async function chercher(){
+  const q = $('#q').value.trim();
+  if (q === derniere) return; derniere = q;
+  const r = $('#resultats');
+  if (q.length < 3) { r.innerHTML = ''; $('#info').textContent = q ? 'Encore une lettre ou deux…' : ''; return; }
+  const { data, error } = await sbInvite.rpc('trouver_ma_place', { recherche: q });
+  if (q !== $('#q').value.trim()) return;
+  if (error) { $('#info').textContent = 'La recherche est indisponible pour le moment.'; return; }
+  $('#info').textContent = data.length ? '' : 'Personne à ce nom… essayez votre nom de famille, ou demandez aux témoins !';
+  r.innerHTML = '';
+  for (const p of data) {
+    const el = document.createElement('div'); el.className = 'resultat carte-papier cadre';
+    const voisins = (p.voisins || []).filter(Boolean);
+    el.innerHTML = `<div class="qui">${echap(p.nom)}</div>
+      <p class="capitales doux" style="margin:10px 0 2px">vous êtes attendu·e à la table</p>
+      ${p.table_numero ? `<div class="table-num">${/^\d+$/.test(p.table_numero) ? 'Table ' + echap(p.table_numero) : echap(p.table_numero)}</div>` : ''}
+      <div class="table-nom">${echap(p.table_nom || 'Table ' + (p.table_numero || ''))}</div>
+      ${voisins.length ? `<div class="voisins">avec ${voisins.map(v => `<b>${echap(v.split(' ')[0])}</b>`).join(', ').replace(/, ([^,]*)$/, ' et $1')}</div>` : ''}
+      ${geo ? '<button class="btn petit clair">Voir sur le plan</button><div class="mini" hidden></div>' : ''}`;
+    if (geo) {
+      el.querySelector('button').onclick = e => { const m = el.querySelector('.mini'); m.hidden = !m.hidden; e.target.textContent = m.hidden ? 'Voir sur le plan' : 'Masquer le plan'; if (!m.innerHTML) dessiner(m, p.table_id, p.place); };
+    }
+    r.appendChild(el);
+  }
+}
+
+function dessiner(cont, tid, place){
+  const { salle, tables, decors } = geo, m = 80;
+  let s = `<rect class="sol" x="0" y="0" width="${salle.l}" height="${salle.h}"/>`;
+  for (const d of decors || []) s += renduDecor(d);
+  for (const t of tables || []) s += renduTable({ ...t, sieges: [] }, { lecture: true, surbrillance: t.id === tid });
+  cont.innerHTML = `<svg viewBox="${-m} ${-m} ${salle.l + 2 * m} ${salle.h + 2 * m}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+  const siege = cont.querySelector(`[data-siege="${tid}:${place}"]`); if (siege) siege.classList.add('cible');
+}
+</script>
+</body>
+</html>

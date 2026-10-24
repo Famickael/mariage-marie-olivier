@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marie &amp; Olivier · 5 décembre 2026</title>
+<link rel="stylesheet" href="assets/charte.css">
+<style>
+  main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+  .couverture{width:min(440px,100%);padding:70px 30px 60px;text-align:center;overflow:hidden}
+  .couverture .monogramme{font-size:clamp(4rem,18vw,6rem);margin:14px 0 10px}
+  .couverture .date{letter-spacing:.32em;font-size:.95rem}
+  .couverture .o1{position:absolute;width:130px;left:-14px;top:-10px;transform:rotate(-8deg);opacity:.85}
+  .couverture .o2{position:absolute;width:150px;right:-10px;bottom:-6px;transform:rotate(172deg);opacity:.85}
+  .couverture .o3{position:absolute;width:70px;right:30px;top:30px;opacity:.8}
+  .couverture .o4{position:absolute;width:44px;left:40px;bottom:46px;opacity:.75}
+</style>
+</head>
+<body>
+<main>
+  <div class="couverture carte-papier cadre">
+    <span id="o"></span>
+    <p class="capitales">Notre mariage</p>
+    <div class="monogramme">M<span class="et">&amp;</span>O</div>
+    <p class="date">05.12.2026</p>
+    <div class="filet-or"><span>✦</span></div>
+    <p class="italique doux" style="margin:0">Ouvrouer-les-Champs</p>
+  </div>
+</main>
+<script>
+  /* Page de couverture volontairement sans liens : chaque invité reçoit
+     directement le lien de la page qui le concerne. */
+</script>
+<script src="assets/commun.js"></script>
+<script>
+  if (typeof ornement === 'function') $('#o').outerHTML = ornement('branche', 'o1') + ornement('mimosa', 'o2') + ornement('colibri', 'o3') + ornement('papillon', 'o4');
+</script>
+</body>
+</html>

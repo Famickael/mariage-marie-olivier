@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Marie &amp; Olivier · Projection</title>
+<link rel="stylesheet" href="../assets/charte.css">
+<style>
+  html,body{height:100%;overflow:hidden}
+  body{background:radial-gradient(ellipse at 50% 40%,#fbfaf7,var(--satin) 60%,var(--perle) 100%)}
+  body.plein{cursor:none}
+  #scene{position:absolute;inset:0}
+  .coin{position:absolute;opacity:.9;pointer-events:none}
+  .coin.hg{width:24vmin;top:-1vmin;left:-1vmin;transform:rotate(-6deg)}
+  .coin.bd{width:22vmin;bottom:-1vmin;left:2vmin;transform:scaleX(-1) rotate(186deg)}
+  .coin.hd{width:12vmin;top:2vmin;right:3vmin}
+  .bandeau{position:absolute;left:0;right:0;bottom:1.2vmin;text-align:center;pointer-events:none}
+  .bandeau .monogramme{font-size:4vmin}
+  .bandeau .capitales{font-size:1.2vmin;margin-left:1.5vmin;vertical-align:.6vmin}
+  #qr-coin{position:absolute;right:2vmin;bottom:2vmin;background:#fff;padding:1vmin;box-shadow:var(--ombre);text-align:center}
+  #qr-coin .capitales{font-size:1vmin;letter-spacing:.2em;margin-top:.6vmin}
+  #qr-coin img,#qr-coin canvas{width:13vmin!important;height:13vmin!important;display:block}
+
+  #diapos{position:absolute;inset:2vmin 18vmin 8vmin;display:flex;align-items:center;justify-content:center}
+  .diapo{position:absolute;max-width:100%;max-height:100%;display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translate(var(--dx,0),var(--dy,0)) rotate(var(--rot,0deg)) scale(1.05);
+    transition:opacity .8s ease,transform 1s cubic-bezier(.2,.8,.2,1),filter 1.2s ease}
+  .diapo.visible{opacity:1;transform:translate(var(--dx,0),var(--dy,0)) rotate(var(--rot,0deg)) scale(1)}
+  .diapo.dessous{filter:brightness(.9) saturate(.7) blur(.5px)}
+  .diapo.sortie{opacity:0}
+  .cadre-photo{position:relative;background:#fff;padding:1vmin 1vmin 1vmin;box-shadow:0 1.4vmin 4vmin rgba(27,38,82,.28),0 .2vmin .6vmin rgba(27,38,82,.2)}
+  .cadre-photo .media{position:relative;outline:.2vmin solid var(--or-clair);outline-offset:-.8vmin;line-height:0;background:var(--perle)}
+  .cadre-photo img,.cadre-photo video{display:block;max-width:calc(100vw - 40vmin);max-height:calc(100vh - 13vmin);width:auto;height:auto;object-fit:contain}
+  .cadre-photo img{min-width:40vmin;min-height:30vmin}
+  .legende{position:absolute;right:1.8vmin;bottom:1.8vmin;max-width:min(55%,60vmin);background:rgba(252,251,248,.94);padding:1vmin 1.6vmin;
+    text-align:right;box-shadow:0 .3vmin 1.2vmin rgba(0,0,0,.2);border-right:.3vmin solid var(--or);line-height:1.3}
+  .legende .mot{font-size:2.3vmin;font-style:italic;color:var(--encre);white-space:pre-wrap;margin-bottom:.4vmin;max-height:22vh;overflow:hidden}
+  .legende .qui{font-size:1.3vmin;text-transform:uppercase;letter-spacing:.2em;color:var(--encre-douce)}
+  .legende .qui .nom{font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--bleu-nuit);font-size:2.6vmin;margin-left:.8vmin;letter-spacing:0;text-transform:none}
+  .attente{padding:6vmin 8vmin;text-align:center}
+  .attente .monogramme{font-size:14vmin}
+  .attente .capitales{font-size:1.8vmin}
+  .attente .italique{font-size:2.2vmin}
+  .carton{padding:6vmin 7vmin;max-width:70vmin;text-align:center}
+  .carton .texte{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:3.6vmin;white-space:pre-wrap;color:var(--bleu-nuit)}
+  .carton .signature{display:block;margin-top:2vmin;text-transform:uppercase;letter-spacing:.25em;font-size:1.5vmin}
+  #aide{position:absolute;top:1vmin;left:50%;transform:translateX(-50%);font-size:1.3vmin;color:var(--encre-douce);opacity:.7;transition:opacity 1s}
+  body.plein #aide{opacity:0}
+  #pause{position:absolute;top:2vmin;right:18vmin;font-size:1.4vmin;text-transform:uppercase;letter-spacing:.3em;color:var(--bleu);display:none}
+  body.enpause #pause{display:block}
+  #etat-cache{position:absolute;left:1vmin;bottom:.5vmin;font-size:1vmin;color:var(--encre-douce);opacity:.5}
+  #etat-cache.hors{color:var(--erreur);opacity:1}
+</style>
+</head>
+<body>
+<section id="scene" hidden>
+  <span id="coins"></span>
+  <div id="diapos"></div>
+  <div class="bandeau"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="capitales">05.12.2026</span></div>
+  <div id="qr-coin"><div id="qr"></div><div class="capitales">Vos souvenirs</div></div>
+  <div id="aide">F plein écran · espace pause · ← → naviguer · V vidéos oui/non · R recharger</div>
+  <div id="pause">Pause</div>
+  <div id="etat-cache"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../assets/commun.js"></script>
+<script>
+Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45000, RAFRAICHIR: 20000, LARGEUR_IMAGE: 1600 });
+let items = [], connus = new Set(), file = [], nouveaux = [];
+let position = -1, timer = null, enPause = false, avecVideos = true, premierChargement = true, courant = null;
+
+$('#coins').outerHTML = ornement('branche', 'coin hg') + ornement('mimosa', 'coin bd') + ornement('colibri', 'coin hd');
+qrDans($('#qr'), urlSite('../souvenirs/'), 256);
+exigerConnexion('Projection', demarrer);
+
+async function demarrer(){
+  $('#scene').hidden = false;
+  await charger();
+  setInterval(charger, CONFIG.RAFRAICHIR);
+  suivant();
+}
+
+/* ---------- données ---------- */
+const cache = new Map(); let octetsCache = 0;
+async function charger(){
+  let data, error;
+  try { ({ data, error } = await sb.from('envois').select('*, fichiers(*)').order('created_at', { ascending: true })); }
+  catch (e) { error = e; }
+  if (error) { console.warn('hors ligne, on continue avec la mémoire', error.message || error); majEtatCache(items, true); return; }
+  const liste = [];
+  const fichiersImg = [];
+  for (const e of data) {
+    if (e.visible === false) continue;
+    const nom = e.invite_nom || 'Un invité';
+    for (const f of e.fichiers) {
+      if (f.visible === false) continue;
+      const t = f.type_mime || '';
+      if (t.startsWith('image/')) { const it = { id: 'f-' + f.id, type: 'photo', nom, texte: f.message, chemin: f.chemin, date: f.created_at }; liste.push(it); fichiersImg.push(it); }
+      else if (t.startsWith('video/')) liste.push({ id: 'f-' + f.id, type: 'video', nom, texte: f.message, chemin: f.chemin, date: f.created_at });
+    }
+  }
+  // URLs signées (12 h), images redimensionnées et converties (HEIC compris) par Supabase
+  const media = liste.filter(i => i.chemin);
+  if (media.length) {
+    const { data: signes } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrls(media.map(i => i.chemin), 43200);
+    media.forEach((i, k) => { i.url = signes && signes[k] ? signes[k].signedUrl : null; });
+    for (const i of fichiersImg) {
+      try { const { data: d } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(i.chemin, 43200, { transform: { width: CONFIG.LARGEUR_IMAGE, quality: 80 } }); if (d) i.urlImg = d.signedUrl; } catch {}
+    }
+  }
+  // Mise en mémoire en arrière-plan : la projection démarre tout de suite, les médias se téléchargent un par un.
+  liste.forEach(i => { if (cache.has(i.id)) i.local = cache.get(i.id); });
+  precharger(liste);
+  majEtatCache(liste);
+  const arrives = liste.filter(i => !connus.has(i.id));
+  liste.forEach(i => connus.add(i.id));
+  // ne garder en projection que ce qui est en mémoire (ou atteignable en ligne)
+  items = liste;
+  if (premierChargement) { premierChargement = false; file = melanger(items); }
+  else if (!file.length && items.length) file = melanger(items);
+  else if (arrives.length) { arrives.forEach(i => { i.nouveau = true; }); nouveaux.push(...arrives); }
+  // retirer de la file ce qui n'est plus projetable
+  const ids = new Set(items.map(i => i.id));
+  file = file.filter(i => ids.has(i.id)).map(i => items.find(x => x.id === i.id));
+}
+
+let prechargeEnCours = false;
+async function precharger(liste){
+  if (prechargeEnCours) return; prechargeEnCours = true;
+  // photos d'abord (rapides), vidéos ensuite
+  const aFaire = [...liste.filter(i => i.type === 'photo'), ...liste.filter(i => i.type === 'video')].filter(i => !i.local && i.url);
+  for (const i of aFaire) {
+    try {
+      const src = i.type === 'photo' && i.urlImg ? i.urlImg : i.url;
+      let r = await fetch(src); if (!r.ok && i.urlImg) r = await fetch(i.url);
+      if (!r.ok) continue;
+      const b = await r.blob(); const u = URL.createObjectURL(b); cache.set(i.id, u); octetsCache += b.size;
+      const vivant = items.find(x => x.id === i.id); if (vivant) vivant.local = u; i.local = u;
+    } catch (e) { console.warn('cache', i.chemin, e); }
+    majEtatCache(items);
+  }
+  prechargeEnCours = false; majEtatCache(items);
+}
+function majEtatCache(liste, horsLigne){
+  const n = liste.filter(i => i.local).length, tot = liste.length;
+  const el = $('#etat-cache'); if (!el) return;
+  el.className = (horsLigne || !navigator.onLine) ? 'hors' : '';
+  el.textContent = `${n}/${tot} en mémoire (${(octetsCache/1048576).toFixed(0)} Mo)` + ((horsLigne || !navigator.onLine) ? ' · hors ligne, projection depuis la mémoire' : '');
+}
+window.addEventListener('offline', () => majEtatCache(items, true));
+window.addEventListener('online', () => { majEtatCache(items); charger(); });
+function melanger(a){ const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+
+/* ---------- lecture ---------- */
+function prochain(){
+  if (!navigator.onLine) { const enMem = file.filter(i => i.local); if (enMem.length && enMem.length < file.length) { file = enMem; position = -1; } }
+  while (nouveaux.length) { const n = nouveaux.shift(); if (avecVideos || n.type !== 'video') { file.splice(position + 1, 0, n); return file[++position]; } }
+  if (!file.length) return null;
+  for (let k = 0; k < file.length; k++) {
+    position = (position + 1) % file.length;
+    if (position === 0) file = melanger(items);
+    const it = file[position];
+    if (it && (avecVideos || it.type !== 'video')) return it;
+  }
+  return null;
+}
+function precedent(){
+  if (!file.length) return null;
+  position = (position - 1 + file.length) % file.length;
+  return file[position];
+}
+
+function suivant(){ clearTimeout(timer); afficher(prochain()); }
+function afficher(it){
+  const cont = $('#diapos');
+  // la pile : on garde les 3 dernières sous la nouvelle, assombries ; les plus anciennes s'effacent
+  [...cont.children].forEach((el, i, arr) => {
+    el.classList.add('dessous');
+    if (arr.length - i > 3) { el.classList.add('sortie'); setTimeout(() => el.remove(), 1300); }
+  });
+  courant = it;
+  const d = document.createElement('div'); d.className = 'diapo';
+  if (!it) {
+    cont.innerHTML = '';
+    d.innerHTML = `<div class="attente carte-papier cadre"><div class="monogramme">M<span class="et">&amp;</span>O</div><div class="filet-or"><span>✦</span></div><p class="capitales">Vos photos, vidéos et mots apparaîtront ici</p><p class="italique doux">Scannez le code en bas à droite pour partager les vôtres</p></div>`;
+    cont.appendChild(d); requestAnimationFrame(() => d.classList.add('visible'));
+    timer = setTimeout(suivant, 8000); return;
+  }
+  const nouveau = ''; it.nouveau = false;
+  let duree = CONFIG.DUREE_PHOTO;
+  if (it.type === 'mot') {
+    duree = Math.min(CONFIG.DUREE_MOT + it.texte.length * 40, 25000);
+    d.innerHTML = nouveau + `<div class="carton carte-papier cadre"><div class="texte">${echap(it.texte)}</div><span class="signature">${echap(it.nom)}</span></div>`;
+  } else {
+    const media = it.type === 'photo'
+      ? `<img src="${it.local || it.urlImg || it.url}" alt="" onerror="this.onerror=null;this.src='${it.url}'">`
+      : `<video src="${it.local || it.url}" autoplay muted playsinline></video>`;
+    d.innerHTML = `<div class="cadre-photo"><div class="media">${media}
+        <div class="legende">${it.texte ? `<div class="mot">${echap(it.texte)}</div>` : ''}<div class="qui">par<span class="nom">${echap(it.nom)}</span></div></div>
+      </div></div>`;
+    // légère rotation et décalage aléatoires, comme une photo posée sur la table
+    d.style.setProperty('--rot', ((Math.random() * 4) - 2).toFixed(2) + 'deg');
+    d.style.setProperty('--dx', ((Math.random() * 3) - 1.5).toFixed(2) + 'vmin');
+    d.style.setProperty('--dy', ((Math.random() * 3) - 1.5).toFixed(2) + 'vmin');
+    if (it.type === 'video') {
+      const v = d.querySelector('video');
+      v.addEventListener('ended', () => { if (!enPause) suivant(); });
+      v.addEventListener('error', () => suivant());
+      duree = CONFIG.DUREE_VIDEO_MAX;
+    }
+  }
+  cont.appendChild(d);
+  requestAnimationFrame(() => d.classList.add('visible'));
+  if (!enPause) timer = setTimeout(suivant, duree);
+}
+
+/* ---------- commandes ---------- */
+document.addEventListener('keydown', e => {
+  if ($('#scene').hidden) return;
+  switch (e.key) {
+    case 'f': case 'F': pleinEcran(); break;
+    case ' ': e.preventDefault(); enPause = !enPause; document.body.classList.toggle('enpause', enPause); if (enPause) clearTimeout(timer); else suivant(); break;
+    case 'ArrowRight': suivant(); break;
+    case 'ArrowLeft': clearTimeout(timer); afficher(precedent()); break;
+    case 'v': case 'V': avecVideos = !avecVideos; $('#aide').textContent = avecVideos ? 'Vidéos activées' : 'Vidéos désactivées'; setTimeout(() => $('#aide').textContent = 'F plein écran · espace pause · ← → naviguer · V vidéos oui/non · R recharger', 2000); break;
+    case 'r': case 'R': charger(); break;
+  }
+});
+$('#scene').addEventListener('dblclick', pleinEcran);
+function pleinEcran(){
+  if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(() => {}); }
+  else document.exitFullscreen();
+}
+document.addEventListener('fullscreenchange', () => document.body.classList.toggle('plein', !!document.fullscreenElement));
+</script>
+</body>
+</html>
