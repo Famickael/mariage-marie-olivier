@@ -10,29 +10,32 @@
   main{max-width:1060px;margin:0 auto;padding:30px 16px 0}
 
   /* ---- ouverture : la branche se dessine, l'oiseau s'envole ---- */
-  .scene{position:relative;height:min(330px,52vw);margin:0 auto 6px;max-width:900px;pointer-events:none}
-  .scene .branche-anim{position:absolute;left:50%;bottom:0;width:min(560px,92vw);transform:translateX(-50%)}
+  .scene{position:relative;height:min(370px,86vw);margin:0 auto 6px;max-width:900px;pointer-events:none}
+  .scene .branche-anim{position:absolute;left:50%;bottom:0;width:min(430px,86vw);transform:translateX(-50%)}
   .scene .branche-anim svg{width:100%;height:auto;display:block;overflow:visible}
   .scene .colibri-anim{position:absolute;width:min(170px,30vw);left:calc(50% + min(150px,24vw));top:12%;opacity:0}
   .scene .colibri-anim svg{width:100%;height:auto;overflow:visible}
   .scene .papillon-anim{position:absolute;width:min(70px,12vw);left:calc(50% - min(290px,46vw));top:28%;opacity:0}
   /* traits : dessinés progressivement (longueurs calculées en JS) */
-  .pret .traits .t{stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:tracer 1.6s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(var(--i) * .035s + .2s)}
+  .pret #branche-anim .branche [data-l]{stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:tracer 1.4s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(var(--i) * .012s + .1s)}
+  .pret #branche-anim .branche .plein{opacity:0;animation:poindre .6s ease forwards;animation-delay:calc(var(--i) * .012s + .9s)}
+  .pret #branche-anim .oiseau{opacity:0;animation:poindre 1s ease forwards 1.6s}
   @keyframes tracer{to{stroke-dashoffset:0}}
+  @keyframes poindre{to{opacity:1}}
   /* oiseau perché : il attend, puis s'envole vers la droite */
-  .pret .oiseau{transform-box:fill-box;transform-origin:50% 60%;animation:envol 2.6s cubic-bezier(.5,0,.6,1) forwards;animation-delay:2.6s}
+  .pret #branche-anim .oiseau{transform-box:fill-box;transform-origin:50% 60%;animation:poindre 1s ease forwards 1.6s,envol 2.6s cubic-bezier(.5,0,.6,1) forwards 3.4s}
   @keyframes envol{
     0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}
     12%{transform:translate(2px,-6px) rotate(-6deg) scale(1.02)}
     100%{transform:translate(520px,-420px) rotate(-14deg) scale(.55);opacity:0}
   }
-  .pret .oiseau .aile{transform-box:fill-box;transform-origin:50% 100%;animation:battre .22s ease-in-out infinite alternate;animation-delay:2.7s;animation-play-state:running}
+  .pret #branche-anim .oiseau .aile{transform-box:fill-box;transform-origin:50% 100%;animation:battre .22s ease-in-out infinite alternate;animation-delay:3.5s}
   @keyframes battre{from{transform:scaleY(1)}to{transform:scaleY(.55) translateY(-6%)}}
   /* le colibri arrive se poser dans le cadre, puis plane */
-  .pret .colibri-anim{animation:arrivee 1.8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:3.4s}
+  .pret .colibri-anim{animation:arrivee 1.8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:4.2s}
   @keyframes arrivee{from{opacity:0;transform:translate(220px,-160px) scale(.6)}to{opacity:1;transform:none}}
   .pret .colibri-anim .aile{transform-box:fill-box;transform-origin:50% 100%;animation:battre .12s ease-in-out infinite alternate}
-  .pret .papillon-anim{animation:papillonne 7s ease-in-out 4.2s infinite alternate,apparaitre .9s ease 4.2s forwards}
+  .pret .papillon-anim{animation:papillonne 7s ease-in-out 5s infinite alternate,apparaitre .9s ease 5s forwards}
   @keyframes apparaitre{to{opacity:.9}}
   @keyframes papillonne{from{transform:translate(0,0) rotate(-8deg)}to{transform:translate(40px,-26px) rotate(10deg)}}
   @media (prefers-reduced-motion:reduce){.scene .colibri-anim,.scene .papillon-anim{opacity:1}}
@@ -157,7 +160,11 @@ $('#colibri-anim').innerHTML = ornement('colibri');
 $('#papillon-anim').innerHTML = ornement('papillon');
 $$('[data-frise]').forEach(el => el.innerHTML = ornement('frise'));
 requestAnimationFrame(() => {
-  $$('#branche-anim .traits .t').forEach((el, i) => { try { el.style.setProperty('--L', Math.ceil(el.getTotalLength()) + 1); } catch { el.style.setProperty('--L', 400); } el.style.setProperty('--i', i); });
+  $$('#branche-anim .branche *').forEach((el, i) => {
+    el.style.setProperty('--i', i);
+    if (el.classList.contains('plein') || typeof el.getTotalLength !== 'function') return;
+    try { el.style.setProperty('--L', Math.ceil(el.getTotalLength()) + 2); el.dataset.l = '1'; } catch {}
+  });
   document.body.classList.add('pret');
 });
 
