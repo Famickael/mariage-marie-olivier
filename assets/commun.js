@@ -93,18 +93,21 @@ const ORNEMENTS = {
     <path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(144)"/><path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(216)"/>
     <path d="M0 -4 c-8 -10 -6 -22 0 -24 c6 2 8 14 0 24z" transform="rotate(288)"/><circle r="4" class="or"/></g></svg>`
 };
-/* Les dessins riches (assets/ornements.js, style gravure) remplacent les esquisses ci-dessus quand ils sont chargés. */
-const ALIAS_ORNEMENTS = { branche: 'brancheFleurie', mimosa: 'mimosa', colibri: 'colibri', papillon: 'papillon', fleur: 'fleur' };
-function ornement(nom, cls = '', style = ''){
-  const riches = window.ORNEMENTS_RICHES || {};
-  const src = riches[nom] || riches[ALIAS_ORNEMENTS[nom]] || ORNEMENTS[nom] || ORNEMENTS[Object.keys(ALIAS_ORNEMENTS).find(k => ALIAS_ORNEMENTS[k] === nom)] || '';
-  return src.replace(/^<svg /, `<svg class="orne ${cls}" style="${style}" `).replace(/ class="orne"(?=[ >])/, '');
+function ornement(nom, cls = '', style = ''){ return (ORNEMENTS[nom] || '').replace('class="orne"', `class="orne ${cls}" style="${style}"`); }
+
+/* Motifs du faire-part : <img> détourées (assets/motifs/*.png). `base` = chemin relatif vers assets/. */
+const BASE_ASSETS = (document.currentScript && document.currentScript.src.replace(/commun\.js.*$/, '')) || 'assets/';
+function motif(nom, cls = '', style = ''){ return `<img class="motif ${cls}" style="${style}" src="${BASE_ASSETS}motifs/${nom}.png" alt="" draggable="false">`; }
+
+/* Colonnes latérales (grands écrans) : les deux panneaux du faire-part ouvert, de part et d'autre du contenu. */
+function colonnesCote(){
+  document.body.insertAdjacentHTML('afterbegin', `<div class="cote gauche" aria-hidden="true">${motif('panneau-gauche')}</div><div class="cote droite" aria-hidden="true">${motif('panneau-droit')}</div>`);
 }
 
 /* En-tête commun des pages invités : <header class="entete-site" data-titre="…" data-sous="…"> */
 function enteteSite(el){
   el.classList.add('carte-papier', 'cadre');
-  el.innerHTML = `${ornement('brancheFleurie', 'orn a')}${ornement('mimosa', 'orn b')}${ornement('colibri', 'orn c')}${ornement('papillon', 'orn d')}
+  el.innerHTML = `${motif('motif-a', 'orn a')}${motif('couv-droite-haut', 'orn b')}
     <p class="capitales">Notre mariage</p>
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <p class="capitales" style="letter-spacing:.3em">05.12.2026</p>
@@ -112,10 +115,10 @@ function enteteSite(el){
     <h1>${echap(el.dataset.titre || '')}</h1>
     ${el.dataset.sous ? `<p class="sous">${el.dataset.sous}</p>` : ''}`;
 }
-document.addEventListener('DOMContentLoaded', () => $$('header.entete-site').forEach(enteteSite));
+document.addEventListener('DOMContentLoaded', () => { $$('header.entete-site').forEach(enteteSite); if (document.body.dataset.cotes !== 'non') colonnesCote(); });
 
 function piedBleu(texte){
-  return `${ornement('brancheFleurie', 'orn a')}${ornement('oiseauPerche', 'orn b')}
+  return `${motif('couv-gauche-bas', 'blanc orn a')}${motif('oiseau-branche', 'blanc orn b')}
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <p class="capitales">Samedi 5 décembre 2026 · Ouvrouer-les-Champs</p>
     ${texte ? `<p>${echap(texte)}</p>` : ''}`;

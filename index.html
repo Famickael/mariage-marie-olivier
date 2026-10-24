@@ -7,41 +7,22 @@
 <title>Marie &amp; Olivier · 5 décembre 2026</title>
 <link rel="stylesheet" href="assets/charte.css">
 <style>
-  main{max-width:1060px;margin:0 auto;padding:30px 16px 0}
+  main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
-  /* ---- ouverture : la branche se dessine, l'oiseau s'envole ---- */
-  .scene{position:relative;height:min(370px,86vw);margin:0 auto 6px;max-width:900px;pointer-events:none}
-  .scene .branche-anim{position:absolute;left:50%;bottom:0;width:min(430px,86vw);transform:translateX(-50%)}
-  .scene .branche-anim svg{width:100%;height:auto;display:block;overflow:visible}
-  .scene .colibri-anim{position:absolute;width:min(170px,30vw);left:calc(50% + min(150px,24vw));top:12%;opacity:0}
-  .scene .colibri-anim svg{width:100%;height:auto;overflow:visible}
-  .scene .papillon-anim{position:absolute;width:min(70px,12vw);left:calc(50% - min(290px,46vw));top:28%;opacity:0}
-  /* traits : dessinés progressivement (longueurs calculées en JS) */
-  .pret #branche-anim .branche [data-l]{stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:tracer 1.4s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(var(--i) * .012s + .1s)}
-  .pret #branche-anim .branche .plein{opacity:0;animation:poindre .6s ease forwards;animation-delay:calc(var(--i) * .012s + .9s)}
-  .pret #branche-anim .oiseau{opacity:0;animation:poindre 1s ease forwards 1.6s}
-  @keyframes tracer{to{stroke-dashoffset:0}}
-  @keyframes poindre{to{opacity:1}}
-  /* oiseau perché : il attend, puis s'envole vers la droite */
-  .pret #branche-anim .oiseau{transform-box:fill-box;transform-origin:50% 60%;animation:poindre 1s ease forwards 1.6s,envol 2.6s cubic-bezier(.5,0,.6,1) forwards 3.4s}
-  @keyframes envol{
-    0%{transform:translate(0,0) rotate(0) scale(1);opacity:1}
-    12%{transform:translate(2px,-6px) rotate(-6deg) scale(1.02)}
-    100%{transform:translate(520px,-420px) rotate(-14deg) scale(.55);opacity:0}
-  }
-  .pret #branche-anim .oiseau .aile{transform-box:fill-box;transform-origin:50% 100%;animation:battre .22s ease-in-out infinite alternate;animation-delay:3.5s}
-  @keyframes battre{from{transform:scaleY(1)}to{transform:scaleY(.55) translateY(-6%)}}
-  /* le colibri arrive se poser dans le cadre, puis plane */
-  .pret .colibri-anim{animation:arrivee 1.8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:4.2s}
-  @keyframes arrivee{from{opacity:0;transform:translate(220px,-160px) scale(.6)}to{opacity:1;transform:none}}
-  .pret .colibri-anim .aile{transform-box:fill-box;transform-origin:50% 100%;animation:battre .12s ease-in-out infinite alternate}
-  .pret .papillon-anim{animation:papillonne 7s ease-in-out 5s infinite alternate,apparaitre .9s ease 5s forwards}
-  @keyframes apparaitre{to{opacity:.9}}
-  @keyframes papillonne{from{transform:translate(0,0) rotate(-8deg)}to{transform:translate(40px,-26px) rotate(10deg)}}
-  @media (prefers-reduced-motion:reduce){.scene .colibri-anim,.scene .papillon-anim{opacity:1}}
+  /* ---- ouverture : le bandeau du faire-part se dévoile, les colibris arrivent ---- */
+  .scene{position:relative;width:min(1100px,100%);margin:0 auto;aspect-ratio:1120/454;max-height:52vh;pointer-events:none}
+  .scene .bande{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;
+    clip-path:inset(0 100% 0 0);animation:devoiler 2.4s cubic-bezier(.4,0,.2,1) .2s forwards}
+  @keyframes devoiler{to{clip-path:inset(0 0 0 0)}}
+  .scene .colibri{position:absolute;width:12%;left:70%;top:6%;opacity:0;animation:arrivee 2.2s cubic-bezier(.2,.8,.2,1) 1.6s forwards}
+  @keyframes arrivee{0%{opacity:0;transform:translate(60vw,-30vh) rotate(-12deg) scale(.7)}60%{opacity:1}100%{opacity:1;transform:none}}
+  .scene .colibri-2{position:absolute;width:9%;left:4%;top:28%;opacity:0;transform:scaleX(-1);animation:arrivee2 2s cubic-bezier(.2,.8,.2,1) 2.4s forwards}
+  @keyframes arrivee2{0%{opacity:0;transform:scaleX(-1) translate(40vw,-20vh) scale(.7)}100%{opacity:1;transform:scaleX(-1)}}
+  .scene .colibri img,.scene .colibri-2 img{width:100%;height:auto}
+  @media (prefers-reduced-motion:reduce){.scene .bande{clip-path:none;animation:none}.scene .colibri,.scene .colibri-2{opacity:1;animation:none}}
 
   /* ---- titre ---- */
-  .tete{text-align:center;position:relative;padding-top:4px}
+  .tete{text-align:center;margin-top:-10px}
   .tete .monogramme{font-size:clamp(3.8rem,13vw,5.4rem)}
   .tete h1{font-size:clamp(1.9rem,6vw,2.6rem);font-style:italic;margin-top:8px}
   .tete .rebours{margin-top:10px}
@@ -49,42 +30,38 @@
   .session{display:flex;justify-content:center;gap:10px;align-items:center;margin-top:14px;font-size:.92rem;min-height:34px}
 
   /* ---- sections ---- */
-  section.groupe{margin-top:50px}
-  section.groupe > .frise{display:block;width:min(560px,90vw);margin:0 auto 10px;color:var(--bleu);opacity:.75}
-  section.groupe > .frise svg{width:100%;height:auto;display:block}
-  section.groupe > h2{font-size:2rem;text-align:center;font-style:italic}
+  section.groupe{margin-top:54px;position:relative}
+  section.groupe > .motif-titre{display:block;width:min(420px,80vw);margin:0 auto 6px;height:70px;object-fit:contain;object-position:bottom}
+  section.groupe > h2{font-size:2.1rem;text-align:center;font-style:italic}
   section.groupe > p{text-align:center;margin:4px auto 0;max-width:560px;color:var(--encre-douce)}
-  .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,330px));justify-content:center;gap:22px;margin-top:24px}
-  .fonction{padding:26px 24px 20px;display:flex;flex-direction:column;gap:10px;transition:transform .2s,box-shadow .2s;overflow:hidden}
+  .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:24px}
+  .fonction{padding:24px 20px 18px;display:flex;flex-direction:column;gap:9px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-height:290px}
   .fonction:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(27,38,82,.16)}
-  .fonction .icone{width:64px;height:64px;border-radius:50%;border:1px solid var(--bleu-pale);display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(circle at 35% 30%,#fff,var(--bleu-voile) 85%);color:var(--bleu);box-shadow:inset 0 0 0 4px #fff}
-  .fonction .icone svg{width:42px;height:42px}
-  .fonction .coin{position:absolute;right:-26px;bottom:-30px;width:130px;color:var(--bleu);opacity:.16;transform:rotate(-12deg);pointer-events:none}
-  .fonction h3{font-size:1.6rem;font-style:italic}
-  .fonction p{margin:0;font-size:.98rem;color:var(--encre-douce);flex:1}
-  .pastille{align-self:flex-start;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--bleu-pale);color:var(--bleu-doux);border-radius:20px}
-  .pastille.invites{border-color:var(--or-clair);color:#8a6a24}
-  .pastille.prive{border-color:var(--bleu);color:var(--bleu)}
-  .actions{display:flex;gap:8px;margin-top:8px;flex-wrap:nowrap}
-  .actions .btn{flex:1;padding:9px 6px;font-size:.64rem;letter-spacing:.08em;min-width:0}
-  .actions .btn:nth-child(2){flex:1.45}
+  .fonction .deco{position:absolute;right:-10px;top:-6px;width:46%;max-height:46%;object-fit:contain;object-position:top right;opacity:.95}
+  .fonction h3{font-size:1.5rem;font-style:italic;margin-top:70px;position:relative}
+  .fonction p{margin:0;font-size:.95rem;color:var(--encre-douce);flex:1;position:relative}
+  .actions{display:flex;gap:6px;margin-top:8px;flex-wrap:nowrap;position:relative}
+  .actions .btn{flex:1;padding:9px 4px;font-size:.6rem;letter-spacing:.06em;min-width:0}
+  .actions .btn:nth-child(2){flex:1.5}
 
   /* ---- QR ---- */
   dialog{border:0;padding:0;background:transparent;max-width:94vw}
   dialog::backdrop{background:rgba(27,38,82,.5)}
-  .qr-carte{padding:34px 34px 26px;text-align:center;width:min(380px,92vw)}
+  .qr-carte{padding:30px 30px 24px;text-align:center;width:min(400px,92vw)}
   .qr-carte h3{font-size:1.7rem;font-style:italic}
-  .qr-carte #qr{display:flex;justify-content:center;margin:18px 0 10px;padding:12px;background:#fff;border:1px solid var(--perle)}
-  .qr-carte .url{font-size:.85rem;word-break:break-all;color:var(--encre-douce)}
+  .qr-carte #qr{display:flex;justify-content:center;margin:16px 0 8px;padding:12px;background:#fff;border:1px solid var(--perle)}
+  .qr-carte .aide{font-size:.88rem;color:var(--encre-douce);font-style:italic;margin:0 0 14px}
+  .qr-carte .actions{flex-wrap:wrap;justify-content:center}
+  .qr-carte .actions .btn{flex:none;font-size:.66rem;letter-spacing:.12em;padding:9px 14px}
+  canvas#affiche{display:none}
 </style>
 </head>
 <body>
 <main>
-  <div class="scene" id="scene" aria-hidden="true">
-    <div class="branche-anim" id="branche-anim"></div>
-    <div class="colibri-anim" id="colibri-anim"></div>
-    <div class="papillon-anim" id="papillon-anim"></div>
+  <div class="scene" aria-hidden="true">
+    <img class="bande motif" src="assets/motifs/bande-bas.png" alt="">
+    <span class="colibri"><img class="motif" src="assets/motifs/colibri.png" alt=""></span>
+    <span class="colibri-2"><img class="motif" src="assets/motifs/colibri.png" alt=""></span>
   </div>
   <header class="tete">
     <p class="capitales">Notre mariage</p>
@@ -98,86 +75,65 @@
   <div class="session" id="session"></div>
 
   <section class="groupe">
-    <span class="frise" data-frise></span>
+    <img class="motif motif-titre" src="assets/motifs/colibri-droit.png" alt="">
     <h2>Pour les invités</h2>
     <p class="italique">Liens à imprimer sur les tables, le livret, ou à envoyer par message.</p>
     <div class="grille" id="g-invites"></div>
   </section>
 
   <section class="groupe">
-    <span class="frise" data-frise></span>
-    <h2>Pour l'équipe</h2>
-    <p class="italique">Témoins, famille proche, prestataires : en lecture pour qui a le lien, modifiable une fois connecté.</p>
-    <div class="grille" id="g-equipe"></div>
-  </section>
-
-  <section class="groupe">
-    <span class="frise" data-frise></span>
-    <h2>Pour Marie &amp; Olivier</h2>
-    <p class="italique">Outils réservés, protégés par un mot de passe.</p>
-    <div class="grille" id="g-maries"></div>
+    <img class="motif motif-titre" src="assets/motifs/oiseau-branche.png" alt="" style="height:110px">
+    <h2>Pour les organisateurs</h2>
+    <p class="italique">Marie, Olivier, les témoins et la famille proche. Les outils réservés demandent un mot de passe.</p>
+    <div class="grille" id="g-orga"></div>
   </section>
 
   <dialog id="dlg-qr">
     <div class="qr-carte carte-papier cadre">
       <h3 id="qr-titre"></h3>
       <div id="qr"></div>
-      <p class="url" id="qr-url"></p>
-      <div class="actions" style="justify-content:center;margin-top:16px">
-        <button class="btn petit" id="qr-png">Télécharger l'image</button>
-        <button class="btn petit clair" id="qr-fermer">Fermer</button>
+      <p class="aide">Scannez-le avec un téléphone pour vérifier.</p>
+      <div class="actions">
+        <button class="btn" id="qr-affiche">Télécharger l'affiche à imprimer</button>
+        <button class="btn clair" id="qr-fermer">Fermer</button>
       </div>
     </div>
   </dialog>
+  <canvas id="affiche"></canvas>
 </main>
 <footer class="pied-bleu" id="pied"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="assets/ornements.js"></script>
 <script src="assets/commun.js"></script>
 <script>
 const FONCTIONS = [
-  { groupe: 'invites', orne: 'colibri', coin: 'glycine', titre: 'Souvenirs', chemin: 'souvenirs/', public: 'Tous les invités',
+  { groupe: 'invites', deco: 'colibri', titre: 'Souvenirs', chemin: 'souvenirs/', accroche: 'Partagez vos souvenirs',
     texte: 'Les invités déposent leurs photos, vidéos et petits mots, depuis leur téléphone. Eux seuls voient ce qu\'ils envoient.' },
-  { groupe: 'invites', orne: 'fleur', coin: 'brancheFleurie', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', public: 'Tous les invités',
+  { groupe: 'invites', deco: 'couv-droite-haut', titre: 'Trouver ma table', chemin: 'plan-de-table/ma-place.html', accroche: 'Trouvez votre table',
     texte: 'Chacun tape son nom et découvre sa table et ses voisins. Actif une fois le plan « publié » depuis l\'éditeur.' },
-  { groupe: 'invites', orne: 'papillon', coin: 'mimosa', titre: 'Programme', chemin: 'programme/', public: 'Tous les invités',
+  { groupe: 'invites', deco: 'motif-a', titre: 'Programme', chemin: 'programme/', accroche: 'Le programme',
     texte: 'Le déroulé de la journée, avec uniquement les moments marqués « visibles des invités » dans le planning.' },
-  { groupe: 'equipe', orne: 'brancheFleurie', coin: 'feuilleTachetee', titre: 'Planning détaillé', chemin: 'planning/', public: 'Témoins, famille',
-    texte: 'Le minute par minute du week-end : qui fait quoi, où, quand. Le curseur « maintenant » suit la journée en direct.' },
-  { groupe: 'maries', orne: 'mimosa', coin: 'oiseauPerche', titre: 'Plan de table', chemin: 'plan-de-table/', public: 'Connexion requise',
+  { groupe: 'orga', deco: 'colibri-droit', titre: 'Planning détaillé', chemin: 'planning/', accroche: 'Le planning du week-end',
+    texte: 'Le minute par minute du week-end : qui fait quoi, où, quand. Lisible avec le lien, modifiable une fois connecté.' },
+  { groupe: 'orga', deco: 'oiseau-branche', titre: 'Plan de table', chemin: 'plan-de-table/', accroche: 'Plan de table',
     texte: 'Dessinez la salle, assemblez les tables, habillez-les et glissez les invités à leur place.' },
-  { groupe: 'maries', orne: 'oiseauPerche', coin: 'glycine', titre: 'Souvenirs · administration', chemin: 'souvenirs/admin.html', public: 'Connexion requise',
+  { groupe: 'orga', deco: 'colibri', titre: 'Souvenirs · administration', chemin: 'souvenirs/admin.html', accroche: 'Souvenirs',
     texte: 'Voir, trier, masquer ou supprimer les envois des invités. Tout télécharger en un zip.' },
-  { groupe: 'maries', orne: 'feuilleTachetee', coin: 'papillon', titre: 'Projection', chemin: 'projection/', public: 'Connexion requise',
+  { groupe: 'orga', deco: 'couv-gauche-bas', titre: 'Projection', chemin: 'projection/', accroche: 'Projection',
     texte: 'Le diaporama de la soirée : les photos des invités s\'affichent au fil de l\'eau, avec leurs mots.' }
 ];
-
-/* ouverture animée */
-$('#branche-anim').innerHTML = ornement('oiseauPerche');
-$('#colibri-anim').innerHTML = ornement('colibri');
-$('#papillon-anim').innerHTML = ornement('papillon');
-$$('[data-frise]').forEach(el => el.innerHTML = ornement('frise'));
-requestAnimationFrame(() => {
-  $$('#branche-anim .branche *').forEach((el, i) => {
-    el.style.setProperty('--i', i);
-    if (el.classList.contains('plein') || typeof el.getTotalLength !== 'function') return;
-    try { el.style.setProperty('--L', Math.ceil(el.getTotalLength()) + 2); el.dataset.l = '1'; } catch {}
-  });
-  document.body.classList.add('pret');
-});
 
 const jours = Math.ceil((new Date(CONFIG.DATE_ISO + 'T16:30') - new Date()) / 86400000);
 $('#rebours').textContent = jours > 1 ? `J − ${jours} · ${CONFIG.DATE_LONGUE}` : jours === 1 ? 'C\'est demain !' : jours === 0 ? 'C\'est aujourd\'hui !' : CONFIG.DATE_LONGUE;
 
+let fonctionQR = null;
 for (const f of FONCTIONS) {
   const url = urlSite(f.chemin);
   const el = document.createElement('article');
   el.className = 'fonction carte-papier';
-  el.innerHTML = `<span class="coin">${ornement(f.coin)}</span><div class="icone">${ornement(f.orne)}</div>
+  el.innerHTML = `${motif(f.deco, 'deco')}
     <h3>${echap(f.titre)}</h3>
-    <span class="pastille ${f.groupe === 'invites' ? 'invites' : f.groupe === 'maries' ? 'prive' : ''}">${echap(f.public)}</span>
     <p>${echap(f.texte)}</p>
     <div class="actions">
       <a class="btn" href="${url}" target="_blank" rel="noopener">Ouvrir</a>
@@ -188,23 +144,68 @@ for (const f of FONCTIONS) {
     try { await navigator.clipboard.writeText(url); toast('Lien copié'); } catch { prompt('Copiez ce lien :', url); }
   };
   el.querySelector('[data-qr]').onclick = () => {
-    $('#qr-titre').textContent = f.titre; $('#qr-url').textContent = url;
-    qrDans($('#qr'), url, 240); $('#dlg-qr').showModal();
-    $('#qr-png').onclick = () => { const c = $('#qr canvas'); if (c) c.toBlob(b => telecharger(b, `qr-${sansAccent(f.titre).replace(/[^a-z0-9]+/g, '-')}.png`)); };
+    fonctionQR = { ...f, url };
+    $('#qr-titre').textContent = f.titre;
+    qrDans($('#qr'), url, 220); $('#dlg-qr').showModal();
   };
   $('#g-' + f.groupe).appendChild(el);
 }
 $('#qr-fermer').onclick = () => $('#dlg-qr').close();
+$('#qr-affiche').onclick = () => fonctionQR && affiche(fonctionQR);
 $('#pied').innerHTML = piedBleu('Une idée d\'outil en plus ? Demandez à Mickaël.');
 
+/* ---------- Affiche A5 à imprimer : QR code habillé aux couleurs du faire-part ---------- */
+async function affiche(f){
+  const W = 1748, H = 2480; // A5 à 300 dpi
+  const c = $('#affiche'); c.width = W; c.height = H; const x = c.getContext('2d');
+  try { await document.fonts.load('500 100px "Cormorant Garamond"'); await document.fonts.load('400 40px "EB Garamond"'); } catch {}
+  const img = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  const [pg, pd, colib, oiseau, bas] = await Promise.all([img('assets/motifs/motif-a.png'), img('assets/motifs/couv-droite-haut.png'), img('assets/motifs/colibri.png'), img('assets/motifs/oiseau-branche.png'), img('assets/motifs/couv-gauche-bas.png')]);
+  // papier satiné
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#fdfcfa'); g.addColorStop(.45, '#f4f1ea'); g.addColorStop(.55, '#fbfaf7'); g.addColorStop(1, '#efebe2');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // cadre fin bleu + filet
+  x.strokeStyle = '#26356f'; x.lineWidth = 3; x.strokeRect(60, 60, W - 120, H - 120);
+  x.strokeStyle = 'rgba(38,53,111,.35)'; x.lineWidth = 1.5; x.strokeRect(84, 84, W - 168, H - 168);
+  // panneaux du faire-part à gauche et à droite
+  const dessiner = (im, dx, dy, dw) => { if (!im) return; const dh = dw * im.height / im.width; x.drawImage(im, dx, dy, dw, dh); return dh; };
+  if (pg) dessiner(pg, 110, 110, 330);
+  if (pd) dessiner(pd, W - 110 - 380, 110, 380);
+  if (bas) { x.save(); x.globalAlpha = .9; dessiner(bas, 110, H - 110 - 400, 420); x.restore(); }
+  // textes
+  x.textAlign = 'center'; x.fillStyle = '#1e1e22';
+  x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'NOTRE MARIAGE', W / 2, 330, 18);
+  x.font = '400 300px "Cormorant Garamond", Georgia, serif'; x.fillText('M', W / 2 - 170, 600); x.fillText('O', W / 2 + 170, 600);
+  x.fillStyle = '#b8913f'; x.font = '400 120px "Cormorant Garamond", Georgia, serif'; x.fillText('&', W / 2, 560);
+  x.fillStyle = '#1e1e22'; x.font = '500 44px "EB Garamond", Georgia, serif'; espacer(x, '05.12.2026', W / 2, 680, 14);
+  // filet doré
+  x.strokeStyle = '#d9bf7f'; x.lineWidth = 2; x.beginPath(); x.moveTo(W / 2 - 220, 740); x.lineTo(W / 2 - 40, 740); x.moveTo(W / 2 + 40, 740); x.lineTo(W / 2 + 220, 740); x.stroke();
+  x.fillStyle = '#b8913f'; x.font = '40px serif'; x.fillText('✦', W / 2, 754);
+  x.fillStyle = '#1e1e22'; let fs = 150; do { x.font = `italic 500 ${fs}px "Cormorant Garamond", Georgia, serif`; fs -= 6; } while (x.measureText(f.accroche).width > W - 420 && fs > 60); x.fillText(f.accroche, W / 2, 940);
+  // QR sur carte blanche
+  const qc = $('#qr canvas'); const taille = 820, qx = (W - taille) / 2, qy = 1040;
+  x.save(); x.shadowColor = 'rgba(27,38,82,.18)'; x.shadowBlur = 40; x.shadowOffsetY = 16; x.fillStyle = '#fff'; x.fillRect(qx - 40, qy - 40, taille + 80, taille + 80); x.restore();
+  x.strokeStyle = 'rgba(38,53,111,.3)'; x.lineWidth = 1.5; x.strokeRect(qx - 24, qy - 24, taille + 48, taille + 48);
+  if (qc) { x.imageSmoothingEnabled = false; x.drawImage(qc, qx, qy, taille, taille); x.imageSmoothingEnabled = true; }
+  if (colib) dessiner(colib, qx + taille - 20, qy - 150, 170);
+  x.fillStyle = '#1e1e22'; x.font = '500 46px "EB Garamond", Georgia, serif'; espacer(x, 'SCANNEZ-MOI', W / 2, qy + taille + 130, 16);
+  x.fillStyle = '#5c5c63'; x.font = 'italic 400 54px "EB Garamond", Georgia, serif'; x.textAlign = 'center'; x.fillText(f.titre === 'Souvenirs' ? 'Vos photos, vidéos et petits mots de la journée' : f.titre === 'Trouver ma table' ? 'Votre nom, votre table, vos voisins' : 'Avec l\'appareil photo de votre téléphone', W / 2, qy + taille + 210);
+  if (oiseau) dessiner(oiseau, W - 110 - 300, H - 110 - 390, 300);
+  x.fillStyle = '#1e1e22'; x.font = '500 38px "EB Garamond", Georgia, serif'; espacer(x, 'SAMEDI 5 DÉCEMBRE 2026 · OUVROUER-LES-CHAMPS', W / 2, H - 150, 10);
+  c.toBlob(b => telecharger(b, `affiche-${sansAccent(f.titre).replace(/[^a-z0-9]+/g, '-')}.png`), 'image/png');
+  toast('Affiche A5 téléchargée : à imprimer, puis découper le long du cadre.', 3500);
+}
+function espacer(x, txt, cx, y, esp){
+  const largeurs = [...txt].map(ch => x.measureText(ch).width); const total = largeurs.reduce((a, b) => a + b, 0) + esp * (txt.length - 1);
+  let px = cx - total / 2; x.textAlign = 'left';
+  [...txt].forEach((ch, i) => { x.fillText(ch, px, y); px += largeurs[i] + esp; });
+  x.textAlign = 'center';
+}
+
 async function majSession(){
-  const s = $('#session');
-  if (!sb) return;
+  const s = $('#session'); if (!sb) return;
   const { data } = await sb.auth.getSession();
-  if (data.session) {
-    s.innerHTML = `<span class="doux">Connecté : ${echap(data.session.user.email)}</span> <button class="btn petit clair" id="btn-deco">Se déconnecter</button>`;
-    $('#btn-deco').onclick = deconnecter;
-  }
+  if (data.session) { s.innerHTML = `<span class="doux">Connecté : ${echap(data.session.user.email)}</span> <button class="btn petit clair" id="btn-deco">Se déconnecter</button>`; $('#btn-deco').onclick = deconnecter; }
 }
 majSession();
 </script>

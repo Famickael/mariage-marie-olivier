@@ -17,8 +17,8 @@
   --bleu-voile:#e6e9f3;
   --or:#b8913f;            /* avec parcimonie */
   --or-clair:#d9bf7f;
-  --encre:#1b2652;         /* texte courant : bleu nuit */
-  --encre-douce:#5b6799;   /* texte secondaire : bleu doux */
+  --encre:#1e1e22;         /* texte courant : noir doux, comme le faire-part */
+  --encre-douce:#5c5c63;   /* texte secondaire */
   --ok:#3f6b55;
   --erreur:#9b2f3a;
   --ombre:0 14px 40px rgba(27,38,82,.12),0 2px 6px rgba(27,38,82,.07);
@@ -49,15 +49,15 @@ body::after{
 }
 @keyframes reflet{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
 
-h1,h2,h3,.titre{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;color:var(--bleu-nuit);margin:0;line-height:1.1}
-.capitales{text-transform:uppercase;letter-spacing:.3em;font-size:.76rem;font-weight:500;color:var(--bleu)}
+h1,h2,h3,.titre{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;color:var(--encre);margin:0;line-height:1.1}
+.capitales{text-transform:uppercase;letter-spacing:.3em;font-size:.76rem;font-weight:500;color:var(--encre)}
 .italique{font-style:italic}
 .doux{color:var(--encre-douce)}
 .centre{text-align:center}
 a{color:var(--bleu)}
 
 /* Monogramme M & O */
-.monogramme{font-family:"Cormorant Garamond",serif;font-weight:400;color:var(--bleu-nuit);letter-spacing:.04em;line-height:1;white-space:nowrap}
+.monogramme{font-family:"Cormorant Garamond",serif;font-weight:400;color:var(--encre);letter-spacing:.04em;line-height:1;white-space:nowrap}
 .monogramme .et{font-size:.42em;vertical-align:.32em;margin:0 .22em;color:var(--or)}
 
 /* Filet doré */
@@ -80,7 +80,7 @@ a{color:var(--bleu)}
 :focus-visible{outline:2px solid var(--or);outline-offset:2px}
 
 /* Champs */
-label.champ{display:block;text-transform:uppercase;letter-spacing:.18em;font-size:.66rem;font-weight:500;color:var(--bleu-doux);margin:16px 0 4px}
+label.champ{display:block;text-transform:uppercase;letter-spacing:.18em;font-size:.66rem;font-weight:500;color:var(--encre-douce);margin:16px 0 4px}
 input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],input[type=time],input[type=date],textarea,select{
   width:100%;font:inherit;font-size:1rem;color:var(--encre);background:rgba(255,255,255,.75);
   border:0;border-bottom:1px solid var(--bleu-pale);padding:8px 6px;border-radius:0}
@@ -101,17 +101,26 @@ textarea{resize:vertical}
 .orne .plein{fill:currentColor;stroke:none}
 .orne .or{color:var(--or)}
 
+/* Motifs du faire-part (PNG détourés, encre bleue sur fond transparent) */
+.motif{display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
+.motif.blanc{filter:brightness(0) invert(1)}   /* encre blanche sur fond bleu */
+/* Colonnes latérales fixes (grands écrans) : les deux panneaux du faire-part ouvert */
+.cote{position:fixed;top:0;bottom:0;width:min(17vw,300px);z-index:0;pointer-events:none;display:none;overflow:hidden}
+.cote img{position:absolute;top:50%;transform:translateY(-50%);width:100%;height:auto;max-height:100%;object-fit:contain}
+.cote.gauche{left:max(0px,calc(50vw - 640px - min(17vw,300px)))}
+.cote.droite{right:max(0px,calc(50vw - 640px - min(17vw,300px)))}
+@media (min-width:1180px){.cote{display:block}}
+body > main,body > footer,body > header{position:relative;z-index:1}
+
 /* En-tête commun des pages invités */
 .entete-site{text-align:center;position:relative;padding:44px 22px 34px;overflow:hidden}
 .entete-site .monogramme{font-size:clamp(3.4rem,15vw,4.8rem);margin:6px 0 2px}
 .entete-site h1{font-style:italic;font-size:clamp(1.9rem,7vw,2.5rem)}
 .entete-site .sous{margin:8px 0 0;color:var(--encre-douce)}
 .entete-site .orn{position:absolute;pointer-events:none}
-.entete-site .orn.a{width:150px;left:-20px;top:-16px;transform:rotate(-8deg)}
-.entete-site .orn.b{width:170px;right:-24px;bottom:-30px;transform:rotate(172deg)}
-.entete-site .orn.c{width:90px;right:26px;top:22px}
-.entete-site .orn.d{width:60px;left:36px;bottom:40px;opacity:.85}
-@media (max-width:520px){ .entete-site .orn.c{width:64px;right:10px} .entete-site .orn.a{width:110px} .entete-site .orn.b{width:120px} }
+.entete-site .orn.a{width:min(150px,28vw);left:-20px;top:-14px;opacity:.92}
+.entete-site .orn.b{width:min(230px,40vw);right:-20px;bottom:-24px;opacity:.95}
+.entete-site > *:not(.orn){position:relative}
 
 /* Pied de page bleu */
 .pied-bleu{background:var(--bleu-nuit);color:#fff;text-align:center;padding:34px 20px 30px;margin-top:70px;width:100%;position:relative;overflow:hidden}
@@ -119,9 +128,10 @@ textarea{resize:vertical}
 .pied-bleu .monogramme .et{color:var(--or-clair)}
 .pied-bleu p{margin:8px 0 0;color:rgba(255,255,255,.8);font-style:italic}
 .pied-bleu .capitales{color:var(--or-clair)}
-.pied-bleu .orn{position:absolute;color:rgba(255,255,255,.22);pointer-events:none}
-.pied-bleu .orn.a{width:170px;left:-30px;bottom:-40px;transform:rotate(-10deg)}
-.pied-bleu .orn.b{width:140px;right:-20px;top:-30px;transform:rotate(160deg)}
+.pied-bleu .orn{position:absolute;opacity:.55;pointer-events:none}
+.pied-bleu .orn.a{width:min(260px,40vw);left:-10px;bottom:-30px}
+.pied-bleu .orn.b{width:min(170px,30vw);right:10px;bottom:-12px}
+.pied-bleu > *:not(.orn){position:relative}
 
 /* Connexion organisateur */
 .connexion{max-width:380px;margin:12vh auto;padding:38px 32px;text-align:center}

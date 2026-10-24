@@ -10,8 +10,8 @@
   main{max-width:860px;margin:0 auto;padding:30px 16px 90px}
   header.tete{text-align:center;position:relative}
   header.tete h1{font-size:clamp(2rem,7vw,2.8rem);font-style:italic}
-  header.tete .o1{position:absolute;width:130px;left:-10px;top:-20px;opacity:.85;transform:rotate(-8deg)}
-  header.tete .o2{position:absolute;width:90px;right:0;top:0;opacity:.85}
+  header.tete .o1{position:absolute;width:130px;left:-10px;top:-30px}
+  header.tete .o2{position:absolute;width:150px;right:0;top:-10px}
   @media (max-width:600px){header.tete .o1,header.tete .o2{width:70px}}
   .outils{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
   .jours{display:flex;justify-content:center;gap:0;margin:24px auto 0;border:1px solid var(--perle-fonce);width:max-content;max-width:100%;overflow-x:auto;background:#fff}
@@ -101,12 +101,11 @@
 <footer class="pied-bleu" id="pied"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../assets/ornements.js"></script>
 <script src="../assets/commun.js"></script>
 <script src="../assets/programme.js"></script>
 <script>
 let items = [], jourActif = null, edition = false, enEdition = null;
-$('#o').outerHTML = ornement('brancheFleurie', 'o1') + ornement('colibri', 'o2');
+$('#o').outerHTML = motif('motif-a', 'o1') + motif('colibri-droit', 'o2');
 $('#pied').innerHTML = piedBleu('');
 
 async function demarrer(){

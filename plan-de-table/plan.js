@@ -1069,8 +1069,8 @@ function imprimer(type){
     html = `<div class="imp-page">${tete('Trouvez votre table')}<div class="imp-alpha">${corps}</div></div>`;
   } else if (type === 'cartons') {
     const liste = tables.flatMap(t => t.sieges.filter(Boolean).map(g => ({ i: ix.invites.get(g), t }))).filter(x => x.i);
-    const ornes = ['branche', 'mimosa', 'colibri', 'papillon', 'fleur'];
-    html = `<div class="imp-page imp-cartons">${liste.map(({ i, t }, k) => `<div class="carton"><span class="pli"></span>${ornement(ornes[k % ornes.length], '', 'right:4mm;bottom:3mm;transform:rotate(' + (k % 2 ? 160 : -10) + 'deg)')}<div class="bas"><div class="nom">${echap(i.nom)}</div><div class="tab">${echap(libelleTable(t))}</div></div></div>`).join('')}</div>`;
+    const ornes = ['colibri', 'oiseau-branche', 'colibri-droit', 'motif-a'];
+    html = `<div class="imp-page imp-cartons">${liste.map(({ i, t }, k) => `<div class="carton"><span class="pli"></span>${motif(ornes[k % ornes.length], '', 'position:absolute;right:3mm;bottom:2mm;width:20mm;max-height:22mm;object-fit:contain')}<div class="bas"><div class="nom">${echap(i.nom)}</div><div class="tab">${echap(libelleTable(t))}</div></div></div>`).join('')}</div>`;
   } else if (type === 'traiteur') {
     let tot = { a: 0, e: 0 }, lignes = '';
     for (const t of tables) {
