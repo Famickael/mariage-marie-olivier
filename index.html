@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241742">
+<link rel="stylesheet" href="assets/charte.css?v=202610241753">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -27,6 +27,9 @@
   .fonction{padding:24px 20px 18px;display:flex;flex-direction:column;gap:9px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-height:290px;cursor:pointer}
   .fonction:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(27,38,82,.16)}
   .fonction .deco{position:absolute;right:-10px;top:-6px;width:46%;max-height:46%;object-fit:contain;object-position:top right;opacity:.95}
+  .fonction .deco.carte-1{transform:scaleX(-1);right:22px;top:6px;width:40%}
+  .visites{position:relative;margin:0;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-douce);display:flex;align-items:center;gap:7px;min-height:1em;white-space:nowrap}
+  .visites::before{content:'✦';color:var(--or);font-size:.55rem}
   .fonction h3{font-size:1.5rem;font-style:italic;margin-top:70px;position:relative}
   .etat-pub{position:absolute;left:20px;top:18px;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:12px;border:1px solid var(--perle-fonce);color:var(--encre-douce);background:rgba(255,255,255,.7)}
   .etat-pub.ok{border-color:#9bbba6;color:var(--ok)} .etat-pub.non{border-color:#e0b4b8;color:var(--erreur)}
@@ -48,8 +51,6 @@
 </style>
 </head>
 <body data-ouverture="clic">
-<img class="motif branche-titre g" src="assets/motifs/branche-titre-gauche.png" alt="" draggable="false" decoding="async">
-<img class="motif branche-titre d" src="assets/motifs/branche-titre-droite.png" alt="" draggable="false" decoding="async">
 <main>
   <header class="tete"
     <p class="capitales">Notre mariage</p>
@@ -88,8 +89,8 @@
 
 <script src="assets/vendor/supabase.min.js"></script>
 <script src="assets/vendor/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241742"></script>
-<script src="assets/ouverture.js?v=202610241742"></script>
+<script src="assets/commun.js?v=202610241753"></script>
+<script src="assets/ouverture.js?v=202610241753"></script>
 <script>
 const FONCTIONS = [
   { groupe: 'invites', deco: 'carte-1', titre: 'Déposer ses souvenirs', chemin: 'souvenirs/', etat: 'depot', accroche: 'Partagez vos souvenirs',
@@ -116,10 +117,11 @@ for (const f of FONCTIONS) {
   const url = urlSite(f.chemin);
   const el = document.createElement('article');
   el.className = 'fonction carte-papier';
-  el.innerHTML = `${motif(f.deco, 'deco')}
+  el.innerHTML = `${motif(f.deco, 'deco ' + f.deco)}
     ${f.etat ? `<span class="etat-pub" data-etat="${f.etat}">…</span>` : ''}
     <h3>${echap(f.titre)}</h3>
     <p>${echap(f.texte)}</p>
+    ${f.etat ? `<p class="visites" data-visites="${f.etat}"></p>` : ''}
     ${f.groupe === 'invites' ? `<div class="actions">
       <button class="btn clair" data-copier>Copier le lien</button>
       <button class="btn clair" data-qr>QR code</button>
@@ -152,7 +154,13 @@ $('#pied').innerHTML = piedBleu();
   poser('depot', depot, depot ? 'Dépôt ouvert' : 'Dépôt fermé');
   poser('programme', prog, prog ? 'Publié' : 'Non publié');
   const planOk = !!(plans.data && plans.data.length);
-  poser('plan', planOk, planOk ? 'Plan publié' : 'Plan non publié');
+  poser('plan', planOk, planOk ? 'Publié' : 'Non publié');
+  // visiteurs uniques de chaque page invités
+  for (const k of ['depot', 'plan', 'programme']) {
+    const { count } = await sb.from('mo_visites').select('page', { count: 'exact', head: true }).eq('page', k);
+    const el = $(`.visites[data-visites="${k}"]`); if (!el || count == null) continue;
+    el.textContent = count === 0 ? 'Aucune visite' : count === 1 ? '1 visiteur' : `${count.toLocaleString('fr-FR')} visiteurs`;
+  }
 })();
 
 /* ---------- Affiche A5 à imprimer : QR code habillé aux couleurs du faire-part ---------- */

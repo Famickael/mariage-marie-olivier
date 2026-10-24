@@ -86,14 +86,7 @@ function colonnesCote(){
   // les grands panneaux ne sont chargés que si l'écran est assez large pour les afficher
   const poser = () => { if ($('.cote') || !matchMedia('(min-width:980px)').matches) return; document.body.insertAdjacentHTML('afterbegin', `<div class="cote gauche" aria-hidden="true">${motif('panneau-gauche')}</div><div class="cote droite" aria-hidden="true">${motif('panneau-droit')}</div>`); };
   poser(); matchMedia('(min-width:980px)').addEventListener('change', poser);
-  // petits écrans : quelques motifs du faire-part en fond, le long des bords
-  // (répartis sur la hauteur réelle de la page, en évitant le pied bleu)
-  if (!matchMedia('(min-width:980px)').matches && !$('.fond-mobile')) {
-    const pied = $('.pied-bleu'); const H = (pied ? pied.offsetTop : document.documentElement.scrollHeight) - innerWidth * .4;
-    const noms = [['couv-droite-haut', 'a'], ['couv-gauche-bas', 'b'], ['oiseau-branche', 'c'], ['motif-a', 'd']];
-    const n = Math.max(2, Math.min(4, Math.floor(H / (innerHeight * .5))));
-    noms.slice(0, n).forEach(([nom, cls], i) => document.body.insertAdjacentHTML('afterbegin', motif(nom, 'fond-mobile ' + cls, `top:${Math.round(innerHeight * .5 + (H - innerHeight * .5) * i / n)}px`)));
-  }
+
 }
 
 /* En-tête commun des pages invités : <header class="entete-site" data-titre="…" data-sous="…"> */
@@ -120,6 +113,16 @@ function piedBleu(){
   return `${motif('pied-gauche', 'blanc orn a')}${motif('pied-droit', 'blanc orn b')}
     <div class="monogramme">M<span class="et">&amp;</span>O</div>
     <p class="capitales">Samedi 5 décembre 2026 · Ouvrouer-les-Champs</p>`;
+}
+
+/* Compteur de visiteurs uniques d'une page invités (identifiant anonyme gardé sur l'appareil) */
+async function compterVisite(page){
+  if (!sb) return;
+  try {
+    let id = localStorage.getItem('mo_visiteur');
+    if (!id) { id = uuid(); localStorage.setItem('mo_visiteur', id); }
+    await sb.from('mo_visites').insert({ page, visiteur: id });   // doublon ignoré (clé primaire)
+  } catch {}
 }
 
 /* QR code (bibliothèque qrcodejs chargée par la page) */

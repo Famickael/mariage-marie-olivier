@@ -344,21 +344,6 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.16s}
 .ruban-coin svg{position:absolute;top:26px;right:26px;width:104px;height:auto;transform:rotate(45deg);filter:drop-shadow(0 2px 3px rgba(27,38,82,.35))}
 @media (max-width:520px){.entete-site .ruban-coin{width:140px;height:140px}.ruban-coin::before{top:32px;right:-56px;height:24px;width:260px}.ruban-coin svg{width:68px;top:18px;right:18px}}
 
-/* Branches encadrant le titre de l'accueil (enfants directs de body, avant main) */
-.branche-titre{position:absolute;top:-20px;width:34vw;max-width:520px;pointer-events:none;z-index:0}
-.branche-titre.g{left:-3vw} .branche-titre.d{right:-3vw}
-html{overflow-x:hidden} body{overflow-x:clip}
-@media (max-width:979px){.branche-titre{width:40vw;top:-24px;opacity:.9} .branche-titre.g{left:-8vw} .branche-titre.d{right:-8vw}}
-/* Petits écrans : les panneaux latéraux n'ont pas de place ; des motifs discrets habillent le fond */
-.fond-mobile{display:none}
-@media (max-width:979px){
-  .fond-mobile{display:block;position:absolute;pointer-events:none;z-index:0;opacity:.6;width:52vw}
-  .fond-mobile.a{right:-18vw;transform:scaleX(-1)}
-  .fond-mobile.b{left:-18vw}
-  .fond-mobile.c{right:-20vw}
-  .fond-mobile.d{left:-18vw;transform:scaleX(-1)}
-}
-
 /* Impression : jamais de décor */
 @media print{ .cote,.pied-bleu,.bandeau-orga,.outils,.ruban-coin{display:none!important} body::before,body::after{display:none} }
 
