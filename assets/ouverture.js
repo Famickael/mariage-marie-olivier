@@ -12,7 +12,7 @@
    À charger après commun.js.
    ============================================================ */
 (function(){
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.remove('fp-avant'); return; }
   const M = n => `<img class="motif" src="${BASE_ASSETS}motifs/${n}.png" alt="" draggable="false">`;
   /* Gros-grain : fines côtes perpendiculaires au sens du ruban (mêmes bleus que le ruban) */
   const GG = (id, a) => `<pattern id="${id}" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(${a})"><rect width="3" height="3" fill="#1b2652"/><rect width="1" height="3" fill="#243271"/></pattern>`;
@@ -27,6 +27,7 @@
   ov.innerHTML = `
   <i class="voile vg"></i><i class="voile vd"></i><i class="voile vh"></i><i class="voile vb"></i>
   <i class="halo"></i>
+  <div class="scene">
   <div class="fp" id="fp">
     <div class="volet g"><div class="pli">
       <div class="face recto">
@@ -68,11 +69,13 @@
         <path d="M208 90 C224 82,246 82,262 91 M206 150 C224 158,246 158,264 149 M222 100 C218 112,218 128,222 140" fill="none" stroke="#0b1230" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/></svg></div>
     </div>
   </div>
+  </div>
   <i class="rideau"></i>
   <p class="indice">Cliquez sur le faire-part pour l'ouvrir</p>
   <button class="passer" type="button">Passer</button>`;
   document.body.prepend(ov);
   document.body.classList.add('fp-en-cours');
+  document.documentElement.classList.remove('fp-avant');   // le faire-part couvre désormais la page
   const fp = ov.querySelector('#fp'), liens = ov.querySelector('.liens');
   const etape = c => { fp.classList.add(c); liens.classList.add(c); };
   const t = [];

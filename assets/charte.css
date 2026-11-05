@@ -164,7 +164,9 @@ body.fp-ouvre main > .groupe + .groupe{animation-delay:.4s,.4s}
 body.fp-ouvre.fp-vite main > *,body.fp-ouvre.fp-vite > footer,body.fp-ouvre.fp-vite main > .groupe,body.fp-ouvre.fp-vite main > .tete{animation-duration:.9s,.9s;animation-delay:0s,0s}
 @keyframes fp-page{0%{opacity:0}100%{opacity:1}}
 @keyframes fp-bloc{0%{transform:translateY(16px)}100%{transform:translateY(0)}}
-#ouverture{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:transparent;perspective:1900px;overflow:hidden;
+/* Page masquée dès le premier affichage (classe posée dans le <head>), jusqu'à ce que le faire-part la couvre */
+html.fp-avant body > *{opacity:0}
+#ouverture{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:transparent;overflow:hidden;
   --fpw:min(520px,84vw);--fph:min(calc(var(--fpw) * 1.344),78vh)}   /* dimensions du faire-part (= .fp) */
 /* Voile (couleur du satin) : plein jusqu'à l'ouverture (::before), puis quatre bandes autour du faire-part dont les
    bords suivent exactement la caméra (même durée, même courbe), et qui s'effacent lentement. */
@@ -199,7 +201,11 @@ body.fp-ouvre.fp-vite main > *,body.fp-ouvre.fp-vite > footer,body.fp-ouvre.fp-v
    en position absolue dans le conteneur flex, il est centré exactement au même endroit. */
 .fp{position:relative;width:min(520px,84vw);aspect-ratio:1500/2016;max-height:78vh;transform-style:preserve-3d;
   transform:translateY(2%) scale(.82) rotateX(6deg) rotateY(-4deg);will-change:transform}
-.fp.liens{position:absolute;pointer-events:none}
+.fp.liens{pointer-events:none}
+/* La scène superpose le faire-part et le calque du ruban dans la même case de grille : mêmes dimensions,
+   même position, dans tous les navigateurs. La perspective est portée par elle (centrée sur le faire-part). */
+#ouverture .scene{display:grid;place-items:center;perspective:1900px}
+#ouverture .scene > .fp{grid-area:1 / 1}
 .fp.liens::before{content:none}
 /* Ombre au sol, large et douce (dégradés statiques : on n'anime que transform et opacity) */
 .fp::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-11%;height:22%;border-radius:50%;will-change:transform,opacity;
@@ -274,7 +280,7 @@ body.fp-ouvre.fp-vite main > *,body.fp-ouvre.fp-vite > footer,body.fp-ouvre.fp-v
 
 /* Ruban gros-grain : de la largeur du faire-part ; à chaque extrémité une tranche .bord repliée vers l'arrière,
    et une ombre douce sur le papier (::before) */
-.ruban{position:absolute;left:0;right:0;top:46.5%;height:9%;transform:translateZ(6px);transform-style:preserve-3d;
+.ruban{position:absolute;left:-1px;right:-1px;top:46.5%;height:9%;transform:translateZ(6px);transform-style:preserve-3d;
   background:repeating-linear-gradient(90deg,#1b2652 0 2px,#243271 2px 3px)}
 .ruban::before{content:"";position:absolute;left:0;right:0;top:-16%;bottom:-52%;pointer-events:none;z-index:-1;background:
   linear-gradient(180deg,rgba(27,38,82,0) 0%,rgba(27,38,82,.12) 9%,rgba(27,38,82,0) 9.6%,rgba(27,38,82,0) 68.5%,rgba(27,38,82,.34) 69%,rgba(27,38,82,.14) 82%,rgba(27,38,82,0) 100%)}

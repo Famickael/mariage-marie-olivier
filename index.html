@@ -7,7 +7,7 @@
 <title>Marie &amp; Olivier</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/charte.css?v=202610241824">
+<link rel="stylesheet" href="assets/charte.css?v=202611051400">
 <style>
   main{max-width:1200px;margin:0 auto;padding:0 16px 0}
 
@@ -49,6 +49,7 @@
   .qr-carte .actions .btn{flex:none;font-size:.66rem;letter-spacing:.12em;padding:9px 14px}
   canvas#affiche{display:none}
 </style>
+<script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('fp-avant');setTimeout(function(){document.documentElement.classList.remove('fp-avant')},5000)}</script>
 </head>
 <body data-ouverture="clic">
 <main>
@@ -89,8 +90,8 @@
 
 <script src="assets/vendor/supabase.min.js"></script>
 <script src="assets/vendor/qrcode.min.js"></script>
-<script src="assets/commun.js?v=202610241824"></script>
-<script src="assets/ouverture.js?v=202610241824"></script>
+<script src="assets/commun.js?v=202611051400"></script>
+<script src="assets/ouverture.js?v=202611051400"></script>
 <script>
 const FONCTIONS = [
   { groupe: 'invites', deco: 'carte-1', titre: 'Déposer ses souvenirs', chemin: 'souvenirs/', etat: 'depot', accroche: 'Partagez vos souvenirs',
