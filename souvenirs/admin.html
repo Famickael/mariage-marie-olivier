@@ -29,6 +29,7 @@
   .carte .actions{display:flex;gap:6px;padding:0 10px 10px;align-items:center;flex-wrap:wrap}
   @media (pointer:coarse){ .lien-modif,.interrupteur,.carte .actions a,.carte .actions button{min-height:36px;padding:6px 10px} .galerie{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))} }
   .carte .actions a,.carte .actions button{font:inherit;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;background:none;border:0;padding:4px 0;cursor:pointer;color:var(--bleu);text-decoration:none}
+  .carte .actions .pivot{font-size:1rem;letter-spacing:0;padding:0 3px}
   .carte .actions .suppr{margin-left:auto;color:var(--encre-douce)}
   .carte .actions .suppr:hover{color:var(--erreur)}
   .carte.supprime{opacity:.35;pointer-events:none}
@@ -201,7 +202,10 @@ async function rendreListe(){
         if (apercuPossible(type)) {
           const rec = document.createElement('button'); rec.textContent = 'Recadrer';
           rec.onclick = () => ouvrirRecadrage(f, ap);
-          act.append(dl, rec, sup);
+          const g = document.createElement('button'), d = document.createElement('button');
+          g.textContent = '⟲'; g.title = 'Pivoter à gauche'; g.className = 'pivot'; d.textContent = '⟳'; d.title = 'Pivoter à droite'; d.className = 'pivot';
+          g.onclick = () => pivoter(f, ap, 270, [g, d]); d.onclick = () => pivoter(f, ap, 90, [g, d]);
+          act.append(dl, rec, g, d, sup);
         } else act.append(dl, sup); carte.append(ap, infos, ligne2, act); gal.appendChild(carte);
       });
       sec.appendChild(gal);
@@ -334,30 +338,53 @@ $('#rc-cadre').addEventListener('pointerdown', e => {
   cadre.addEventListener('pointermove', bouger); cadre.addEventListener('pointerup', finir); cadre.addEventListener('pointercancel', finir);
 });
 
+/* Fabrique et dépose les aperçus 1600/400 à partir d'une image, pivotée de rot degrés puis recadrée (fractions). */
+async function deposerVersions(f, bmp, rot, crop, ap){
+  const q = rot % 180 !== 0, W = q ? bmp.height : bmp.width, H = q ? bmp.width : bmp.height;
+  const cx = crop.x * W, cy = crop.y * H, cw = crop.w * W, ch = crop.h * H;
+  const chemins = [];
+  for (const [largeur, qualite] of [[APERCUS.GRAND, 0.82], [APERCUS.MINI, 0.7]]) {
+    const s = Math.min(1, largeur / cw), out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(cw * s)); out.height = Math.max(1, Math.round(ch * s));
+    const ctx = out.getContext('2d'); ctx.imageSmoothingQuality = 'high';
+    ctx.scale(s, s); ctx.translate(-cx, -cy); ctx.translate(W / 2, H / 2); ctx.rotate(rot * Math.PI / 180);
+    ctx.drawImage(bmp, -bmp.width / 2, -bmp.height / 2);
+    const blob = await new Promise((ok, ko) => out.toBlob(b => b ? ok(b) : ko(new Error('encodage impossible')), 'image/jpeg', qualite));
+    const chemin = cheminApercu(f.chemin, largeur); chemins.push(chemin);
+    const { error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).upload(chemin, blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: true });
+    if (error) throw error;
+  }
+  chemins.forEach(c => memoUrls.delete(c));
+  const [mini] = await urlsSignees([cheminApercu(f.chemin, APERCUS.MINI)]);
+  const img = ap && ap.querySelector('img'); if (img && mini) img.src = mini + '&v=' + Date.now();
+}
+
 $('#rc-ok').onclick = async () => {
   if (!rc.bmp) return;
   const btn = $('#rc-ok'); btn.disabled = true; $('#rc-etat').textContent = 'Enregistrement…';
   try {
-    const { W, H } = dimsTournees(), { x, y, w, h } = rc.crop;
-    const cx = x * W, cy = y * H, cw = w * W, ch = h * H;   // en pixels de l'original pivoté
-    const chemins = [];
-    for (const [largeur, qualite] of [[APERCUS.GRAND, 0.82], [APERCUS.MINI, 0.7]]) {
-      const s = Math.min(1, largeur / cw), out = document.createElement('canvas');
-      out.width = Math.max(1, Math.round(cw * s)); out.height = Math.max(1, Math.round(ch * s));
-      const ctx = out.getContext('2d'); ctx.scale(s, s); ctx.translate(-cx, -cy); dessinerTourne(ctx, 1);
-      const blob = await new Promise((ok, ko) => out.toBlob(b => b ? ok(b) : ko(new Error('encodage impossible')), 'image/jpeg', qualite));
-      const chemin = cheminApercu(rc.f.chemin, largeur); chemins.push(chemin);
-      const { error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).upload(chemin, blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: true });
-      if (error) throw error;
-    }
-    chemins.forEach(c => memoUrls.delete(c));
-    const [mini] = await urlsSignees([cheminApercu(rc.f.chemin, APERCUS.MINI)]);
-    const img = rc.ap && rc.ap.querySelector('img'); if (img && mini) img.src = mini + '&v=' + Date.now();
+    await deposerVersions(rc.f, rc.bmp, rc.rot, rc.crop, rc.ap);
     toast('Recadrage enregistré : il sera pris en compte au prochain chargement de la projection');
     fermerRecadrage();
   } catch (e) { $('#rc-etat').textContent = 'Échec de l\'enregistrement : ' + (e.message || e); }
   btn.disabled = false;
 };
+
+/* Rotation en un clic depuis la carte : on fait tourner la version projetée telle qu'elle est (recadrage conservé). */
+async function pivoter(f, ap, angle, boutons){
+  boutons.forEach(b => b.disabled = true); ap.style.opacity = '.4';
+  try {
+    const [grand] = await urlsSignees([cheminApercu(f.chemin, APERCUS.GRAND)]);
+    let r = grand ? await fetch(grand + '&v=' + Date.now()) : null;
+    if (!r || !r.ok) { const [orig] = await urlsSignees([f.chemin]); r = await fetch(orig); }
+    if (!r.ok) throw new Error('photo introuvable');
+    const bmp = await createImageBitmap(await r.blob(), { imageOrientation: 'from-image' });
+    await deposerVersions(f, bmp, angle, { x: 0, y: 0, w: 1, h: 1 }, ap);
+    if (bmp.close) bmp.close();
+    toast('Photo pivotée');
+  } catch (e) { alert('Rotation impossible : ' + (e.message || e)); }
+  boutons.forEach(b => b.disabled = false); ap.style.opacity = '';
+}
 </script>
 </body>
 </html>

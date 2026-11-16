@@ -21,10 +21,10 @@
   .bandeau .monogramme{font-size:4vmin}
   .bandeau .capitales{font-size:1.2vmin;margin-left:1.5vmin;vertical-align:.6vmin}
   #qr-coin{position:absolute;right:2vmin;bottom:2vmin;background:#fff;padding:1vmin;box-shadow:var(--ombre);text-align:center}
-  #qr-coin .capitales{font-size:1.7vmin;letter-spacing:.2em;margin-top:.8vmin}
-  #qr-coin img,#qr-coin canvas{width:22vmin!important;height:22vmin!important;display:block}
+  #qr-coin .capitales{font-size:1.25vmin;letter-spacing:.18em;margin-top:.7vmin;max-width:14vmin;margin-left:auto;margin-right:auto;line-height:1.5}
+  #qr-coin img,#qr-coin canvas{width:14vmin!important;height:14vmin!important;display:block}
 
-  #diapos{position:absolute;inset:2vmin 27vmin 8vmin 6vmin;display:flex;align-items:center;justify-content:center}
+  #diapos{position:absolute;inset:3vmin 18vmin 9vmin 18vmin;display:flex;align-items:center;justify-content:center}
   /* Les photos sont « posées sur une table » : la nouvelle arrive de l'avant (grande, floue d'ombre, transparente)
      et se pose au centre ; les précédentes glissent vers les bords, plus petites, et restent visibles derrière. */
   .diapo{position:absolute;display:flex;align-items:center;justify-content:center;
@@ -36,11 +36,11 @@
   .cadre-photo{position:relative;background:#fff;padding:1vmin;box-shadow:0 5vmin 9vmin rgba(27,38,82,.18),0 1vmin 2vmin rgba(27,38,82,.12);transition:box-shadow 1.6s ease}
   .diapo.visible .cadre-photo{box-shadow:0 1.2vmin 3.2vmin rgba(27,38,82,.28),0 .2vmin .6vmin rgba(27,38,82,.22)}
   .diapo.dessous .cadre-photo{box-shadow:0 .6vmin 1.6vmin rgba(27,38,82,.25)}
-  .cadre-photo .media{position:relative;outline:.2vmin solid var(--or-clair);outline-offset:-.8vmin;line-height:0;background:var(--perle)}
+  .cadre-photo .media{position:relative;line-height:0;background:var(--perle)}
   .cadre-photo img,.cadre-photo video{display:block;max-width:min(52vw,calc(100vw - 40vmin));max-height:60vh;width:auto;height:auto;object-fit:contain}
   .cadre-photo img{min-width:28vmin;min-height:22vmin}
   .legende{position:absolute;right:1.6vmin;bottom:1.6vmin;max-width:min(70%,50vmin);background:rgba(252,251,248,.94);padding:.9vmin 1.4vmin;
-    text-align:right;box-shadow:0 .3vmin 1.2vmin rgba(0,0,0,.2);border-right:.3vmin solid var(--or);line-height:1.3;transition:opacity 1s ease}
+    text-align:right;box-shadow:0 .3vmin 1.2vmin rgba(0,0,0,.2);line-height:1.3;transition:opacity 1s ease}
   .diapo.dessous .legende{opacity:0}
   .legende .mot{font-size:2.7vmin;font-style:italic;color:var(--encre);white-space:pre-wrap;margin-bottom:.4vmin;max-height:18vh;overflow:hidden}
   .legende .qui{font-size:1.6vmin;text-transform:uppercase;letter-spacing:.2em;color:var(--encre-douce)}
@@ -65,7 +65,7 @@
   <span id="coins"></span>
   <div id="diapos"></div>
   <div class="bandeau"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="capitales">05.12.2026</span></div>
-  <div id="qr-coin"><div id="qr"></div><div class="capitales">Partagez vos photos</div></div>
+  <div id="qr-coin"><div id="qr"></div><div class="capitales">Partagez vos souvenirs</div></div>
   <div id="aide">F plein écran · espace pause · ← → naviguer · V vidéos oui/non · R actualiser · Ne rechargez pas la page pendant la soirée</div>
   <div id="pause">Pause</div>
   <div id="etat-cache"></div>
@@ -75,7 +75,7 @@
 <script src="../assets/vendor/qrcode.min.js"></script>
 <script src="../assets/commun.js?v=202611161200"></script>
 <script>
-Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45000, RAFRAICHIR: 60000, MAX_TABLE: 8, CACHE_MAX_VIDEO: 100 * 1048576, CACHE_MAX_TOTAL: 1500 * 1048576 });
+Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45000, RAFRAICHIR: 60000, MAX_TABLE: 16, CACHE_MAX_VIDEO: 100 * 1048576, CACHE_MAX_TOTAL: 1500 * 1048576 });
 let items = [], connus = new Set(), file = [], nouveaux = [];
 let position = -1, timer = null, enPause = false, avecVideos = true, premierChargement = true, courant = null;
 
@@ -205,11 +205,14 @@ function afficher(it){
     if (!el.classList.contains('dessous')) {
       el.classList.add('dessous');
       const v = el.querySelector('video'); if (v) v.pause();
-      const a = Math.random() * Math.PI * 2, r = 0.7 + Math.random() * 0.3;   // direction au hasard, plutôt vers les bords
-      el.style.setProperty('--dx', (Math.cos(a) * r * 33).toFixed(1) + 'vw');
-      el.style.setProperty('--dy', (Math.sin(a) * r * 28).toFixed(1) + 'vh');
+      // direction au hasard, plutôt vers les bords, sans mordre sur les illustrations des côtés ni sur le QR code
+      const a = Math.random() * Math.PI * 2, r = 0.65 + Math.random() * 0.35;
+      let dx = Math.cos(a) * r * 22, dy = Math.sin(a) * r * 25;
+      if (dx > 10 && dy > 8) dy = -dy;
+      el.style.setProperty('--dx', dx.toFixed(1) + 'vw');
+      el.style.setProperty('--dy', dy.toFixed(1) + 'vh');
       el.style.setProperty('--rot', ((Math.random() * 24) - 12).toFixed(1) + 'deg');
-      el.style.setProperty('--s-dessous', (0.46 + Math.random() * 0.12).toFixed(2));
+      el.style.setProperty('--s-dessous', (0.42 + Math.random() * 0.1).toFixed(2));
     }
     if (anciens.length - i > CONFIG.MAX_TABLE) { el.classList.add('sortie'); setTimeout(() => el.remove(), 1500); }
   });
