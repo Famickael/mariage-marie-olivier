@@ -150,8 +150,8 @@ async function compterVisite(page){
 }
 
 /* QR code (bibliothèque qrcodejs chargée par la page) */
-function qrDans(el, texte, taille = 160){
+function qrDans(el, texte, taille = 160, fond = '#ffffff'){
   el.innerHTML = '';
   if (!window.QRCode) { el.textContent = texte; return; }
-  new QRCode(el, { text: texte, width: taille, height: taille, colorDark: '#1b2652', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  new QRCode(el, { text: texte, width: taille, height: taille, colorDark: '#1b2652', colorLight: fond, correctLevel: QRCode.CorrectLevel.M });
 }
