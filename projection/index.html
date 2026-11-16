@@ -20,10 +20,11 @@
   .bandeau{position:absolute;left:0;right:0;bottom:1.2vmin;text-align:center;pointer-events:none}
   .bandeau .monogramme{font-size:4vmin}
   .bandeau .capitales{font-size:1.2vmin;margin-left:1.5vmin;vertical-align:.6vmin}
-  /* QR code imprimé dans le décor, à l'encre bleue comme les gravures : pas de carte blanche, un halo crème garde la zone de lecture claire */
-  #qr-coin{position:absolute;right:1.5vmin;bottom:1.5vmin;text-align:center;padding:4.2vmin 4.2vmin 3.4vmin;
-    background:radial-gradient(closest-side,var(--satin) 0%,var(--satin) 80%,rgba(251,250,247,.8) 90%,rgba(251,250,247,0) 100%)}
-  #qr-coin .capitales{font-family:"Cormorant Garamond",serif;font-style:italic;text-transform:none;font-size:1.6vmin;letter-spacing:.02em;color:var(--bleu-nuit);margin-top:.6vmin;line-height:1.1}
+  /* QR code sur une petite carte de papier du faire-part (texture, filet bleu), posée de biais parmi les gravures */
+  #qr-coin{position:absolute;right:3vmin;bottom:3vmin;text-align:center;padding:1.7vmin 1.7vmin 1.2vmin;transform:rotate(-3deg);
+    box-shadow:0 .6vmin 1.8vmin rgba(27,38,82,.22),0 .1vmin .3vmin rgba(27,38,82,.18)}
+  #qr-coin.cadre::before{inset:.6vmin}
+  #qr-coin .capitales{font-family:"Cormorant Garamond",serif;font-style:italic;text-transform:none;font-size:1.6vmin;letter-spacing:.02em;color:var(--bleu-nuit);margin-top:.5vmin;line-height:1.1;white-space:nowrap}
   #qr-coin img,#qr-coin canvas{width:10vmin!important;height:10vmin!important;display:block;mix-blend-mode:multiply;opacity:.92}
 
   #diapos{position:absolute;inset:3vmin 18vmin 9vmin 18vmin;display:flex;align-items:center;justify-content:center}
@@ -77,7 +78,7 @@
   <span id="coins"></span>
   <div id="diapos"></div>
   <div class="bandeau"><span class="monogramme">M<span class="et">&amp;</span>O</span><span class="capitales">05.12.2026</span></div>
-  <div id="qr-coin"><div id="qr"></div><div class="capitales">Partagez vos souvenirs</div></div>
+  <div id="qr-coin" class="carte-papier cadre"><div id="qr"></div><div class="capitales">Partagez vos souvenirs</div></div>
   <div id="aide">F plein écran · espace pause · ← → naviguer · V vidéos oui/non · R actualiser · Ne rechargez pas la page pendant la soirée</div>
   <div id="pause">Pause</div>
   <div id="etat-cache"></div>
