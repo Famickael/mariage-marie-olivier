@@ -299,17 +299,18 @@ document.addEventListener('fullscreenchange', () => document.body.classList.togg
    sur des photos de la table, ouvrent et ferment lentement les ailes, puis repartent. Chaque trajet est tiré au hasard.
    Une photo posée ne glisse jamais sous un papillon, et une photo qui porte un papillon n'est pas effacée.
    Touche P : faire venir des papillons tout de suite. */
-const PAPILLON = { ATTENTE_MIN: 25000, ATTENTE_MAX: 45000, FPS: 60, BATTEMENT_MS: 150 };
-let papVisite = false, papMinuterie = null, papAttendSlide = false;
+const PAPILLON = { ATTENTE_MIN: 6000, ATTENTE_MAX: 20000, MAX: 3, FPS: 60, BATTEMENT_MS: 150 };
+let papMinuterie = null, papAttendSlide = false;
 const papillonsReserves = [];   // points où un papillon est posé ou va se poser : { x, y, el }
 function preparerPapillon(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  planifierPapillon(12000);
+  planifierPapillon(5000);
 }
 function planifierPapillon(ms){
   clearTimeout(papMinuterie);
   // au bout du délai, on attend le prochain changement de photo : les papillons ont alors tout le temps de se poser
-  papMinuterie = setTimeout(() => { papAttendSlide = true; }, ms != null ? ms : PAPILLON.ATTENTE_MIN + Math.random() * (PAPILLON.ATTENTE_MAX - PAPILLON.ATTENTE_MIN));
+  // en pause, la table ne bouge pas : on peut venir tout de suite
+  papMinuterie = setTimeout(() => { if (enPause) visitePapillon(); else papAttendSlide = true; }, ms != null ? ms : PAPILLON.ATTENTE_MIN + Math.random() * (PAPILLON.ATTENTE_MAX - PAPILLON.ATTENTE_MIN));
 }
 // Avant qu'une nouvelle photo apparaisse au centre : les papillons posés (ou en approche) à sa place s'envolent d'abord.
 async function libererPlace(d){
@@ -326,7 +327,8 @@ async function libererPlace(d){
 // un point visible (non recouvert) d'une photo posée à l'arrière depuis un moment, loin des autres papillons
 function pointDePose(){
   const toutes = [...$('#diapos').children].filter(el => !el.classList.contains('sortie'));
-  const cands = toutes.slice(4).filter(el => el.classList.contains('dessous') && Date.now() - (+el.dataset.dessous || 0) > 2500);
+  // les plus anciennes vont bientôt s'effacer : on les évite seulement quand la table est presque pleine
+  const cands = toutes.slice(toutes.length >= CONFIG.MAX_TABLE ? 3 : 0).filter(el => el.classList.contains('dessous') && Date.now() - (+el.dataset.dessous || 0) > 2500);
   const v = Math.min(innerWidth, innerHeight) / 100;
   for (const el of cands.sort(() => Math.random() - .5)) {
     const r = el.querySelector('.cadre-photo, .carton'); if (!r) continue;
@@ -436,21 +438,23 @@ async function volPapillon(pose, taille, battementMs){
   pap.remove(); om.remove();
 }
 // une visite : 1 papillon le plus souvent, parfois 2, plus rarement 3, qui arrivent l'un après l'autre
+// une visite : 1 papillon le plus souvent, parfois 2, plus rarement 3, qui arrivent l'un après l'autre.
+// Les visites peuvent se chevaucher (la suivante est programmée dès le départ de celle-ci), avec au plus MAX à l'écran.
 async function visitePapillon(force){
-  if (papVisite || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) { planifierPapillon(); return; }
-  const tirage = Math.random(), nombre = force || (tirage < .55 ? 1 : tirage < .85 ? 2 : 3);
+  if (document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) { planifierPapillon(); return; }
+  const libres = PAPILLON.MAX - document.querySelectorAll('.papillon').length;
+  if (libres <= 0) { planifierPapillon(4000); return; }
+  const tirage = Math.random(), nombre = Math.min(libres, force || (tirage < .55 ? 1 : tirage < .85 ? 2 : 3));
   const premier = pointDePose();
-  if (!premier) { papAttendSlide = true; return; }   // on retentera après le prochain changement de photo
-  papVisite = true; clearTimeout(papMinuterie);
-  const vols = [];
+  if (!premier) { if (enPause) planifierPapillon(4000); else papAttendSlide = true; return; }   // on retentera après le prochain changement de photo
+  clearTimeout(papMinuterie);
+  planifierPapillon();
   for (let i = 0; i < nombre; i++) {
     const pose = i === 0 ? premier : pointDePose();
     if (!pose) break;
-    vols.push(volPapillon(pose, .75 + Math.random() * .4, PAPILLON.BATTEMENT_MS * (.85 + Math.random() * .3)));
+    volPapillon(pose, .75 + Math.random() * .4, PAPILLON.BATTEMENT_MS * (.85 + Math.random() * .3));
     if (i < nombre - 1) await attendre(350 + Math.random() * 1100);
   }
-  await Promise.all(vols);
-  papVisite = false; planifierPapillon();
 }
 preparerPapillon();
 </script>
