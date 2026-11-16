@@ -43,6 +43,23 @@
   #visionneuse img,#visionneuse video{max-width:100%;max-height:88vh;box-shadow:0 0 40px #0008}
   #visionneuse .fermer{position:absolute;top:14px;right:18px;font-size:2rem;color:#fff;background:none;border:0;cursor:pointer}
   #visionneuse .legende{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-style:italic}
+  /* recadrage */
+  #recadreur{position:fixed;inset:0;background:rgba(27,38,82,.95);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;color:#fff}
+  #rc-zone{line-height:0;touch-action:none;user-select:none;overflow:hidden;padding:14px}
+  #rc-img{position:relative}
+  #rc-canvas{max-width:calc(92vw - 28px);max-height:62vh;display:block}
+  #rc-cadre{position:absolute;box-shadow:0 0 0 9999px rgba(10,14,30,.6);outline:1px solid #fff;cursor:move;
+    background:linear-gradient(90deg,transparent 33.2%,rgba(255,255,255,.45) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.45) 66.6%,transparent 66.8%),
+               linear-gradient(0deg,transparent 33.2%,rgba(255,255,255,.45) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.45) 66.6%,transparent 66.8%)}
+  #rc-cadre .poignee{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;background:#fff;border:2px solid var(--or);border-radius:50%}
+  #rc-cadre .poignee[data-c=nw]{left:0;top:0;cursor:nwse-resize} #rc-cadre .poignee[data-c=ne]{left:100%;top:0;cursor:nesw-resize}
+  #rc-cadre .poignee[data-c=sw]{left:0;top:100%;cursor:nesw-resize} #rc-cadre .poignee[data-c=se]{left:100%;top:100%;cursor:nwse-resize}
+  .rc-outils{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .rc-outils button{font:inherit;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:20px;cursor:pointer}
+  .rc-outils button.actif{background:#fff;color:var(--bleu-nuit)}
+  .rc-outils button.principal{background:var(--or);border-color:var(--or);color:#fff}
+  .rc-outils .sep{width:1px;height:22px;background:rgba(255,255,255,.3);margin:0 4px}
+  #rc-etat{font-style:italic;font-size:.9rem;opacity:.85;min-height:1.2em;text-align:center}
 </style>
 </head>
 <body>
@@ -66,6 +83,16 @@
   </section>
   <div id="visionneuse" hidden><button class="fermer" aria-label="Fermer">×</button><div id="vis-contenu"></div><div class="legende" id="vis-legende"></div></div>
 </main>
+  <div id="recadreur" hidden>
+    <div id="rc-zone"><div id="rc-img"><canvas id="rc-canvas"></canvas><div id="rc-cadre"><span class="poignee" data-c="nw"></span><span class="poignee" data-c="ne"></span><span class="poignee" data-c="sw"></span><span class="poignee" data-c="se"></span></div></div></div>
+    <div class="rc-outils" id="rc-ratios">
+      <button data-ratio="">Libre</button><button data-ratio="1">Carré</button><button data-ratio="1.3333">4:3</button><button data-ratio="0.75">3:4</button><button data-ratio="1.7778">16:9</button>
+      <span class="sep"></span><button id="rc-gauche" title="Pivoter à gauche">⟲</button><button id="rc-droite" title="Pivoter à droite">⟳</button><button id="rc-tout">Photo entière</button>
+    </div>
+    <div class="rc-outils"><button id="rc-annuler">Annuler</button><button class="principal" id="rc-ok">Enregistrer</button></div>
+    <p id="rc-etat"></p>
+  </div>
+
 
 <script src="../assets/vendor/supabase.min.js"></script>
 <script src="../assets/vendor/jszip.min.js"></script>
@@ -171,7 +198,11 @@ async function rendreListe(){
           const { error } = await sb.from('mo_fichiers').update({ supprime: !corbeille }).eq('id', f.id); if (error) { alert(erreurBase(error)); return; }
           charger();
         };
-        act.append(dl, sup); carte.append(ap, infos, ligne2, act); gal.appendChild(carte);
+        if (apercuPossible(type)) {
+          const rec = document.createElement('button'); rec.textContent = 'Recadrer';
+          rec.onclick = () => ouvrirRecadrage(f, ap);
+          act.append(dl, rec, sup);
+        } else act.append(dl, sup); carte.append(ap, infos, ligne2, act); gal.appendChild(carte);
       });
       sec.appendChild(gal);
     } else sec.insertAdjacentHTML('beforeend', `<p class="msg">${e.nb_fichiers > 0 && !corbeille ? `Envoi interrompu : ${e.nb_fichiers} fichier${e.nb_fichiers > 1 ? 's' : ''} attendu${e.nb_fichiers > 1 ? 's' : ''}, aucun reçu.` : e.message ? 'Un mot, sans photo.' : 'Envoi vide.'}</p>`);
@@ -239,6 +270,94 @@ $('#btn-csv').onclick = () => {
 
 function csv(l){ return l.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n'); }
 function dateFr(iso){ return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }); }
+/* ---------- Recadrage ----------
+   On recadre (et pivote) la version projetée : les aperçus apercus/1600 et apercus/400 sont refabriqués
+   à partir de l'original, qui lui reste intact (téléchargement, zip). « Photo entière » annule un recadrage. */
+const rc = { f: null, ap: null, bmp: null, rot: 0, ratio: null, crop: null, k: 1 };
+const borne = (v, a, b) => Math.min(b, Math.max(a, v));
+function dimsTournees(){ const q = rc.rot % 180 !== 0; return { W: q ? rc.bmp.height : rc.bmp.width, H: q ? rc.bmp.width : rc.bmp.height }; }
+function dessinerTourne(ctx, echelle){   // dessine l'original pivoté, à l'échelle donnée, avec le coin haut-gauche en (0,0)
+  const { W, H } = dimsTournees();
+  ctx.save(); ctx.scale(echelle, echelle); ctx.translate(W / 2, H / 2); ctx.rotate(rc.rot * Math.PI / 180);
+  ctx.imageSmoothingQuality = 'high'; ctx.drawImage(rc.bmp, -rc.bmp.width / 2, -rc.bmp.height / 2); ctx.restore();
+}
+function dessinerSource(){
+  const { W, H } = dimsTournees(); rc.k = Math.min(1, 2000 / Math.max(W, H));
+  const c = $('#rc-canvas'); c.width = Math.round(W * rc.k); c.height = Math.round(H * rc.k);
+  dessinerTourne(c.getContext('2d'), rc.k);
+}
+function cadrerSelonRatio(){
+  const c = $('#rc-canvas'); let w = 1, h = 1;
+  if (rc.ratio) { h = (c.width / rc.ratio) / c.height; if (h > 1) { h = 1; w = (c.height * rc.ratio) / c.width; } }
+  rc.crop = { x: (1 - w) / 2, y: (1 - h) / 2, w, h }; majCadre();
+}
+function majCadre(){
+  const { x, y, w, h } = rc.crop, el = $('#rc-cadre');
+  el.style.left = x * 100 + '%'; el.style.top = y * 100 + '%'; el.style.width = w * 100 + '%'; el.style.height = h * 100 + '%';
+  $$('#rc-ratios [data-ratio]').forEach(b => b.classList.toggle('actif', (b.dataset.ratio ? +b.dataset.ratio : null) === rc.ratio));
+}
+async function ouvrirRecadrage(f, ap){
+  Object.assign(rc, { f, ap, rot: 0, ratio: null, bmp: null });
+  $('#recadreur').hidden = false; $('#rc-zone').style.visibility = 'hidden'; $('#rc-etat').textContent = 'Chargement de la photo…';
+  try {
+    const [url] = await urlsSignees([f.chemin]);
+    const r = await fetch(url); if (!r.ok) throw new Error('photo introuvable');
+    rc.bmp = await createImageBitmap(await r.blob(), { imageOrientation: 'from-image' });
+  } catch (e) { $('#rc-etat').textContent = 'Impossible d\'ouvrir cette photo (' + (e.message || e) + ').'; return; }
+  dessinerSource(); cadrerSelonRatio();
+  $('#rc-zone').style.visibility = ''; $('#rc-etat').textContent = 'Déplacez le cadre ou tirez ses coins. L\'original reste intact.';
+}
+function fermerRecadrage(){ $('#recadreur').hidden = true; if (rc.bmp && rc.bmp.close) rc.bmp.close(); rc.bmp = null; }
+$('#rc-annuler').onclick = fermerRecadrage;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#recadreur').hidden) fermerRecadrage(); });
+$('#rc-ratios').onclick = e => { const b = e.target.closest('[data-ratio]'); if (!b || !rc.bmp) return; rc.ratio = b.dataset.ratio ? +b.dataset.ratio : null; cadrerSelonRatio(); };
+$('#rc-tout').onclick = () => { if (!rc.bmp) return; rc.ratio = null; rc.rot = 0; dessinerSource(); cadrerSelonRatio(); };
+$('#rc-gauche').onclick = () => { if (!rc.bmp) return; rc.rot = (rc.rot + 270) % 360; dessinerSource(); cadrerSelonRatio(); };
+$('#rc-droite').onclick = () => { if (!rc.bmp) return; rc.rot = (rc.rot + 90) % 360; dessinerSource(); cadrerSelonRatio(); };
+
+// glisser le cadre, ou un coin pour le redimensionner (en gardant le format choisi)
+$('#rc-cadre').addEventListener('pointerdown', e => {
+  e.preventDefault(); const cadre = $('#rc-cadre'); cadre.setPointerCapture(e.pointerId);
+  const zone = $('#rc-img').getBoundingClientRect(), c = $('#rc-canvas'), coin = e.target.dataset.c, d = { ...rc.crop }, sx = e.clientX, sy = e.clientY, MIN = 0.05;
+  const bouger = ev => {
+    const dx = (ev.clientX - sx) / zone.width, dy = (ev.clientY - sy) / zone.height;
+    if (!coin) { rc.crop = { ...d, x: borne(d.x + dx, 0, 1 - d.w), y: borne(d.y + dy, 0, 1 - d.h) }; majCadre(); return; }
+    const gauche = coin.includes('w'), haut = coin.includes('n');
+    const F = { x: gauche ? d.x + d.w : d.x, y: haut ? d.y + d.h : d.y };                          // coin opposé, fixe
+    const mx = borne((gauche ? d.x : d.x + d.w) + dx, 0, 1), my = borne((haut ? d.y : d.y + d.h) + dy, 0, 1);
+    let w = Math.max(MIN, Math.abs(mx - F.x)), h = Math.max(MIN, Math.abs(my - F.y));
+    if (rc.ratio) { const kr = c.width / (rc.ratio * c.height); if (h < w * kr) w = h / kr; else h = w * kr; }
+    w = Math.min(w, gauche ? F.x : 1 - F.x); h = Math.min(h, haut ? F.y : 1 - F.y);
+    rc.crop = { x: gauche ? F.x - w : F.x, y: haut ? F.y - h : F.y, w, h }; majCadre();
+  };
+  const finir = () => { cadre.removeEventListener('pointermove', bouger); cadre.removeEventListener('pointerup', finir); cadre.removeEventListener('pointercancel', finir); };
+  cadre.addEventListener('pointermove', bouger); cadre.addEventListener('pointerup', finir); cadre.addEventListener('pointercancel', finir);
+});
+
+$('#rc-ok').onclick = async () => {
+  if (!rc.bmp) return;
+  const btn = $('#rc-ok'); btn.disabled = true; $('#rc-etat').textContent = 'Enregistrement…';
+  try {
+    const { W, H } = dimsTournees(), { x, y, w, h } = rc.crop;
+    const cx = x * W, cy = y * H, cw = w * W, ch = h * H;   // en pixels de l'original pivoté
+    const chemins = [];
+    for (const [largeur, qualite] of [[APERCUS.GRAND, 0.82], [APERCUS.MINI, 0.7]]) {
+      const s = Math.min(1, largeur / cw), out = document.createElement('canvas');
+      out.width = Math.max(1, Math.round(cw * s)); out.height = Math.max(1, Math.round(ch * s));
+      const ctx = out.getContext('2d'); ctx.scale(s, s); ctx.translate(-cx, -cy); dessinerTourne(ctx, 1);
+      const blob = await new Promise((ok, ko) => out.toBlob(b => b ? ok(b) : ko(new Error('encodage impossible')), 'image/jpeg', qualite));
+      const chemin = cheminApercu(rc.f.chemin, largeur); chemins.push(chemin);
+      const { error } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).upload(chemin, blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: true });
+      if (error) throw error;
+    }
+    chemins.forEach(c => memoUrls.delete(c));
+    const [mini] = await urlsSignees([cheminApercu(rc.f.chemin, APERCUS.MINI)]);
+    const img = rc.ap && rc.ap.querySelector('img'); if (img && mini) img.src = mini + '&v=' + Date.now();
+    toast('Recadrage enregistré : il sera pris en compte au prochain chargement de la projection');
+    fermerRecadrage();
+  } catch (e) { $('#rc-etat').textContent = 'Échec de l\'enregistrement : ' + (e.message || e); }
+  btn.disabled = false;
+};
 </script>
 </body>
 </html>
