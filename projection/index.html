@@ -58,6 +58,16 @@
   body.enpause #pause{display:block}
   #etat-cache{position:absolute;left:1vmin;bottom:.5vmin;font-size:1vmin;color:var(--encre-douce);opacity:.5}
   #etat-cache.hors{color:var(--erreur);opacity:1}
+  /* papillon : deux demi-ailes (la même image, l'une en miroir) qui battent en 3D ; trajectoire et battements
+     sont confiés au compositeur du navigateur (Web Animations), donc fluides même quand la page charge des photos */
+  #papillon,#pap-ombre{position:absolute;left:0;top:0;pointer-events:none;opacity:0;will-change:transform,opacity;z-index:4}
+  #papillon{--ph:5.6vmin;width:calc(var(--ph) * 1.588);height:var(--ph);margin:calc(var(--ph) / -2) 0 0 calc(var(--ph) * -.794);perspective:30vmin}
+  #papillon .aile{position:absolute;top:0;width:50%;height:100%;will-change:transform}
+  #papillon .aile::before{content:"";position:absolute;inset:0;background:url(../assets/motifs/papillon-demi.png) center/100% 100% no-repeat}
+  #papillon .aile.g{left:0;transform-origin:100% 50%}
+  #papillon .aile.d{right:0;transform-origin:0 50%}
+  #papillon .aile.d::before{transform:scaleX(-1)}
+  #pap-ombre{width:6vmin;height:3.6vmin;margin:-1.8vmin 0 0 -3vmin;border-radius:50%;background:rgba(27,38,82,.5);filter:blur(.9vmin);z-index:3}
 </style>
 </head>
 <body>
@@ -203,7 +213,7 @@ function afficher(it){
   const anciens = [...cont.children].filter(el => !el.classList.contains('sortie'));
   anciens.forEach((el, i) => {
     if (!el.classList.contains('dessous')) {
-      el.classList.add('dessous');
+      el.classList.add('dessous'); el.dataset.dessous = Date.now();
       const v = el.querySelector('video'); if (v) v.pause();
       // direction au hasard, plutôt vers les bords, sans mordre sur les illustrations des côtés ni sur le QR code
       const a = Math.random() * Math.PI * 2, r = 0.65 + Math.random() * 0.35;
@@ -262,6 +272,7 @@ document.addEventListener('keydown', e => {
     case 'ArrowLeft': clearTimeout(timer); afficher(precedent()); break;
     case 'v': case 'V': avecVideos = !avecVideos; $('#aide').textContent = avecVideos ? 'Vidéos activées' : 'Vidéos désactivées'; setTimeout(() => $('#aide').textContent = 'F plein écran · espace pause · ← → naviguer · V vidéos oui/non · R recharger', 2000); break;
     case 'r': case 'R': charger(); break;
+    case 'p': case 'P': visitePapillon(); break;
   }
 });
 $('#scene').addEventListener('dblclick', pleinEcran);
@@ -270,6 +281,115 @@ function pleinEcran(){
   else document.exitFullscreen();
 }
 document.addEventListener('fullscreenchange', () => document.body.classList.toggle('plein', !!document.fullscreenElement));
+/* ---------- Papillon ----------
+   De temps en temps, un papillon (celui du faire-part) arrive d'un bord de l'écran, se pose sur une photo
+   de la table, ouvre et ferme lentement les ailes, puis repart. Touche P : le faire venir tout de suite. */
+const PAPILLON = { ATTENTE_MIN: 25000, ATTENTE_MAX: 45000, FPS: 60, BATTEMENT_MS: 150 };
+let papEnVol = false, papMinuterie = null;
+function preparerPapillon(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  $('#scene').insertAdjacentHTML('beforeend', '<div id="pap-ombre"></div><div id="papillon"><div class="aile g"></div><div class="aile d"></div></div>');
+  planifierPapillon(12000);
+}
+function planifierPapillon(ms){
+  clearTimeout(papMinuterie);
+  papMinuterie = setTimeout(visitePapillon, ms != null ? ms : PAPILLON.ATTENTE_MIN + Math.random() * (PAPILLON.ATTENTE_MAX - PAPILLON.ATTENTE_MIN));
+}
+// un point visible (non recouvert) d'une photo posée à l'arrière depuis un moment
+function pointDePose(){
+  const toutes = [...$('#diapos').children].filter(el => !el.classList.contains('sortie'));
+  const cands = toutes.slice(4).filter(el => el.classList.contains('dessous') && Date.now() - (+el.dataset.dessous || 0) > 2500);
+  for (const el of cands.sort(() => Math.random() - .5)) {
+    const r = el.querySelector('.cadre-photo, .carton'); if (!r) continue;
+    const b = r.getBoundingClientRect();
+    for (let k = 0; k < 14; k++) {
+      const x = b.left + b.width * (.2 + Math.random() * .6), y = b.top + b.height * (.2 + Math.random() * .6);
+      if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue;
+      const dessus = document.elementFromPoint(x, y);
+      if (dessus && dessus.closest('.diapo') === el) return { x, y, el };
+    }
+  }
+  return null;
+}
+function pointHorsEcran(saufCote){
+  const v = Math.min(innerWidth, innerHeight) / 100, cotes = ['g', 'd', 'h'].filter(c => c !== saufCote);
+  const c = cotes[Math.floor(Math.random() * cotes.length)];
+  if (c === 'g') return { x: -12 * v, y: innerHeight * (.15 + Math.random() * .6), c };
+  if (c === 'd') return { x: innerWidth + 12 * v, y: innerHeight * (.15 + Math.random() * .6), c };
+  return { x: innerWidth * (.2 + Math.random() * .6), y: -12 * v, c };
+}
+const bez = (a, b, c, d, t) => { const u = 1 - t; return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d; };
+// trajectoire d'un vol : courbe de Bézier + zigzags de papillon ; arrivee=true : se pose (ralentit, descend vers la table)
+function trajectoire(de, vers, duree, arrivee, capInitial){
+  const v = Math.min(innerWidth, innerHeight) / 100;
+  const dx = vers.x - de.x, dy = vers.y - de.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+  const c1 = { x: de.x + dx * .3 + nx * L * (Math.random() - .5) * .7, y: de.y + dy * .3 + ny * L * (Math.random() - .5) * .7 };
+  const c2 = { x: de.x + dx * .72 + nx * L * (Math.random() - .5) * .5, y: de.y + dy * .72 + ny * L * (Math.random() - .5) * .5 };
+  const base = t => ({ x: bez(de.x, c1.x, c2.x, vers.x, t), y: bez(de.y, c1.y, c2.y, vers.y, t) });
+  const n = Math.max(2, Math.round(duree / 1000 * PAPILLON.FPS)), zig = 2 + Math.random() * 2, phase = Math.random() * 6.28;
+  const corps = [], ombre = [];
+  let cap = capInitial;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const u = arrivee ? 1 - Math.pow(1 - t, 2.4) : Math.pow(t, 1.9);            // ralentit à la pose, accélère au décollage
+    const h = arrivee ? Math.pow(1 - u, .8) : Math.pow(u, .7);                    // altitude : 1 en vol, 0 posé
+    const p = base(u);
+    const vivacite = Math.min(1, h * 2.5);                                         // zigzags et sautillements seulement en vol
+    const ondule = Math.sin(t * zig * 6.28 + phase) * 2.2 * v * vivacite;
+    const saut = Math.sin(t * duree / PAPILLON.BATTEMENT_MS * 6.28) * .35 * v * vivacite;   // monte un peu à chaque battement
+    const x = p.x + nx * ondule, y = p.y + ny * ondule - saut;
+    const q = base(Math.min(1, u + .02)), r0 = base(Math.max(0, u - .02));
+    const visee = Math.atan2(q.y - r0.y, q.x - r0.x) * 180 / Math.PI + 90;
+    if (cap == null) cap = visee;
+    let ecart = ((visee - cap + 540) % 360) - 180;
+    cap += ecart * (arrivee ? Math.min(1, h * 1.6) : 1) * .25;                    // le cap se fige en se posant
+    const s = 1 + .3 * h, op = arrivee ? Math.min(1, t * 8) : Math.min(1, (1 - t) * 8);
+    corps.push({ transform: `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${cap.toFixed(1)}deg) scale(${s.toFixed(3)})`, opacity: op });
+    ombre.push({ transform: `translate(${(x + h * 3.2 * v).toFixed(1)}px,${(y + h * 4.5 * v).toFixed(1)}px) rotate(${cap.toFixed(1)}deg) scale(${(1 - .35 * h).toFixed(3)})`, opacity: op * (.32 - .2 * h) });
+  }
+  return { corps, ombre, cap };
+}
+// fait varier la vitesse des battements sans à-coup (même animation, vitesse de lecture qui glisse)
+function vitesseAiles(ailes, de, a, duree){
+  const t0 = performance.now();
+  return new Promise(ok => { const pas = () => { const k = Math.min(1, (performance.now() - t0) / duree); ailes.forEach(an => an.updatePlaybackRate(de + (a - de) * k * k * (3 - 2 * k))); k < 1 ? setTimeout(pas, 50) : ok(); }; pas(); });
+}
+async function visitePapillon(){
+  const pap = $('#papillon'), om = $('#pap-ombre');
+  if (!pap || papEnVol || document.hidden) { planifierPapillon(); return; }
+  const pose = pointDePose();
+  if (!pose) { planifierPapillon(8000); return; }
+  papEnVol = true; clearTimeout(papMinuterie);
+  try {
+    const de = pointHorsEcran();
+    const battement = [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(76deg)' }, { transform: 'rotateY(0deg)' }];
+    const opts = { duration: PAPILLON.BATTEMENT_MS, iterations: Infinity, easing: 'ease-in-out' };
+    const ailes = [pap.querySelector('.g').animate(battement, opts), pap.querySelector('.d').animate(battement.map(k => ({ transform: k.transform.replace('(', '(-') })), opts)];
+    // arrivée
+    const dureeA = 4200 + Math.hypot(pose.x - de.x, pose.y - de.y) * 1.6;
+    const a = trajectoire(de, pose, dureeA, true, null);
+    const anA = pap.animate(a.corps, { duration: dureeA, fill: 'forwards' }); om.animate(a.ombre, { duration: dureeA, fill: 'forwards' });
+    setTimeout(() => vitesseAiles(ailes, 1, .085, 1400), dureeA - 1400);
+    await anA.finished;
+    // posé : ailes qui s'ouvrent et se ferment lentement ; repart plus tôt si une photo vient le recouvrir
+    const dureePose = 4000 + Math.random() * 3000, fin = performance.now() + dureePose;
+    while (performance.now() < fin) {
+      await new Promise(ok => setTimeout(ok, 400));
+      const dessus = document.elementFromPoint(pose.x, pose.y);
+      if (!dessus || dessus.closest('.diapo') !== pose.el || pose.el.classList.contains('sortie')) break;
+    }
+    // décollage
+    await vitesseAiles(ailes, .085, 1, 350);
+    const vers = pointHorsEcran(de.c), dureeD = 3000 + Math.hypot(vers.x - pose.x, vers.y - pose.y) * 1.3;
+    const d = trajectoire(pose, vers, dureeD, false, a.cap);
+    const anD = pap.animate(d.corps, { duration: dureeD, fill: 'forwards' }); om.animate(d.ombre, { duration: dureeD, fill: 'forwards' });
+    await anD.finished;
+    ailes.forEach(an => an.cancel());
+    pap.getAnimations().forEach(an => an.cancel()); om.getAnimations().forEach(an => an.cancel());
+  } catch (e) { console.warn('papillon', e); }
+  papEnVol = false; planifierPapillon();
+}
+preparerPapillon();
 </script>
 </body>
 </html>
