@@ -31,6 +31,30 @@ function toast(txt, ms = 2200){
   t.textContent = txt; t.classList.add('vu'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('vu'), ms);
 }
 
+/* ---------- Versions réduites des photos ----------
+   Fabriquées une fois pour toutes au moment du dépôt (dans le navigateur de l'invité) et rangées
+   à côté de l'original sous apercus/<largeur>/<chemin>.jpg. La projection et l'administration les
+   lisent telles quelles : plus besoin de la transformation d'images de Supabase (facturée par photo). */
+const APERCUS = { MINI: 400, GRAND: 1600 };
+function cheminApercu(chemin, largeur){ return `apercus/${largeur}/${chemin}.jpg`; }
+function apercuPossible(type){ return /^image\//.test(type || '') && !/gif|svg/i.test(type); }
+async function reduireImage(fichier, largeur, qualite){
+  const bmp = await createImageBitmap(fichier, { imageOrientation: 'from-image' });   // respecte l'orientation EXIF
+  const r = Math.min(1, largeur / bmp.width), w = Math.round(bmp.width * r), h = Math.round(bmp.height * r);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bmp, 0, 0, w, h);
+  if (bmp.close) bmp.close();
+  return new Promise((ok, ko) => c.toBlob(b => b ? ok(b) : ko(new Error('encodage impossible')), 'image/jpeg', qualite));
+}
+async function deposerApercus(client, fichier, chemin){
+  if (!apercuPossible(fichier.type)) return;
+  for (const [largeur, qualite] of [[APERCUS.GRAND, 0.82], [APERCUS.MINI, 0.7]]) {
+    const b = await reduireImage(fichier, largeur, qualite);
+    const { error } = await client.storage.from(CONFIG.BUCKET_SOUVENIRS).upload(cheminApercu(chemin, largeur), b, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: true });
+    if (error) throw error;
+  }
+}
+
 /* URL absolue d'une page du site, pour partager un lien ou un QR code. */
 function urlSite(chemin){ const base = location.href.replace(/[^/]*([?#].*)?$/, ''); return new URL(chemin, base).href; }
 

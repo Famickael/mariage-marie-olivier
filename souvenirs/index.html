@@ -111,7 +111,7 @@
 
 <script src="../assets/vendor/supabase.min.js"></script>
 <script src="../assets/vendor/tus.min.js"></script>
-<script src="../assets/commun.js?v=202611051400"></script>
+<script src="../assets/commun.js?v=202611161200"></script>
 <script>compterVisite('depot');</script>
 <script src="../assets/ouverture.js?v=202611051400"></script>
 <script>
@@ -310,7 +310,9 @@ function envoyerFichier(f){
         f.chemin = chemin;
         f.barre.style.width = '100%'; f.etat.textContent = 'Envoyé'; f.etat.className = 'etat ok';
         prog.maj(f, f.file.size);
-        journaliser(f).finally(resolve);   // enregistré tout de suite : rien n'est perdu si la page est fermée ensuite
+        journaliser(f)   // enregistré tout de suite : rien n'est perdu si la page est fermée ensuite
+          .then(() => deposerApercus(sbInvite, f.file, chemin).catch(e => console.warn('aperçus', e)))   // sans aperçu, la projection lit l'original
+          .finally(resolve);
       }
     });
     upload.start();

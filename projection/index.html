@@ -68,9 +68,9 @@
 
 <script src="../assets/vendor/supabase.min.js"></script>
 <script src="../assets/vendor/qrcode.min.js"></script>
-<script src="../assets/commun.js?v=202611051400"></script>
+<script src="../assets/commun.js?v=202611161200"></script>
 <script>
-Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45000, RAFRAICHIR: 60000, LARGEUR_IMAGE: 1600, CACHE_MAX_VIDEO: 100 * 1048576, CACHE_MAX_TOTAL: 1500 * 1048576 });
+Object.assign(CONFIG, { DUREE_PHOTO: 9000, DUREE_MOT: 11000, DUREE_VIDEO_MAX: 45000, RAFRAICHIR: 60000, CACHE_MAX_VIDEO: 100 * 1048576, CACHE_MAX_TOTAL: 1500 * 1048576 });
 let items = [], connus = new Set(), file = [], nouveaux = [];
 let position = -1, timer = null, enPause = false, avecVideos = true, premierChargement = true, courant = null;
 
@@ -106,14 +106,19 @@ async function charger(){
       else if (t.startsWith('video/')) liste.push({ id: 'f-' + f.id, type: 'video', nom, texte: f.message, chemin: f.chemin, taille: f.taille || 0, date: f.created_at });
     }
   }
-  // URLs signées (12 h), demandées une seule fois par média ; images redimensionnées par Supabase
+  // URLs signées (12 h), demandées une seule fois par média
   const media = liste.filter(i => i.chemin);
   const nouveauxMedias = media.filter(i => !urls.has(i.id));
   if (nouveauxMedias.length) {
     const { data: signes } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrls(nouveauxMedias.map(i => i.chemin), 43200);
     nouveauxMedias.forEach((i, k) => urls.set(i.id, { url: signes && signes[k] ? signes[k].signedUrl : null }));
-    for (const i of nouveauxMedias.filter(i => i.type === 'photo')) {
-      try { const { data: d } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(i.chemin, 43200, { transform: { width: CONFIG.LARGEUR_IMAGE, quality: 80 } }); if (d) urls.get(i.id).urlImg = d.signedUrl; } catch {}
+    // version réduite fabriquée au dépôt (apercus/1600/…) ; si elle manque, precharger() se rabat sur l'original
+    const photos = nouveauxMedias.filter(i => i.type === 'photo');
+    if (photos.length) {
+      try {
+        const { data: red } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrls(photos.map(i => cheminApercu(i.chemin, APERCUS.GRAND)), 43200);
+        photos.forEach((i, k) => { if (red && red[k] && red[k].signedUrl) urls.get(i.id).urlImg = red[k].signedUrl; });
+      } catch {}
     }
   }
   media.forEach(i => { const u = urls.get(i.id) || {}; i.url = u.url; i.urlImg = u.urlImg; if (inutilisables.has(i.id)) i.inutilisable = true; });

@@ -69,7 +69,7 @@
 
 <script src="../assets/vendor/supabase.min.js"></script>
 <script src="../assets/vendor/jszip.min.js"></script>
-<script src="../assets/commun.js?v=202611051400"></script>
+<script src="../assets/commun.js?v=202611161200"></script>
 <script>
 let envois = [], tous = [], corbeille = false;
 $('#btn-corbeille').onclick = () => { corbeille = !corbeille; rendreListe(); };
@@ -79,6 +79,19 @@ $('#btn-refresh').onclick = charger;
     publication: await publicationReglage('depot_souvenirs', 'Dépôt des invités', 'Publié : les invités peuvent déposer leurs souvenirs. Non publié : la page leur dit que le dépôt est fermé.', null) });
   charger();
 })();
+
+/* URLs signées mémorisées 50 min : la même URL d'un rafraîchissement à l'autre, donc l'image reste en cache. */
+const memoUrls = new Map();
+async function urlsSignees(chemins){
+  const t = Date.now();
+  const manquants = [...new Set(chemins.filter(c => c && !(memoUrls.has(c) && t - memoUrls.get(c).t < 50 * 60000)))];
+  if (manquants.length) {
+    let data = null;
+    try { ({ data } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrls(manquants, 3600)); } catch {}
+    if (data) manquants.forEach((c, k) => memoUrls.set(c, { url: (data && data[k] && data[k].signedUrl) || null, t }));
+  }
+  return chemins.map(c => c && memoUrls.has(c) ? memoUrls.get(c).url : null);
+}
 
 async function charger(){
   $('#info').textContent = 'Chargement...';
@@ -121,14 +134,22 @@ async function rendreListe(){
     if (e.fichiers.length) {
       const gal = document.createElement('div'); gal.className = 'galerie';
       e.fichiers.sort((a, b) => a.created_at.localeCompare(b.created_at));
-      // vignettes réduites (400 px) : l'original n'est chargé qu'en plein écran ou au téléchargement
-      const signes = await Promise.all(e.fichiers.map(f => sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(f.chemin, 3600, (f.type_mime || '').startsWith('image/') ? { transform: { width: 400, quality: 70 } } : undefined).then(r => r.data).catch(() => null)));
+      // vignettes réduites (400 px, fabriquées au dépôt) : l'original n'est chargé qu'en plein écran, au téléchargement,
+      // ou en secours si la vignette n'existe pas
+      const [minis, originaux] = await Promise.all([
+        urlsSignees(e.fichiers.map(f => apercuPossible(f.type_mime) ? cheminApercu(f.chemin, APERCUS.MINI) : null)),
+        urlsSignees(e.fichiers.map(f => f.chemin))
+      ]);
       e.fichiers.forEach((f, i) => {
-        const url = signes && signes[i] && signes[i].signedUrl;
+        const url = originaux[i], mini = minis[i];
         const carte = document.createElement('div'); carte.className = 'carte';
         const ap = document.createElement('div'); ap.className = 'apercu';
         const type = f.type_mime || '';
-        if (type.startsWith('image/') && url) { const img = document.createElement('img'); img.loading = 'lazy'; img.src = url; img.alt = ''; img.onerror = () => { ap.textContent = 'aperçu indisponible'; }; ap.appendChild(img); }
+        if (type.startsWith('image/') && (mini || url)) {
+          const img = document.createElement('img'); img.loading = 'lazy'; img.src = mini || url; img.alt = '';
+          img.onerror = () => { if (mini && url && img.src === mini) img.src = url; else ap.textContent = 'aperçu indisponible'; };
+          ap.appendChild(img);
+        }
         else if (type.startsWith('video/') && url) { const v = document.createElement('video'); v.src = url; v.muted = true; v.preload = 'none'; v.playsInline = true; ap.appendChild(v); }
         else ap.textContent = /heic|heif/i.test(type + f.nom_original) ? 'HEIC · non projetable' : type.startsWith('audio/') ? 'audio' : 'fichier';
         ap.onclick = async () => { const { data } = await sb.storage.from(CONFIG.BUCKET_SOUVENIRS).createSignedUrl(f.chemin, 3600); voir(f, data && data.signedUrl); };
